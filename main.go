@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/michaeloa/gh-devxp/pkg/cmd"
+	"github.com/elhub/gh-devxp/pkg/cmd"
 )
 
 var (
