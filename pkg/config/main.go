@@ -6,8 +6,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func ReadConfig() (*Settings, error) {
-	data, err := ioutil.ReadFile(".devxp")
+func ReadConfig(filepath string) (*Settings, error) {
+	data, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return nil, err
 	}
