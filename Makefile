@@ -1,24 +1,23 @@
 BINARY_NAME=gh-devxp
+BUILD_DIR=build
 
 build:
-	go build -o ${BINARY_NAME}
+	go build -o ${BUILD_DIR}/${BINARY_NAME}
 
 run: build
-	./${BINARY_NAME}
+	${BUILD_DIR}/${BINARY_NAME}
 
 clean:
 	go clean
-	rm ${BINARY_NAME}
+	rm -rf ${BUILD_DIR}
 
 install:
 	gh extension remove ${BINARY_NAME}
 	gh extension install .
 
 test:
-	go test ./...
-
-test_coverage:
-	go test ./... -coverprofile=coverage.out
+	mkdir -p ${BUILD_DIR}
+	go test ./... -coverprofile=${BUILD_DIR}/coverage.out
 
 dep:
 	go mod download
@@ -28,3 +27,6 @@ vet:
 
 lint:
 	golangci-lint run --enable-all
+
+ci_test:
+	cd .teamcity && mvn compile && cd ..

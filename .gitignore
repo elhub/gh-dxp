@@ -1,2 +1,109 @@
-/gh-devxp
-/gh-devxp.exe
+### Elhub-Ansible
+ansible/galaxy/*
+ansible/inventories/*
+ansible/vault_ids/*
+!ansible/galaxy/.gitkeep
+!ansible/inventories/.gitkeep
+!ansible/vault_ids/.gitkeep
+
+### Intellij+all Patch ###
+# Ignores the whole .idea folder and all .iml files
+.idea/
+modules.xml
+*.iml
+*.ipr
+
+# IntelliJ
+out/
+
+# CMake
+cmake-build-*/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# SonarQube
+.idea/sonarlint
+.scannerwork/
+
+### Gradle ###
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Cache of project
+.gradletasknamecache
+
+### Gradle Patch ###
+**/build/
+# do not remove
+!src/main/kotlin/no/elhub/devxp/build
+!src/test/kotlin/no/elhub/devxp/build
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+# https://github.com/takari/maven-wrapper#usage-without-binary-jar
+.mvn/wrapper/maven-wrapper.jar
+
+### Java ###
+# Compiled class file
+*.class
+
+# Log file
+*.log
+*.log*
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+### React ###
+.DS_*
+logs
+**/*.backup.*
+**/*.back.*
+
+node_modules
+bower_components
+
+*.sublime*
+
+psd
+thumb
+sketch
+screenshots/*
+!screenshots/.gitkeep
+
+### NPM ###
+dist/
+
+### Testing ###
+/coverage
+/allure-report
+/allure-results
+
+### Python ###
+__pycache__/
+*.py[cod]
+*$py.class
