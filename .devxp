@@ -1,0 +1,17 @@
+---
+lint:
+  linters:
+    - name: checkstyle
+    - name: detekt
+    - name: ansible-lint
+      include:
+        - ".*\\.yml$"
+    - name: yamllint
+    - name: eslint
+    - name: prettier
+  exclude:
+    - "(\\.idea$)"
+    - "(\\.gradle$)"
+    - "(^build/)"
+    - "(^gradle/)"
+    - "(target/)"

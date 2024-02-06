@@ -9,5 +9,10 @@ var (
 )
 
 func main() {
+	// Use ReadConfig to read .devxp yaml file and print out content
+	//settings, err := config.ReadConfig(".devxp")
+	//if err != nil {
+	//		panic(err)
+	//	}
 	cmd.Execute(version)
 }
