@@ -7,23 +7,23 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-devxp/pkg/utils"
+	"github.com/michaeloa/gh-devxp/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
-func WorkCmd() *cobra.Command {
+func LintCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "work [branch-name]",
-		Short: "Create a new branch based on an issue and checkout to it.",
-		Args:  cobra.MaximumNArgs(1),
+		Use:   "lint",
+		Short: "Run the set of linters defined in the .devxp config.",
+		Args:  cobra.MaximumNArgs(0),
 		Long: heredoc.Docf(`
-			Create a new branch and checkout to it. If the branch already exists,
-			it will be checked out.
+			Run the set of linters defined in the .devxp config file. If no linters are defined,
+			the command will do nothing.
 		`, "`"),
 		Example: heredoc.Doc(`
 			// Create a new branch 'wip' and checkout to it:
-			$ gh devxp work wip
+			$ gh devxp lint
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
