@@ -5,11 +5,12 @@ import (
 	"os"
 
 	"github.com/caarlos0/log"
+	"github.com/elhub/gh-devxp/pkg/config"
 	"github.com/spf13/cobra"
 )
 
-func Execute(version string) {
-	mainCmd := GenerateCmd(version)
+func Execute(settings *config.Settings, version string) {
+	mainCmd := GenerateCmd(settings, version)
 	ctx := context.Background()
 
 	if err := mainCmd.ExecuteContext(ctx); err != nil {
@@ -18,7 +19,7 @@ func Execute(version string) {
 	}
 }
 
-func GenerateCmd(version string) *cobra.Command {
+func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	var (
 		debug bool
 	)
@@ -44,6 +45,7 @@ func GenerateCmd(version string) *cobra.Command {
 
 	retCmd.AddCommand(
 		WorkCmd(),
+		LintCmd(settings),
 	)
 
 	return retCmd
