@@ -10,8 +10,8 @@ import (
 
 type GoLint struct{}
 
-func (GoLint) Exec() []lintOutput {
-	fmt.Println("Running golint")
+func (GoLint) Exec() ([]lintOutput, error) {
+	fmt.Print("Running golint... ")
 	var outputs []lintOutput
 
 	// Run the linter
@@ -40,5 +40,6 @@ func (GoLint) Exec() []lintOutput {
 		}
 	}
 
-	return outputs
+	fmt.Println("done.")
+	return outputs, err
 }

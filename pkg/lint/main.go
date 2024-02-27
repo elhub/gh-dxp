@@ -16,11 +16,17 @@ func Run(ctx context.Context, settings *config.Settings) error {
 	var outputs []lintOutput
 	for _, lintEntry := range settings.Lint.Linters {
 		if linter, ok := linters[lintEntry.Name]; ok {
-			output := linter.Exec()
+			output, err := linter.Exec()
 			outputs = append(outputs, output...)
+
+			if err != nil {
+				fmt.Printf("%s returned %d errors\n", lintEntry.Name, len(outputs))
+			}
+
 		} else {
 			fmt.Printf("Linter %s not found\n", lintEntry.Name)
 		}
+
 	}
 
 	// print the outputs

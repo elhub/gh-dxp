@@ -1,5 +1,5 @@
 package lint
 
 type Linter interface {
-	Exec() []lintOutput
+	Exec() ([]lintOutput, error)
 }
