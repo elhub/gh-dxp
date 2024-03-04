@@ -1,14 +1,13 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"testing"
 )
 
 func TestReadConfig(t *testing.T) {
 	// Create a temporary file
-	tmpfile, err := ioutil.TempFile("", ".devxp")
+	tmpfile, err := os.CreateTemp("", ".devxp")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -77,7 +76,7 @@ func TestFailConfig(t *testing.T) {
 
 func TestBadYamlConfig(t *testing.T) {
 	// Create a temporary file
-	tmpfile, err := ioutil.TempFile("", ".failxp")
+	tmpfile, err := os.CreateTemp("", ".failxp")
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -9,6 +9,7 @@ lint:
     - name: yamllint
     - name: eslint
     - name: prettier
+    - name: golint
   exclude:
     - "(\\.idea$)"
     - "(\\.gradle$)"

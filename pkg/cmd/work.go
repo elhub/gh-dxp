@@ -23,7 +23,7 @@ func WorkCmd() *cobra.Command {
 		`, "`"),
 		Example: heredoc.Doc(`
 			// Create a new branch 'wip' and checkout to it:
-			$ gh prx work wip
+			$ gh devxp work wip
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
