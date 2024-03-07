@@ -36,6 +36,7 @@ func TestGoLintErrors(t *testing.T) {
 
 func TestGoLint(t *testing.T) {
 	utils.ExecCmd = mockExecCommand
+	defer func() { utils.ExecCmd = exec.Command }() // Restore after test
 
 	// Call GoLint.Exec
 	outputs, err := lint.GoLint{}.Exec()
