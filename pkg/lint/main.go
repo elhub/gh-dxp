@@ -7,15 +7,16 @@ import (
 	"github.com/elhub/gh-devxp/pkg/config"
 )
 
+var Linters = map[string]Linter{
+	"golint": GoLint{},
+}
+
 func Run(ctx context.Context, settings *config.Settings) error {
-	linters := map[string]Linter{
-		"golint": GoLint{},
-	}
 
 	// iterate over settings.Linters and run each one
-	var outputs []lintOutput
+	var outputs []LintOutput
 	for _, lintEntry := range settings.Lint.Linters {
-		if linter, ok := linters[lintEntry.Name]; ok {
+		if linter, ok := Linters[lintEntry.Name]; ok {
 			output, err := linter.Exec()
 			outputs = append(outputs, output...)
 
@@ -31,7 +32,7 @@ func Run(ctx context.Context, settings *config.Settings) error {
 
 	// print the outputs
 	for _, output := range outputs {
-		fmt.Printf("%s:%d:%d: %s: %s\n", output.path, output.line, output.character, output.code, output.description)
+		fmt.Printf("%s:%d:%d: %s: %s\n", output.Path, output.Line, output.Character, output.Code, output.Description)
 	}
 
 	return nil
