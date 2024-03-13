@@ -10,9 +10,9 @@ import (
 
 type GoLint struct{}
 
-func (GoLint) Exec() ([]lintOutput, error) {
+func (GoLint) Exec() ([]LintOutput, error) {
 	fmt.Print("Running golint... ")
-	var outputs []lintOutput
+	var outputs []LintOutput
 
 	// Run the linter
 	out, err := utils.Exec("golangci-lint", "run", "./...")
@@ -24,17 +24,23 @@ func (GoLint) Exec() ([]lintOutput, error) {
 	lines := strings.Split(out, "\n")
 	for _, line := range lines {
 		tokens := strings.Split(line, ":")
-		if len(tokens) >= 5 {
+		if len(tokens) >= 3 {
 			line, _ := strconv.Atoi(tokens[1])
-			character, _ := strconv.Atoi(tokens[2])
-			description := strings.Join(tokens[4:], " ")
-			output := lintOutput{
-				linter:      "golint",
-				path:        tokens[0],
-				line:        line,
-				character:   character,
-				code:        tokens[3],
-				description: description,
+			var character int
+			var description string
+			if len(tokens) >= 4 {
+				character, _ = strconv.Atoi(tokens[2])
+				description = strings.Join(tokens[3:], " ")
+			} else {
+				character = 0
+				description = strings.Join(tokens[2:], " ")
+			}
+			output := LintOutput{
+				Linter:      "golint",
+				Path:        tokens[0],
+				Line:        line,
+				Character:   character,
+				Description: description,
 			}
 			outputs = append(outputs, output)
 		}
