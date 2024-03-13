@@ -27,7 +27,7 @@ vet:
 	go vet
 
 lint:
-	golangci-lint run --enable-all
+	golangci-lint run --config=~/.local/lint-config/golangci.yml ./...
 
 ci_test:
 	cd .teamcity && mvn compile && cd ..
