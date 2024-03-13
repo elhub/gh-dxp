@@ -15,14 +15,14 @@ func TestGoLintParser(t *testing.T) {
 	tests := []struct {
 		name      string
 		inputLine string
-		expected  lint.LintOutput
+		expected  lint.LinterOutput
 		expectErr bool
 	}{
 		{
 			name:      "valid golint line with line number and column",
 			inputLine: "pkg/config/config_test.go:32:5: shadow declaration of \"err\" shadows declaration at line 10 (govet)",
 			expectErr: false,
-			expected: lint.LintOutput{
+			expected: lint.LinterOutput{
 				Linter:      "golint",
 				Path:        "pkg/config/config_test.go",
 				Line:        32,
@@ -36,7 +36,7 @@ func TestGoLintParser(t *testing.T) {
 			name:      "valid golint line with line number and no column",
 			inputLine: "config_test.go:66: unnecessary trailing newline (whitespace)",
 			expectErr: false,
-			expected: lint.LintOutput{
+			expected: lint.LinterOutput{
 				Linter:      "golint",
 				Path:        "config_test.go",
 				Line:        66,
@@ -50,7 +50,7 @@ func TestGoLintParser(t *testing.T) {
 			name:      "valid golint line with colon in description",
 			inputLine: "pkg/config/config_test.go:789:91: shadow: declaration of \"err\" shadows declaration at line 10 (govet)",
 			expectErr: false,
-			expected: lint.LintOutput{
+			expected: lint.LinterOutput{
 				Linter:      "golint",
 				Path:        "pkg/config/config_test.go",
 				Line:        789,
@@ -64,19 +64,19 @@ func TestGoLintParser(t *testing.T) {
 			name:      "invalid delimiters in golint format",
 			inputLine: "[error] test:1,2 no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
-			expected:  lint.LintOutput{},
+			expected:  lint.LinterOutput{},
 		},
 		{
 			name:      "invalid line fomrat in golint",
 			inputLine: "test.yaml:t:8: [error] no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
-			expected:  lint.LintOutput{},
+			expected:  lint.LinterOutput{},
 		},
 		{
 			name:      "invalid column format in golint",
 			inputLine: "test.yaml:1:t: [error] no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
-			expected:  lint.LintOutput{},
+			expected:  lint.LinterOutput{},
 		},
 	}
 
@@ -92,10 +92,9 @@ func TestGoLintParser(t *testing.T) {
 			}
 		})
 	}
-
 }
 
-// Test golint.go
+// Test golint.go.
 func mockGoExec(command string, args ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestGoLintErrors", "--", command}
 	cs = append(cs, args...)
@@ -108,17 +107,22 @@ func TestGoLintErrors(_ *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}
-	fmt.Fprintf(os.Stdout, "pkg/lint/golint.go:17:2: use of `fmt.Print` forbidden by pattern `^(fmt.Print(|f|ln)|print|println)$` (forbidigo)\n")
-	fmt.Fprintf(os.Stdout, "pkg/lint/lint_test.go:24:23: unused-parameter: parameter 't' seems to be unused, consider removing or renaming it as _ (revive)\n")
+	fmt.Fprintf(os.Stdout, "pkg/lint/golint.go:17:2: use of `fmt.Print` forbidden by pattern "+
+		"`^(fmt.Print(|f|ln)|print|println)$` (forbidigo)\n")
+	fmt.Fprintf(os.Stdout, "pkg/lint/lint_test.go:24:23: unused-parameter: parameter 't' seems "+
+		"to be unused, consider removing or renaming it as _ (revive)\n")
 	os.Exit(0)
 }
 
-func TestGoLint(t *testing.T) {
-	utils.ExecCmd = mockGoExec
-	defer func() { utils.ExecCmd = exec.Command }() // Restore after test
+func mockGoExecutor() *utils.Executor {
+	return &utils.Executor{
+		ExecCmd: mockGoExec,
+	}
+}
 
+func TestGoLint(t *testing.T) {
 	// Call golint.Exec
-	outputs, err := lint.GoLint{}.Exec()
+	outputs, err := lint.GoLint{}.Exec(mockGoExecutor())
 
 	if err != nil {
 		t.Errorf("GoLint threw an error when none was expected")
@@ -135,5 +139,4 @@ func TestGoLint(t *testing.T) {
 	if outputs[0].Path != "pkg/lint/golint.go" {
 		t.Errorf("Expected first issue path to be 'pkg/lint/golint.go', got '%s'", outputs[0].Path)
 	}
-
 }

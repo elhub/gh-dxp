@@ -28,37 +28,37 @@ func WorkCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			branchId := ""
+			branchID := ""
 			if len(args) > 0 {
-				branchId = args[0]
+				branchID = args[0]
 			}
 
-			return checkoutBranch(ctx, branchId)
+			return checkoutBranch(ctx, branchID)
 		},
 	}
 
 	return cmd
 }
 
-func checkoutBranch(ctx context.Context, branchId string) error {
+func checkoutBranch(_ context.Context, branchID string) error {
 	// Does the branch exist?
-	branchExists, err := branchExists(branchId)
-	if err != nil {
-		return err
+	branchExists, existsErr := branchExists(branchID)
+	if existsErr != nil {
+		return existsErr
 	}
 
 	if branchExists {
-		log.Debugf("Branch '%s' already exists, checking out to it", branchId)
-		out, err := utils.Exec("git", "checkout", branchId)
-		if err != nil {
-			return errors.Wrap(err, "Failed to checkout branch")
+		log.Debugf("Branch '%s' already exists, checking out to it", branchID)
+		out, err1 := utils.Exec().Run("git", "checkout", branchID)
+		if err1 != nil {
+			return errors.Wrap(err1, "Failed to checkout branch")
 		}
 		log.Info(strings.Trim(out, "\n"))
 	} else {
-		log.Debugf("Creating branch '%s' and checking out to it", branchId)
-		out, err := utils.Exec("git", "checkout", "-b", branchId)
-		if err != nil {
-			return errors.Wrap(err, "Failed to create branch")
+		log.Debugf("Creating branch '%s' and checking out to it", branchID)
+		out, err2 := utils.Exec().Run("git", "checkout", "-b", branchID)
+		if err2 != nil {
+			return errors.Wrap(err2, "Failed to create branch")
 		}
 		log.Info(strings.Trim(out, "\n"))
 	}
@@ -66,17 +66,18 @@ func checkoutBranch(ctx context.Context, branchId string) error {
 	return nil
 }
 
-func branchExists(branchId string) (bool, error) {
-	_, err := utils.Exec("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branchId)
+func branchExists(branchID string) (bool, error) {
+	_, err := utils.Exec().Run("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branchID)
 	if err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
+		var exitErr *exec.ExitError
+		if errors.As(err, &exitErr) {
 			if exitErr.ExitCode() == 0 {
 				return true, nil
 			}
 			return false, nil
-		} else {
-			return false, err
 		}
+
+		return false, err
 	}
 	return true, nil
 }

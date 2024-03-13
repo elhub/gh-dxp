@@ -13,12 +13,12 @@ type GoLint struct{}
 
 var golintRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*)?:? (.*) \((.*)\)$`)
 
-func (GoLint) Exec() ([]LintOutput, error) {
+func (GoLint) Exec(exec *utils.Executor) ([]LinterOutput, error) {
 	fmt.Print("Running golint... ")
-	var outputs []LintOutput
+	var outputs []LinterOutput
 
 	// Run the linter
-	out, err := utils.Exec("golangci-lint", "run", "./...")
+	out, err := exec.Run("golangci-lint", "run", "./...")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}
@@ -26,8 +26,8 @@ func (GoLint) Exec() ([]LintOutput, error) {
 	// Go through line by line and parse into lintOuput
 	lines := strings.Split(out, "\n")
 	for _, line := range lines {
-		output, err := GoLintParser(line)
-		if err == nil {
+		output, parseErr := GoLintParser(line)
+		if parseErr == nil {
 			outputs = append(outputs, output)
 		}
 	}
@@ -36,13 +36,13 @@ func (GoLint) Exec() ([]LintOutput, error) {
 	return outputs, err
 }
 
-func GoLintParser(inputLine string) (LintOutput, error) {
+func GoLintParser(inputLine string) (LinterOutput, error) {
 	matchExtract := golintRegex.FindAllStringSubmatch(inputLine, -1)
 	if len(matchExtract) > 0 {
 		matches := matchExtract[0]
 		line, _ := strconv.Atoi(matches[2])
 		column, _ := strconv.Atoi(matches[3])
-		return LintOutput{
+		return LinterOutput{
 			Linter:      "golint",
 			Path:        matches[1],
 			Line:        line,
@@ -52,5 +52,5 @@ func GoLintParser(inputLine string) (LintOutput, error) {
 			Source:      matches[5],
 		}, nil
 	}
-	return LintOutput{}, fmt.Errorf("invalid golint line format")
+	return LinterOutput{}, fmt.Errorf("invalid golint line format")
 }

@@ -1,6 +1,6 @@
 package lint
 
-type LintOutput struct {
+type LinterOutput struct {
 	Linter      string
 	Path        string
 	Line        int

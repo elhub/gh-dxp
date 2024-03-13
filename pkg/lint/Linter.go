@@ -1,5 +1,7 @@
 package lint
 
+import "github.com/elhub/gh-devxp/pkg/utils"
+
 type Linter interface {
-	Exec() ([]LintOutput, error)
+	Exec(exec *utils.Executor) ([]LinterOutput, error)
 }

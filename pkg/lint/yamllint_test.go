@@ -15,7 +15,7 @@ func TestYamlLintParser(t *testing.T) {
 	tests := []struct {
 		name      string
 		inputLine string
-		expected  lint.LintOutput
+		expected  lint.LinterOutput
 		expectErr bool
 	}{
 		{
@@ -23,7 +23,7 @@ func TestYamlLintParser(t *testing.T) {
 			inputLine: "test_infra/test_plugin/new_test/fix.yaml:195:101: [error] line too long (399 > " +
 				"100 characters) (line-length)",
 			expectErr: false,
-			expected: lint.LintOutput{
+			expected: lint.LinterOutput{
 				Linter:      "yamllint",
 				Path:        "test_infra/test_plugin/new_test/fix.yaml",
 				Line:        195,
@@ -37,7 +37,7 @@ func TestYamlLintParser(t *testing.T) {
 			name:      "valid yammlint line without parenthesis",
 			inputLine: "test.yaml:1:8: [error] no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: false,
-			expected: lint.LintOutput{
+			expected: lint.LinterOutput{
 				Linter:      "yamllint",
 				Path:        "test.yaml",
 				Line:        1,
@@ -51,19 +51,19 @@ func TestYamlLintParser(t *testing.T) {
 			name:      "yamllint invalid line",
 			inputLine: "test.yaml:t:8: [error] no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
-			expected:  lint.LintOutput{},
+			expected:  lint.LinterOutput{},
 		},
 		{
 			name:      "yamllint invalid column",
 			inputLine: "test.yaml:1:t: [error] no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
-			expected:  lint.LintOutput{},
+			expected:  lint.LinterOutput{},
 		},
 		{
 			name:      "yamllint invalid format",
 			inputLine: "[error] test:1,2 no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
-			expected:  lint.LintOutput{},
+			expected:  lint.LinterOutput{},
 		},
 	}
 
@@ -79,10 +79,9 @@ func TestYamlLintParser(t *testing.T) {
 			}
 		})
 	}
-
 }
 
-// Test golint.go
+// Test yamllint.go.
 func mockYamlExec(command string, args ...string) *exec.Cmd {
 	cs := []string{"-test.run=TestYamlLintErrors", "--", command}
 	cs = append(cs, args...)
@@ -100,12 +99,15 @@ func TestYamlLintErrors(_ *testing.T) {
 	os.Exit(0)
 }
 
-func TestYamlLint(t *testing.T) {
-	utils.ExecCmd = mockYamlExec
-	defer func() { utils.ExecCmd = exec.Command }() // Restore after test
+func mockYamlExecutor() *utils.Executor {
+	return &utils.Executor{
+		ExecCmd: mockYamlExec,
+	}
+}
 
+func TestYamlLint(t *testing.T) {
 	// Call YamlLint.Exec
-	outputs, err := lint.YamlLint{}.Exec()
+	outputs, err := lint.YamlLint{}.Exec(mockYamlExecutor())
 
 	if err != nil {
 		t.Errorf("YamlLint threw an error when none was expected")
@@ -122,5 +124,4 @@ func TestYamlLint(t *testing.T) {
 	if outputs[0].Path != "./test/weird.yml" {
 		t.Errorf("Expected first issue path to be './test/weird.yml', got '%s'", outputs[0].Path)
 	}
-
 }
