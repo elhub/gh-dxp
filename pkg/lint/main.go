@@ -8,7 +8,8 @@ import (
 )
 
 var Linters = map[string]Linter{
-	"golint": GoLint{},
+	"golint":   GoLint{},
+	"yamllint": YamlLint{},
 }
 
 func Run(ctx context.Context, settings *config.Settings) error {
@@ -32,7 +33,7 @@ func Run(ctx context.Context, settings *config.Settings) error {
 
 	// print the outputs
 	for _, output := range outputs {
-		fmt.Printf("%s:%d:%d: %s: %s\n", output.Path, output.Line, output.Character, output.Code, output.Description)
+		fmt.Printf("%s:%d:%d: %s: %s\n", output.Path, output.Line, output.Column, output.Description, output.Severity)
 	}
 
 	return nil

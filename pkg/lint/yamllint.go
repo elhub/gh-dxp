@@ -9,16 +9,16 @@ import (
 	"github.com/elhub/gh-devxp/pkg/utils"
 )
 
-type GoLint struct{}
+type YamlLint struct{}
 
-var golintRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*)?:? (.*) \((.*)\)$`)
+var yamlRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*): \[(.*)\] (.*) \((.*)\)$`)
 
-func (GoLint) Exec() ([]LintOutput, error) {
-	fmt.Print("Running golint... ")
+func (YamlLint) Exec() ([]LintOutput, error) {
+	fmt.Print("Running yamllint... ")
 	var outputs []LintOutput
 
 	// Run the linter
-	out, err := utils.Exec("golangci-lint", "run", "./...")
+	out, err := utils.Exec("yamllint", "-f", "parsable", ".")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}
@@ -26,7 +26,7 @@ func (GoLint) Exec() ([]LintOutput, error) {
 	// Go through line by line and parse into lintOuput
 	lines := strings.Split(out, "\n")
 	for _, line := range lines {
-		output, err := GoLintParser(line)
+		output, err := YamlLintParser(line)
 		if err == nil {
 			outputs = append(outputs, output)
 		}
@@ -36,21 +36,21 @@ func (GoLint) Exec() ([]LintOutput, error) {
 	return outputs, err
 }
 
-func GoLintParser(inputLine string) (LintOutput, error) {
-	matchExtract := golintRegex.FindAllStringSubmatch(inputLine, -1)
+func YamlLintParser(inputLine string) (LintOutput, error) {
+	matchExtract := yamlRegex.FindAllStringSubmatch(inputLine, -1)
 	if len(matchExtract) > 0 {
 		matches := matchExtract[0]
 		line, _ := strconv.Atoi(matches[2])
 		column, _ := strconv.Atoi(matches[3])
 		return LintOutput{
-			Linter:      "golint",
+			Linter:      "yamllint",
 			Path:        matches[1],
 			Line:        line,
 			Column:      column,
-			Description: matches[4],
-			Severity:    "error",
-			Source:      matches[5],
+			Description: matches[5],
+			Severity:    matches[4],
+			Source:      matches[6],
 		}, nil
 	}
-	return LintOutput{}, fmt.Errorf("invalid golint line format")
+	return LintOutput{}, fmt.Errorf("invalid yamllint line format")
 }
