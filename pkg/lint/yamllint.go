@@ -13,12 +13,12 @@ type YamlLint struct{}
 
 var yamlRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*): \[(.*)\] (.*) \((.*)\)$`)
 
-func (YamlLint) Exec() ([]LintOutput, error) {
+func (YamlLint) Exec(exec *utils.Executor) ([]LinterOutput, error) {
 	fmt.Print("Running yamllint... ")
-	var outputs []LintOutput
+	var outputs []LinterOutput
 
 	// Run the linter
-	out, err := utils.Exec("yamllint", "-f", "parsable", ".")
+	out, err := exec.Run("yamllint", "-f", "parsable", ".")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}
@@ -26,8 +26,8 @@ func (YamlLint) Exec() ([]LintOutput, error) {
 	// Go through line by line and parse into lintOuput
 	lines := strings.Split(out, "\n")
 	for _, line := range lines {
-		output, err := YamlLintParser(line)
-		if err == nil {
+		output, parseErr := YamlLintParser(line)
+		if parseErr == nil {
 			outputs = append(outputs, output)
 		}
 	}
@@ -36,13 +36,13 @@ func (YamlLint) Exec() ([]LintOutput, error) {
 	return outputs, err
 }
 
-func YamlLintParser(inputLine string) (LintOutput, error) {
+func YamlLintParser(inputLine string) (LinterOutput, error) {
 	matchExtract := yamlRegex.FindAllStringSubmatch(inputLine, -1)
 	if len(matchExtract) > 0 {
 		matches := matchExtract[0]
 		line, _ := strconv.Atoi(matches[2])
 		column, _ := strconv.Atoi(matches[3])
-		return LintOutput{
+		return LinterOutput{
 			Linter:      "yamllint",
 			Path:        matches[1],
 			Line:        line,
@@ -52,5 +52,5 @@ func YamlLintParser(inputLine string) (LintOutput, error) {
 			Source:      matches[6],
 		}, nil
 	}
-	return LintOutput{}, fmt.Errorf("invalid yamllint line format")
+	return LinterOutput{}, fmt.Errorf("invalid yamllint line format")
 }

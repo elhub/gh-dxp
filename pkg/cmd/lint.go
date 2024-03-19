@@ -23,7 +23,7 @@ func LintCmd(settings *config.Settings) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
-			return lint.Run(ctx, settings)
+			return lint.Run(ctx, settings, lint.DefaultLinters())
 		},
 	}
 

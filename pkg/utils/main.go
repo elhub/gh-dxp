@@ -8,11 +8,19 @@ import (
 	"github.com/caarlos0/log"
 )
 
-var ExecCmd = exec.Command
+type Executor struct {
+	ExecCmd func(name string, arg ...string) *exec.Cmd
+}
 
-func Exec(name string, args ...string) (string, error) {
+func Exec() *Executor {
+	return &Executor{
+		ExecCmd: exec.Command,
+	}
+}
+
+func (e *Executor) Run(name string, args ...string) (string, error) {
 	log.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
-	cmd := ExecCmd(name, args...)
+	cmd := e.ExecCmd(name, args...)
 	bytes, err := cmd.CombinedOutput()
 	return string(bytes), err
 }

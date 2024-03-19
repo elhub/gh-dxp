@@ -1,14 +1,16 @@
-package utils
+package utils_test
 
 import (
 	"os"
 	"os/exec"
 	"testing"
+
+	"github.com/elhub/gh-devxp/pkg/utils"
 )
 
-// mockExecCommand is a helper function that creates a mock of exec.Command
+// mockExecCommand is a helper function that creates a mock of exec.Command.
 func mockExecCommand(command string, args ...string) *exec.Cmd {
-	// This test binary always exits with 0 and prints whatever is passed to -echo
+	// This test binary always exits with 0 and prints whatever is passed to -echo.
 	cs := []string{"-test.run=TestHelperProcess", "--", command}
 	cs = append(cs, args...)
 	cmd := exec.Command(os.Args[0], cs...)
@@ -16,8 +18,8 @@ func mockExecCommand(command string, args ...string) *exec.Cmd {
 	return cmd
 }
 
-// TestHelperProcess is a helper function for mockExecCommand
-func TestHelperProcess(t *testing.T) {
+// TestHelperProcess is a helper function for mockExecCommand.
+func TestHelperProcess(_ *testing.T) {
 	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
 		return
 	}
@@ -30,15 +32,14 @@ func TestHelperProcess(t *testing.T) {
 	}
 }
 
+func mockExec() *utils.Executor {
+	return &utils.Executor{
+		ExecCmd: mockExecCommand,
+	}
+}
+
 func TestExec(t *testing.T) {
-	// Replace exec.Command with our mock
-	ExecCmd = mockExecCommand
-	defer func() { ExecCmd = exec.Command }() // Restore after test
-
-	// Call Exec
-	_, err := Exec("echo", "hello")
-
-	// Check if Exec returns an error
+	_, err := mockExec().Run("echo", "hello")
 	if err != nil {
 		t.Errorf("Expected Exec to not return an error, got %v", err)
 	}

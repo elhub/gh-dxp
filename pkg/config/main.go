@@ -7,14 +7,14 @@ import (
 )
 
 func ReadConfig(filepath string) (*Settings, error) {
-	data, err := os.ReadFile(filepath)
-	if err != nil {
-		return nil, err
+	data, readErr := os.ReadFile(filepath)
+	if readErr != nil {
+		return nil, readErr
 	}
 
 	var cfg Settings
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, err
+	if yamlErr := yaml.Unmarshal(data, &cfg); yamlErr != nil {
+		return nil, yamlErr
 	}
 
 	return &cfg, nil

@@ -1,8 +1,10 @@
-package config
+package config_test
 
 import (
 	"os"
 	"testing"
+
+	"github.com/elhub/gh-devxp/pkg/config"
 )
 
 func TestReadConfig(t *testing.T) {
@@ -26,15 +28,15 @@ lint:
   exclude:
     - "(\\.bad$)"
     - "(\\.break$)"`)
-	if _, err := tmpfile.Write(text); err != nil {
-		t.Fatal(err)
+	if _, err1 := tmpfile.Write(text); err1 != nil {
+		t.Fatal(err1)
 	}
-	if err := tmpfile.Close(); err != nil {
-		t.Fatal(err)
+	if err2 := tmpfile.Close(); err2 != nil {
+		t.Fatal(err2)
 	}
 
 	// Set the file name in ReadConfig
-	cfg, err := ReadConfig(tmpfile.Name())
+	cfg, err := config.ReadConfig(tmpfile.Name())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,12 +65,11 @@ lint:
 	if len(cfg.Lint.Exclude) != 2 {
 		t.Errorf("got %+v, want 2", cfg.Lint.Exclude)
 	}
-
 }
 
 func TestFailConfig(t *testing.T) {
 	// Check that an incorrect file returns a error
-	_, err := ReadConfig(".devxpp")
+	_, err := config.ReadConfig(".devxpp")
 	if err == nil {
 		t.Fatal()
 	}
@@ -88,14 +89,14 @@ lint:
   linters:
     - navn: linter1
 	 - name: linter2`)
-	if _, err := tmpfile.Write(text); err != nil {
-		t.Fatal(err)
+	if _, err1 := tmpfile.Write(text); err1 != nil {
+		t.Fatal(err1)
 	}
-	if err := tmpfile.Close(); err != nil {
-		t.Fatal(err)
+	if err2 := tmpfile.Close(); err2 != nil {
+		t.Fatal(err2)
 	}
 
-	_, errFail := ReadConfig(tmpfile.Name())
+	_, errFail := config.ReadConfig(tmpfile.Name())
 	if errFail == nil {
 		t.Fatal(err)
 	}

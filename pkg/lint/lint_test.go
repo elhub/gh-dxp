@@ -6,13 +6,14 @@ import (
 
 	"github.com/elhub/gh-devxp/pkg/config"
 	"github.com/elhub/gh-devxp/pkg/lint"
+	"github.com/elhub/gh-devxp/pkg/utils"
 )
 
-// Test main.go
+// Test main.go.
 type TestMockLint struct{}
 
-func (TestMockLint) Exec() ([]lint.LintOutput, error) {
-	return []lint.LintOutput{
+func (TestMockLint) Exec(_ *utils.Executor) ([]lint.LinterOutput, error) {
+	return []lint.LinterOutput{
 		{
 			Linter:      "mocklint",
 			Path:        "mock/path",
@@ -26,7 +27,7 @@ func (TestMockLint) Exec() ([]lint.LintOutput, error) {
 }
 
 func TestRun(t *testing.T) {
-	lint.Linters = map[string]lint.Linter{
+	var testLinters = map[string]lint.Linter{
 		"mocklint": TestMockLint{},
 	}
 
@@ -43,11 +44,10 @@ func TestRun(t *testing.T) {
 	}
 
 	// Call Run with the mock context and settings
-	err := lint.Run(ctx, settings)
+	err := lint.Run(ctx, settings, testLinters)
 
 	// Check if Run returns an error
 	if err != nil {
 		t.Errorf("Expected Run to not return an error, got %v", err)
 	}
-
 }
