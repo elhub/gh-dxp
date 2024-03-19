@@ -1,4 +1,4 @@
-package pr
+package diff
 
 import (
 	"strings"
@@ -6,12 +6,6 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
 )
-
-type PullRequest struct {
-	Title  string
-	Body   string
-	Labels []string
-}
 
 func createPR(
 	branchID string,
