@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/elhub/gh-devxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/config"
 )
 
 func TestReadConfig(t *testing.T) {

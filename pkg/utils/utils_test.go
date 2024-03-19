@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"testing"
 
-	"github.com/elhub/gh-devxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 // mockExecCommand is a helper function that creates a mock of exec.Command.

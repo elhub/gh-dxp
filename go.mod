@@ -1,4 +1,4 @@
-module github.com/elhub/gh-devxp
+module github.com/elhub/gh-dxp
 
 go 1.21
 

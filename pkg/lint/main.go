@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/elhub/gh-devxp/pkg/config"
-	"github.com/elhub/gh-devxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 func DefaultLinters() map[string]Linter {

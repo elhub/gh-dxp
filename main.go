@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/elhub/gh-devxp/pkg/cmd"
-	"github.com/elhub/gh-devxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/cmd"
+	"github.com/elhub/gh-dxp/pkg/config"
 )
 
 var (

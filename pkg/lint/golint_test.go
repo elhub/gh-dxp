@@ -7,8 +7,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/elhub/gh-devxp/pkg/lint"
-	"github.com/elhub/gh-devxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/lint"
+	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 func TestGoLintParser(t *testing.T) {

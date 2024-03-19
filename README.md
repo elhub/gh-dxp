@@ -1,4 +1,4 @@
-# gh-devxp
+# gh-dxp
 
 A gh client extension brought to you by Elhub's DevXP team.
 

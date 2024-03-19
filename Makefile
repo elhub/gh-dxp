@@ -1,4 +1,4 @@
-BINARY_NAME=gh-devxp
+BINARY_NAME=gh-dxp
 BUILD_DIR=build
 
 build:
