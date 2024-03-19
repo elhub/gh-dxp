@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-devxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/spf13/cobra"
 )
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-devxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
