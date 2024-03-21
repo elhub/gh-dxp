@@ -6,6 +6,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func writeTempFile(t *testing.T, text []byte) *os.File {
@@ -25,7 +26,6 @@ func writeTempFile(t *testing.T, text []byte) *os.File {
 }
 
 func TestReadConfig(t *testing.T) {
-
 	t.Run("valid config file", func(t *testing.T) {
 		// Create a temporary file
 		tmpfile := writeTempFile(t, []byte(`---
@@ -45,18 +45,18 @@ lint:
 		cfg, err := config.ReadConfig(tmpfile.Name())
 
 		// Check that the settings were correctly read
-		assert.NoError(t, err)
-		assert.Equal(t, 2, len(cfg.Lint.Linters))
+		require.NoError(t, err)
+		assert.Len(t, cfg.Lint.Linters, 2)
 		assert.Equal(t, "linter1", cfg.Lint.Linters[0].Name)
 		assert.Equal(t, "linter2", cfg.Lint.Linters[1].Name)
 		assert.Equal(t, ".*\\.txt$", cfg.Lint.Linters[1].Include[0])
 		assert.Equal(t, ".*\\.go$", cfg.Lint.Linters[0].Exclude[0])
-		assert.Equal(t, 2, len(cfg.Lint.Exclude))
+		assert.Len(t, cfg.Lint.Exclude, 2)
 	})
 
 	t.Run("non existent config file", func(t *testing.T) {
 		_, err := config.ReadConfig(".devxpp")
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("incorrectly formatted YAML", func(t *testing.T) {
@@ -71,6 +71,6 @@ lint:
 		_, err := config.ReadConfig(tmpfile.Name())
 
 		// Check that the settings read throws an error
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 }

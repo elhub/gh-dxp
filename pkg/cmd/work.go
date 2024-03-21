@@ -21,7 +21,6 @@ func WorkCmd(exe utils.Executor) *cobra.Command {
 			$ gh devxp work wip
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-
 			branchID := ""
 			if len(args) > 0 {
 				branchID = args[0]

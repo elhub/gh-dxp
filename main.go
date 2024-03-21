@@ -23,5 +23,4 @@ func main() {
 		log.WithError(err).Error("Command failed")
 		os.Exit(1)
 	}
-
 }

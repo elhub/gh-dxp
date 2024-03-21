@@ -5,6 +5,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGoLint(t *testing.T) {
@@ -38,12 +39,12 @@ func TestGoLint(t *testing.T) {
 			outputs, err := lint.GoLint{}.Run(mockExe)
 
 			// Assert that the expectations were met
-			assert.Equal(t, tt.expectedLines, len(outputs))
+			assert.Len(t, outputs, tt.expectedLines)
 			assert.Equal(t, "golint", outputs[0].Linter)
 			if tt.expectErr {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 			} else {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
@@ -127,9 +128,9 @@ func TestGoLintParser(t *testing.T) {
 			// Assert that the expectations were met
 			assert.Equal(t, tt.expected, output)
 			if tt.expectErr {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 			} else {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}

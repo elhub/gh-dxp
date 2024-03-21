@@ -5,6 +5,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestYamlLint(t *testing.T) {
@@ -36,12 +37,12 @@ func TestYamlLint(t *testing.T) {
 			outputs, err := lint.YamlLint{}.Run(mockExe)
 
 			// Assert that the expectations were met
-			assert.Equal(t, tt.expectedLines, len(outputs))
+			require.Len(t, outputs, tt.expectedLines)
 			assert.Equal(t, "yamllint", outputs[0].Linter)
 			if tt.expectErr {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 			} else {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
@@ -111,9 +112,9 @@ func TestYamlLintParser(t *testing.T) {
 			// Assert that the expectations were met
 			assert.Equal(t, tt.expected, output)
 			if tt.expectErr {
-				assert.NotNil(t, err)
+				require.Error(t, err)
 			} else {
-				assert.Nil(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}

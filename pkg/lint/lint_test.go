@@ -6,8 +6,8 @@ import (
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/utils"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
 type mocklintExecutor struct {
@@ -55,7 +55,6 @@ func TestRun(t *testing.T) {
 		err := lint.Run(mockExe, settings, testLinters)
 
 		// Check if Run returns an error
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
-
 }
