@@ -4,10 +4,11 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
+	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func LintCmd(settings *config.Settings) *cobra.Command {
+func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lint",
 		Short: "Run the set of linters defined in the .devxp config.",
@@ -21,9 +22,7 @@ func LintCmd(settings *config.Settings) *cobra.Command {
 			$ gh devxp lint
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			ctx := cmd.Context()
-
-			return lint.Run(ctx, settings, lint.DefaultLinters())
+			return lint.Run(exe, settings, lint.DefaultLinters())
 		},
 	}
 

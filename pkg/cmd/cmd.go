@@ -2,21 +2,20 @@ package cmd
 
 import (
 	"context"
-	"os"
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func Execute(settings *config.Settings, version string) {
+func Execute(settings *config.Settings, version string) error {
 	mainCmd := GenerateCmd(settings, version)
 	ctx := context.Background()
 
-	if err := mainCmd.ExecuteContext(ctx); err != nil {
-		log.WithError(err).Error("Command failed")
-		os.Exit(1)
-	}
+	err := mainCmd.ExecuteContext(ctx)
+
+	return err
 }
 
 func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
@@ -43,9 +42,11 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 
 	retCmd.PersistentFlags().BoolVar(&debug, "debug", false, "verbose logging")
 
+	exe := utils.LinuxExecutor()
+
 	retCmd.AddCommand(
-		WorkCmd(),
-		LintCmd(settings),
+		WorkCmd(exe),
+		LintCmd(exe, settings),
 	)
 
 	return retCmd

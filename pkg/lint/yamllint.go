@@ -13,12 +13,12 @@ type YamlLint struct{}
 
 var yamlRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*): \[(.*)\] (.*) \((.*)\)$`)
 
-func (YamlLint) Exec(exec *utils.Executor) ([]LinterOutput, error) {
+func (YamlLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 	fmt.Print("Running yamllint... ")
 	var outputs []LinterOutput
 
 	// Run the linter
-	out, err := exec.Run("yamllint", "-f", "parsable", ".")
+	out, err := exe.Command("yamllint", "-f", "parsable", ".")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}

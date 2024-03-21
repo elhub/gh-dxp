@@ -1,46 +1,41 @@
 package utils_test
 
 import (
-	"os"
 	"os/exec"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/stretchr/testify/assert"
 )
 
-// mockExecCommand is a helper function that creates a mock of exec.Command.
-func mockExecCommand(command string, args ...string) *exec.Cmd {
-	// This test binary always exits with 0 and prints whatever is passed to -echo.
-	cs := []string{"-test.run=TestHelperProcess", "--", command}
-	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
-	return cmd
-}
-
-// TestHelperProcess is a helper function for mockExecCommand.
-func TestHelperProcess(_ *testing.T) {
-	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
-		return
-	}
-	// Echo whatever comes after -echo
-	for _, arg := range os.Args {
-		if arg == "-echo" {
-			println(arg)
-			os.Exit(0)
+func TestLinuxExecutor_Command(t *testing.T) {
+	t.Run("should return command output", func(t *testing.T) {
+		executor := &utils.LinuxExecutorImpl{
+			ExecCommand: func(name string, args ...string) *exec.Cmd {
+				return exec.Command("echo", "hello")
+			},
 		}
-	}
-}
 
-func mockExec() *utils.Executor {
-	return &utils.Executor{
-		ExecCmd: mockExecCommand,
-	}
-}
+		// Call the method under test
+		output, err := executor.Command("echo", "hello")
 
-func TestExec(t *testing.T) {
-	_, err := mockExec().Run("echo", "hello")
-	if err != nil {
-		t.Errorf("Expected Exec to not return an error, got %v", err)
-	}
+		// Assert that the expectations were met
+		assert.NoError(t, err)
+		assert.Equal(t, "hello\n", output)
+	})
+
+	t.Run("should return error if command fails", func(t *testing.T) {
+		executor := &utils.LinuxExecutorImpl{
+			ExecCommand: func(name string, args ...string) *exec.Cmd {
+				return exec.Command("ls", "/nonexistent")
+			},
+		}
+
+		// Call the method under test
+		output, err := executor.Command("ls", "/nonexistent")
+
+		// Assert that the expectations were met
+		assert.Error(t, err)
+		assert.Contains(t, output, "No such file or directory")
+	})
 }

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+
+	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/cmd"
 	"github.com/elhub/gh-dxp/pkg/config"
 )
@@ -15,5 +18,10 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	cmd.Execute(settings, version)
+
+	if cmdErr := cmd.Execute(settings, version); cmdErr != nil {
+		log.WithError(err).Error("Command failed")
+		os.Exit(1)
+	}
+
 }
