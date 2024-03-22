@@ -1,7 +1,6 @@
 package lint
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -15,12 +14,12 @@ func DefaultLinters() map[string]Linter {
 	}
 }
 
-func Run(_ context.Context, settings *config.Settings, linters map[string]Linter) error {
+func Run(exe utils.Executor, settings *config.Settings, linters map[string]Linter) error {
 	// iterate over settings.Linters and run each one
 	var outputs []LinterOutput
 	for _, lintEntry := range settings.Lint.Linters {
 		if linter, ok := linters[lintEntry.Name]; ok {
-			output, err := linter.Exec(utils.Exec())
+			output, err := linter.Run(exe)
 			outputs = append(outputs, output...)
 
 			if err != nil {
