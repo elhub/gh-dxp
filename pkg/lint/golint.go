@@ -14,7 +14,7 @@ type GoLint struct{}
 var golintRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*)?:? (.*) \((.*)\)$`)
 
 func (GoLint) Run(exe utils.Executor) ([]LinterOutput, error) {
-	fmt.Print("Running golint... ")
+	s := utils.StartSpinner("Running Golint...", "Golint done.")
 	var outputs []LinterOutput
 
 	// Run the linter
@@ -32,7 +32,7 @@ func (GoLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 		}
 	}
 
-	fmt.Println("done.")
+	s.Stop()
 	return outputs, err
 }
 

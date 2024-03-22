@@ -29,7 +29,7 @@ func CheckoutBranch(exe utils.Executor, branchID string) error {
 		if err2 != nil {
 			return errors.Wrap(err2, "Failed to create branch")
 		}
-		log.Info(strings.Trim(out, "\n"))
+		log.Debug(strings.Trim(out, "\n"))
 	}
 
 	return nil
