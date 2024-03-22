@@ -1,22 +1,62 @@
 package lint_test
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"reflect"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestGoLint(t *testing.T) {
+	mockExe := new(mocklintExecutor)
+
+	tests := []struct {
+		name          string
+		mockReturn    string
+		mockError     error
+		expectedLines int
+		expectErr     bool
+	}{
+		{
+			name: "valid golint line with line number and column",
+			mockReturn: "pkg/lint/golint.go:17:2: use of `fmt.Print` forbidden by pattern " +
+				"`^(fmt.Print(|f|ln)|print|println)$` (forbidigo)\n" +
+				"pkg/lint/lint_test.go:24:23: unused-parameter: parameter 't' seems " +
+				"to be unused, consider removing or renaming it as _ (revive)\n",
+			mockError:     nil,
+			expectedLines: 2,
+			expectErr:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set up expectation
+			mockExe.On("Command", "golangci-lint", []string{"run", "./..."}).Return(tt.mockReturn, tt.mockError)
+
+			// Call the method under test
+			outputs, err := lint.GoLint{}.Run(mockExe)
+
+			// Assert that the expectations were met
+			assert.Len(t, outputs, tt.expectedLines)
+			assert.Equal(t, "golint", outputs[0].Linter)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
 
 func TestGoLintParser(t *testing.T) {
 	tests := []struct {
-		name      string
-		inputLine string
-		expected  lint.LinterOutput
-		expectErr bool
+		name       string
+		inputLine  string
+		inputError error
+		expected   lint.LinterOutput
+		expectErr  bool
 	}{
 		{
 			name:      "valid golint line with line number and column",
@@ -82,61 +122,16 @@ func TestGoLintParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Call the method under test
 			output, err := lint.GoLintParser(tt.inputLine)
-			if (err != nil) != tt.expectErr {
-				t.Errorf("GoLintParser() error = %v, expectErr %v", err, tt.expectErr)
-				return
-			}
-			if !reflect.DeepEqual(output, tt.expected) {
-				t.Errorf("golintParser() output = %v, expected %v", output, tt.expected)
+
+			// Assert that the expectations were met
+			assert.Equal(t, tt.expected, output)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
-	}
-}
-
-// Test golint.go.
-func mockGoExec(command string, args ...string) *exec.Cmd {
-	cs := []string{"-test.run=TestGoLintErrors", "--", command}
-	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
-	return cmd
-}
-
-func TestGoLintErrors(_ *testing.T) {
-	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
-		return
-	}
-	fmt.Fprintf(os.Stdout, "pkg/lint/golint.go:17:2: use of `fmt.Print` forbidden by pattern "+
-		"`^(fmt.Print(|f|ln)|print|println)$` (forbidigo)\n")
-	fmt.Fprintf(os.Stdout, "pkg/lint/lint_test.go:24:23: unused-parameter: parameter 't' seems "+
-		"to be unused, consider removing or renaming it as _ (revive)\n")
-	os.Exit(0)
-}
-
-func mockGoExecutor() *utils.Executor {
-	return &utils.Executor{
-		ExecCmd: mockGoExec,
-	}
-}
-
-func TestGoLint(t *testing.T) {
-	// Call golint.Exec
-	outputs, err := lint.GoLint{}.Exec(mockGoExecutor())
-
-	if err != nil {
-		t.Errorf("GoLint threw an error when none was expected")
-	}
-
-	if len(outputs) != 2 {
-		t.Errorf("Expected 2 issues in GoLint.Exec, got '%d'", len(outputs))
-	}
-
-	if outputs[0].Linter != "golint" {
-		t.Errorf("Expected first issue linter to be 'golint', got '%s'", outputs[0].Linter)
-	}
-
-	if outputs[0].Path != "pkg/lint/golint.go" {
-		t.Errorf("Expected first issue path to be 'pkg/lint/golint.go', got '%s'", outputs[0].Path)
 	}
 }

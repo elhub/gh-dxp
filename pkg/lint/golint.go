@@ -13,12 +13,12 @@ type GoLint struct{}
 
 var golintRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*)?:? (.*) \((.*)\)$`)
 
-func (GoLint) Exec(exec *utils.Executor) ([]LinterOutput, error) {
+func (GoLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 	fmt.Print("Running golint... ")
 	var outputs []LinterOutput
 
 	// Run the linter
-	out, err := exec.Run("golangci-lint", "run", "./...")
+	out, err := exe.Command("golangci-lint", "run", "./...")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}

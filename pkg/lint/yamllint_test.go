@@ -1,15 +1,52 @@
 package lint_test
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-	"reflect"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestYamlLint(t *testing.T) {
+	mockExe := new(mocklintExecutor)
+
+	tests := []struct {
+		name          string
+		mockReturn    string
+		mockError     error
+		expectedLines int
+		expectErr     bool
+	}{
+		{
+			name: "valid lint line with line number and column",
+			mockReturn: "./test/weird.yml:1:1: [warning] missing document start \"---\" (document-start)\n" +
+				"./test/weird.yml:2:1: [warning] truthy value should be one of [false, true] (truthy)\n",
+			mockError:     nil,
+			expectedLines: 2,
+			expectErr:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Set up expectation
+			mockExe.On("Command", "yamllint", []string{"-f", "parsable", "."}).Return(tt.mockReturn, tt.mockError)
+
+			// Call the method under test
+			outputs, err := lint.YamlLint{}.Run(mockExe)
+
+			// Assert that the expectations were met
+			require.Len(t, outputs, tt.expectedLines)
+			assert.Equal(t, "yamllint", outputs[0].Linter)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+		})
+	}
+}
 
 func TestYamlLintParser(t *testing.T) {
 	tests := []struct {
@@ -69,59 +106,16 @@ func TestYamlLintParser(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			// Call the method under test
 			output, err := lint.YamlLintParser(tt.inputLine)
-			if (err != nil) != tt.expectErr {
-				t.Errorf("YamlLintParser() output = %v, expectErr %v", err, tt.expectErr)
-				return
-			}
-			if !reflect.DeepEqual(output, tt.expected) {
-				t.Errorf("YamlLintParser() output = %v, expected %v", output, tt.expected)
+
+			// Assert that the expectations were met
+			assert.Equal(t, tt.expected, output)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
 			}
 		})
-	}
-}
-
-// Test yamllint.go.
-func mockYamlExec(command string, args ...string) *exec.Cmd {
-	cs := []string{"-test.run=TestYamlLintErrors", "--", command}
-	cs = append(cs, args...)
-	cmd := exec.Command(os.Args[0], cs...)
-	cmd.Env = []string{"GO_WANT_HELPER_PROCESS=1"}
-	return cmd
-}
-
-func TestYamlLintErrors(_ *testing.T) {
-	if os.Getenv("GO_WANT_HELPER_PROCESS") != "1" {
-		return
-	}
-	fmt.Fprintf(os.Stdout, "./test/weird.yml:1:1: [warning] missing document start \"---\" (document-start)\n")
-	fmt.Fprintf(os.Stdout, "./test/weird.yml:2:1: [warning] truthy value should be one of [false, true] (truthy)\n")
-	os.Exit(0)
-}
-
-func mockYamlExecutor() *utils.Executor {
-	return &utils.Executor{
-		ExecCmd: mockYamlExec,
-	}
-}
-
-func TestYamlLint(t *testing.T) {
-	// Call YamlLint.Exec
-	outputs, err := lint.YamlLint{}.Exec(mockYamlExecutor())
-
-	if err != nil {
-		t.Errorf("YamlLint threw an error when none was expected")
-	}
-
-	if len(outputs) != 2 {
-		t.Errorf("Expected 2 issues in YamlLint.Exec, got '%d'", len(outputs))
-	}
-
-	if outputs[0].Linter != "yamllint" {
-		t.Errorf("Expected first issue linter to be 'yamllint', got '%s'", outputs[0].Linter)
-	}
-
-	if outputs[0].Path != "./test/weird.yml" {
-		t.Errorf("Expected first issue path to be './test/weird.yml', got '%s'", outputs[0].Path)
 	}
 }

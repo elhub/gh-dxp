@@ -8,19 +8,23 @@ import (
 	"github.com/caarlos0/log"
 )
 
-type Executor struct {
-	ExecCmd func(name string, arg ...string) *exec.Cmd
+type Executor interface {
+	Command(name string, args ...string) (string, error)
 }
 
-func Exec() *Executor {
-	return &Executor{
-		ExecCmd: exec.Command,
+type LinuxExecutorImpl struct {
+	ExecCommand func(name string, args ...string) *exec.Cmd
+}
+
+func LinuxExecutor() *LinuxExecutorImpl {
+	return &LinuxExecutorImpl{
+		ExecCommand: exec.Command,
 	}
 }
 
-func (e *Executor) Run(name string, args ...string) (string, error) {
+func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error) {
 	log.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
-	cmd := e.ExecCmd(name, args...)
+	cmd := e.ExecCommand(name, args...)
 	bytes, err := cmd.CombinedOutput()
 	return string(bytes), err
 }

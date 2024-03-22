@@ -1,18 +1,27 @@
 package lint_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 )
 
-// Test main.go.
+type mocklintExecutor struct {
+	mock.Mock
+}
+
+func (m *mocklintExecutor) Command(command string, args ...string) (string, error) {
+	argsCalled := m.Called(command, args)
+	return argsCalled.String(0), argsCalled.Error(1)
+}
+
 type TestMockLint struct{}
 
-func (TestMockLint) Exec(_ *utils.Executor) ([]lint.LinterOutput, error) {
+func (TestMockLint) Run(_ utils.Executor) ([]lint.LinterOutput, error) {
 	return []lint.LinterOutput{
 		{
 			Linter:      "mocklint",
@@ -27,27 +36,25 @@ func (TestMockLint) Exec(_ *utils.Executor) ([]lint.LinterOutput, error) {
 }
 
 func TestRun(t *testing.T) {
-	var testLinters = map[string]lint.Linter{
-		"mocklint": TestMockLint{},
-	}
-
-	// Create a mock context and settings
-	ctx := context.Background()
-	settings := &config.Settings{
-		Lint: config.LintSettings{
-			Linters: []config.LinterSettings{
-				{
-					Name: "mocklint",
+	t.Run("should run a linter", func(t *testing.T) {
+		mockExe := new(mocklintExecutor)
+		var testLinters = map[string]lint.Linter{
+			"mocklint": TestMockLint{},
+		}
+		settings := &config.Settings{
+			Lint: config.LintSettings{
+				Linters: []config.LinterSettings{
+					{
+						Name: "mocklint",
+					},
 				},
 			},
-		},
-	}
+		}
 
-	// Call Run with the mock context and settings
-	err := lint.Run(ctx, settings, testLinters)
+		// Call Run with the mock context and settings
+		err := lint.Run(mockExe, settings, testLinters)
 
-	// Check if Run returns an error
-	if err != nil {
-		t.Errorf("Expected Run to not return an error, got %v", err)
-	}
+		// Check if Run returns an error
+		require.NoError(t, err)
+	})
 }
