@@ -19,7 +19,7 @@ func TestYamlLint(t *testing.T) {
 		expectErr     bool
 	}{
 		{
-			name: "valid lint line with line number and column",
+			name: "valid yamllint output from command",
 			mockReturn: "./test/weird.yml:1:1: [warning] missing document start \"---\" (document-start)\n" +
 				"./test/weird.yml:2:1: [warning] truthy value should be one of [false, true] (truthy)\n",
 			mockError:     nil,
