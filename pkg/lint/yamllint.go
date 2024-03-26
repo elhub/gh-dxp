@@ -14,7 +14,7 @@ type YamlLint struct{}
 var yamlRegex = regexp.MustCompile(`^([^:]*):([0-9]*):([0-9]*): \[(.*)\] (.*) \((.*)\)$`)
 
 func (YamlLint) Run(exe utils.Executor) ([]LinterOutput, error) {
-	fmt.Print("Running yamllint... ")
+	s := utils.StartSpinner("Running Yamllint...", "Yamllint done.")
 	var outputs []LinterOutput
 
 	// Run the linter
@@ -32,7 +32,7 @@ func (YamlLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 		}
 	}
 
-	fmt.Println("done.")
+	s.Stop()
 	return outputs, err
 }
 
