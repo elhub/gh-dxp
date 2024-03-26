@@ -26,7 +26,7 @@ func Run(exe utils.Executor, settings *config.Settings, linters map[string]Linte
 				fmt.Printf("%s returned %d errors\n", lintEntry.Name, len(outputs))
 			}
 		} else {
-			fmt.Printf(" Linter %s not found\n", lintEntry.Name)
+			fmt.Printf("Linter %s not found\n", lintEntry.Name)
 		}
 	}
 
