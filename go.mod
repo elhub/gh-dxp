@@ -2,7 +2,10 @@ module github.com/elhub/gh-dxp
 
 go 1.21
 
-require github.com/cli/go-gh/v2 v2.4.0
+require (
+	github.com/briandowns/spinner v1.23.0
+	github.com/cli/go-gh/v2 v2.4.0
+)
 
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
@@ -13,7 +16,9 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 >>>>>>> origin/main
 	github.com/elliotchance/orderedmap/v2 v2.2.0 // indirect
+	github.com/fatih/color v1.7.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

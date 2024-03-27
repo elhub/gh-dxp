@@ -26,7 +26,10 @@ func WorkCmd(exe utils.Executor) *cobra.Command {
 				branchID = args[0]
 			}
 
-			return branch.CheckoutBranch(exe, branchID)
+			s := utils.StartSpinner("Creating new work branch...", "Work Branch "+branchID)
+			b := branch.CheckoutBranch(exe, branchID)
+			s.Stop()
+			return b
 		},
 	}
 

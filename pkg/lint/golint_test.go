@@ -19,7 +19,7 @@ func TestGoLint(t *testing.T) {
 		expectErr     bool
 	}{
 		{
-			name: "valid golint line with line number and column",
+			name: "valid golint output from command",
 			mockReturn: "pkg/lint/golint.go:17:2: use of `fmt.Print` forbidden by pattern " +
 				"`^(fmt.Print(|f|ln)|print|println)$` (forbidigo)\n" +
 				"pkg/lint/lint_test.go:24:23: unused-parameter: parameter 't' seems " +
@@ -39,7 +39,7 @@ func TestGoLint(t *testing.T) {
 			outputs, err := lint.GoLint{}.Run(mockExe)
 
 			// Assert that the expectations were met
-			assert.Len(t, outputs, tt.expectedLines)
+			require.Len(t, outputs, tt.expectedLines)
 			assert.Equal(t, "golint", outputs[0].Linter)
 			if tt.expectErr {
 				require.Error(t, err)
@@ -107,7 +107,7 @@ func TestGoLintParser(t *testing.T) {
 			expected:  lint.LinterOutput{},
 		},
 		{
-			name:      "invalid line fomrat in golint",
+			name:      "invalid line format in golint",
 			inputLine: "test.yaml:t:8: [error] no new line character at the end of file (new-line-at-end-of-file)",
 			expectErr: true,
 			expected:  lint.LinterOutput{},
