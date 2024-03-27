@@ -1,47 +1,119 @@
 package diff
 
 import (
+	"fmt"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
+	"github.com/cli/go-gh"
+	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/pkg/errors"
 )
 
-func createPR(
-	branchID string,
-	confirm bool,
-) (*PullRequest, error) {
-	log.Debug("Create the PR")
+func Execute(exe utils.Executor, _ *config.Settings, options *Options) error {
+	// Get branchID
+	currentBranch, err := exe.Command("git", "branch", "--show-current")
+	if err != nil {
+		return err
+	}
+	branchId := strings.Trim(currentBranch, "\n")
 
-	pr := PullRequest{}
-	pr.Title = branchID
+	// Check if PR exists on branch
+	prId, err := checkForExistingPR(branchId)
+	if err != nil {
+		return err
+	}
 
-	// What type of PR is this?
-	// Multi-choice: Feature, Bug Fix, Documentation, Test, Refactor, Style, Build, Chore
-	// Type is set as a label.
+	if prId != "" {
+		// If the PR exists, update it by pushing to the remote
+		return update(exe, branchId, prId)
+	} else {
+		// If it doesn't exist, create a new PR
+		return create(exe, options, branchId)
+	}
+}
 
-	// Issue ID(s)
-	// Add the issue ID(s) to the PR body.
-	issueIDs := []string{}
-	survey.AskOne(&survey.Input{
-		Message: "Issue ID(s)",
-	}, &issueIDs, survey.WithValidator(survey.Required))
-	pr.Body += "Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
+func checkForExistingPR(branchId string) (string, error) {
+	stdOut, _, err := gh.Exec("pr", "list", "-H", branchId, "--json", "number", "--jq", ".[].number")
+	if err != nil {
+		return "", errors.Wrap(err, "Failed to fetch pull request")
+	}
 
-	// Test Plan
-	// Test plan is described in the PR body.
-	// If auto-tested, suggest the auto-test as the test plan.
+	number := strings.Trim(stdOut.String(), "\n")
 
-	// Documentation
-	// Multi-choice: README.md, docs, storybook, none needed
+	return number, nil
+}
 
-	// Linting
-	// If not auto-linted, ask why?
+func update(exe utils.Executor, branchId string, prId string) error {
+	// Push the current branch to the already existing git remote
+	s := utils.StartSpinner("Updating Pull Request #"+prId+"...", "Pull Request #"+prId+" has been updated.")
+	_, err := exe.Command("git", "push")
+	s.Stop()
+	if err != nil {
+		return err
+	}
 
-	// Testing
-	// If not auto-tested, ask why?
+	stdOut, _, err := gh.Exec("pr", "list", "-H", branchId, "--json", "url", "--jq", ".[].url")
+	if err != nil {
+		return err
+	}
 
-	// Confirm body or edit
+	log.Info(strings.Trim(stdOut.String(), "\n") + "\n")
 
-	return pr, nil
+	return nil
+}
+
+func create(exe utils.Executor, options *Options, branchId string) error {
+	// Push the current branch to git remote
+	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
+	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchId)
+	s.Stop()
+	if err != nil {
+		return err
+	}
+	log.Info(strings.Trim(currentBranch, "\n"))
+	fmt.Println("Current Branch: ", currentBranch)
+
+	// Fetch the default branch
+	baseBranch := options.baseBranch
+	if baseBranch == "" {
+		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
+		stdOut, _, err := gh.Exec("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
+		s.Stop()
+		if err != nil {
+			return errors.Wrap(err, "Failed to fetch default branch")
+		}
+		baseBranch = strings.Trim(stdOut.String(), "\n")
+	}
+
+	pr, err := createPR(exe, branchId, baseBranch)
+	if err != nil {
+		return err
+	}
+
+	s = utils.StartSpinner("Processing pull request...", "Pull request "+pr.Title+" created.")
+	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", baseBranch}
+	args = append(args, generatePRArgs(options)...)
+	stdOut, _, err := gh.Exec(args...)
+	s.Stop()
+	if err != nil {
+		return errors.Wrap(err, "Failed to create pull request")
+	}
+	log.Info(strings.Trim(stdOut.String(), "\n"))
+
+	return nil
+}
+
+func generatePRArgs(options *Options) []string {
+	args := []string{}
+
+	if len(options.Assignees) > 0 {
+		args = append(args, "--assignee", strings.Join(options.Assignees, ","))
+	}
+	if len(options.Reviewers) > 0 {
+		args = append(args, "--reviewer", strings.Join(options.Reviewers, ","))
+	}
+
+	return args
 }

@@ -45,8 +45,9 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	exe := utils.LinuxExecutor()
 
 	retCmd.AddCommand(
-		WorkCmd(exe),
+		DiffCmd(exe, settings),
 		LintCmd(exe, settings),
+		WorkCmd(exe),
 	)
 
 	return retCmd
