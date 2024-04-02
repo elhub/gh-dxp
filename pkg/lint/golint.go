@@ -18,12 +18,16 @@ func (GoLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 	var outputs []LinterOutput
 
 	// Run the linter
-	out, err := exe.Command("golangci-lint", "run", "./...")
+	lintString, filesErr := GetFiles(".go", " ")
+	if filesErr != nil {
+		return nil, filesErr
+	}
+	out, err := exe.Command("golangci-lint", "run", lintString)
 	if err != nil {
-		fmt.Printf("Return error: %s\n", err)
+		return nil, err
 	}
 
-	// Go through line by line and parse into lintOuput
+	// Go through line by line and parse into lintOutput
 	lines := strings.Split(out, "\n")
 	for _, line := range lines {
 		output, parseErr := GoLintParser(line)

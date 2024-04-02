@@ -36,17 +36,21 @@ func TestDetekt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Set up expectation
-			mockExe.On("Command", "detekt", []string{"-r", "detekt.out"}).Return(tt.mockReturn, tt.mockError)
+			fileString, fileError := lint.GetFiles(".kt", ",")
+			require.NoError(t, fileError)
+			mockExe.On("Command", "detekt", []string{"-i", fileString, "-r", "md:detekt.out"}).Return(tt.mockReturn, tt.mockError)
 			mockExe.On("Command", "rm", []string{"detekt.out"}).Return("", nil)
 
 			// Create a dummy detekt.out file
-			os.WriteFile("detekt.out", []byte(tt.mockReturn), 0644)
+			writeErr := os.WriteFile("detekt.out", []byte(tt.mockReturn), 0644)
+			require.NoError(t, writeErr)
 
 			// Call the method under test
 			outputs, err := lint.Detekt{}.Run(mockExe)
 
 			// Clean up detekt.out file
-			os.Remove("detekt.out")
+			removeErr := os.Remove("detekt.out")
+			require.NoError(t, removeErr)
 
 			// Assert that the expectations were met
 			require.Len(t, outputs, tt.expectedLines)

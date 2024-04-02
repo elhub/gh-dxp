@@ -2,6 +2,9 @@ package lint
 
 import (
 	"fmt"
+	"io/fs"
+	"path/filepath"
+	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/utils"
@@ -36,4 +39,29 @@ func Run(exe utils.Executor, settings *config.Settings, linters map[string]Linte
 	}
 
 	return nil
+}
+
+func GetFiles(extension string, separator string) (string, error) {
+	rootDir, rootErr := utils.LinuxExecutor().GetRootDir()
+	if rootErr != nil {
+		return "", rootErr
+	}
+	var files []string
+	err := filepath.WalkDir(rootDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if filepath.Ext(path) == extension {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return "", err
+	}
+	fileString := strings.Join(files, separator)
+
+	return fileString, nil
 }
