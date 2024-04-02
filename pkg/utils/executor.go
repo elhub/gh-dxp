@@ -10,6 +10,7 @@ import (
 
 type Executor interface {
 	Command(name string, args ...string) (string, error)
+	GetRootDir() (string, error)
 }
 
 type LinuxExecutorImpl struct {
@@ -27,4 +28,12 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 	cmd := e.ExecCommand(name, args...)
 	bytes, err := cmd.CombinedOutput()
 	return string(bytes), err
+}
+
+func (e *LinuxExecutorImpl) GetRootDir() (string, error) {
+	output, err := e.Command("git", "rev-parse", "--show-toplevel")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSuffix(output, "\n"), nil
 }
