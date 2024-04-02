@@ -19,7 +19,11 @@ func (Detekt) Run(exe utils.Executor) ([]LinterOutput, error) {
 	var outputs []LinterOutput
 
 	// Run the linter
-	_, err := exe.Command("detekt", "-r", "detekt.out")
+	lintString, filesErr := GetFiles(".kt", ",")
+	if filesErr != nil {
+		fmt.Printf("Return error: %s\n", filesErr)
+	}
+	_, err := exe.Command("detekt", "-i", lintString, "-r", "md:detekt.out")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}
