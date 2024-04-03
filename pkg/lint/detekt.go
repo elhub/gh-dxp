@@ -19,7 +19,7 @@ func (Detekt) Run(exe utils.Executor) ([]LinterOutput, error) {
 	var outputs []LinterOutput
 
 	// Run the linter
-	lintString, filesErr := GetFiles(".kt", ",")
+	lintString, filesErr := GetFiles(",", ".kt")
 	if filesErr != nil {
 		fmt.Printf("Return error: %s\n", filesErr)
 	}

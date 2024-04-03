@@ -41,7 +41,7 @@ func Run(exe utils.Executor, settings *config.Settings, linters map[string]Linte
 	return nil
 }
 
-func GetFiles(extension string, separator string) (string, error) {
+func GetFiles(separator string, extensions ...string) (string, error) {
 	rootDir, rootErr := utils.LinuxExecutor().GetRootDir()
 	if rootErr != nil {
 		return "", rootErr
@@ -52,7 +52,7 @@ func GetFiles(extension string, separator string) (string, error) {
 			return err
 		}
 
-		if filepath.Ext(path) == extension {
+		if stringInSlice(filepath.Ext(path), extensions) {
 			files = append(files, path)
 		}
 		return nil
@@ -64,4 +64,13 @@ func GetFiles(extension string, separator string) (string, error) {
 	fileString := strings.Join(files, separator)
 
 	return fileString, nil
+}
+
+func stringInSlice(a string, list []string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
 }
