@@ -36,7 +36,7 @@ func TestDetekt(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Set up expectation
-			fileString, fileError := lint.GetFiles(".kt", ",")
+			fileString, fileError := lint.GetFiles(",", ".kt")
 			require.NoError(t, fileError)
 			mockExe.On("Command", "detekt", []string{"-i", fileString, "-r", "md:detekt.out"}).Return(tt.mockReturn, tt.mockError)
 			mockExe.On("Command", "rm", []string{"detekt.out"}).Return("", nil)

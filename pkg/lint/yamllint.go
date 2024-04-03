@@ -17,8 +17,14 @@ func (YamlLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 	s := utils.StartSpinner("Running Yamllint...", "Yamllint done.")
 	var outputs []LinterOutput
 
+	files, filesErr := GetFiles(" ", ".yaml", ".yml")
+
+	if filesErr != nil {
+		return nil, filesErr
+	}
+
 	// Run the linter
-	out, err := exe.Command("yamllint", "-f", "parsable", ".")
+	out, err := exe.Command("yamllint", files, "-f", "parsable", ".")
 	if err != nil {
 		fmt.Printf("Return error: %s\n", err)
 	}
