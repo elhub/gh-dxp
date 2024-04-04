@@ -1,6 +1,7 @@
 package branch_test
 
 import (
+	"bytes"
 	"os/exec"
 	"testing"
 
@@ -16,6 +17,11 @@ type MockExecutor struct {
 func (m *MockExecutor) Command(name string, args ...string) (string, error) {
 	argsCalled := m.Called(name, args)
 	return argsCalled.String(0), argsCalled.Error(1)
+}
+
+func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, bytes.Buffer, error) {
+	args := m.Called(arg)
+	return *bytes.NewBufferString(args.String(0)), bytes.Buffer{}, args.Error(1)
 }
 
 type FakeExitError struct {

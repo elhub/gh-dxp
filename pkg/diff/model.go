@@ -1,7 +1,7 @@
 package diff
 
 type Options struct {
-	Confirm bool
+	AutoConfirm bool
 
 	baseBranch string
 

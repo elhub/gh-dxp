@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/caarlos0/log"
-	"github.com/cli/go-gh"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
@@ -13,55 +12,46 @@ import (
 
 func Execute(exe utils.Executor, _ *config.Settings, options *Options) error {
 	// Get branchID
-	currentBranch, err := exe.Command("git", "branch", "--show-current")
-	if err != nil {
-		return err
+	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
+	if errBranch != nil {
+		return errBranch
 	}
 	branchId := strings.Trim(currentBranch, "\n")
 
 	// Check if PR exists on branch
-	prId, err := checkForExistingPR(branchId)
-	if err != nil {
-		return err
+	_, errCheck := CheckForExistingPR(exe, branchId)
+	if errCheck != nil {
+		return errCheck
 	}
 
-	if prId != "" {
-		// If the PR exists, update it by pushing to the remote
-		return update(exe, branchId, prId)
-	} else {
-		// If it doesn't exist, create a new PR
-		return create(exe, options, branchId)
-	}
+	log.Info("Should not reach here.")
+	/*
+
+		if prId != "" {
+			// If the PR exists, update it by pushing to the remote
+			return update(exe, branchId, prId)
+		} else {
+			// If it doesn't exist, create a new PR
+			return create(exe, options, branchId)
+		}
+	*/
+	return nil
 }
 
-func checkForExistingPR(branchId string) (string, error) {
-	stdOut, _, err := gh.Exec("pr", "list", "-H", branchId, "--json", "number", "--jq", ".[].number")
+func CheckForExistingPR(exe utils.Executor, branchId string) (string, error) {
+	log.Info("Branch ID: " + branchId)
+	stdOut, _, err := exe.GH("pr", "list", "-H", branchId, "--json", "number", "--jq", ".[].number")
+
+	log.Info("PR list: " + stdOut.String())
+
 	if err != nil {
-		return "", errors.Wrap(err, "Failed to fetch pull request")
+		log.Info("Error: " + err.Error())
+		return "", errors.New("Failed to find existing PR")
 	}
 
 	number := strings.Trim(stdOut.String(), "\n")
 
 	return number, nil
-}
-
-func update(exe utils.Executor, branchId string, prId string) error {
-	// Push the current branch to the already existing git remote
-	s := utils.StartSpinner("Updating Pull Request #"+prId+"...", "Pull Request #"+prId+" has been updated.")
-	_, err := exe.Command("git", "push")
-	s.Stop()
-	if err != nil {
-		return err
-	}
-
-	stdOut, _, err := gh.Exec("pr", "list", "-H", branchId, "--json", "url", "--jq", ".[].url")
-	if err != nil {
-		return err
-	}
-
-	log.Info(strings.Trim(stdOut.String(), "\n") + "\n")
-
-	return nil
 }
 
 func create(exe utils.Executor, options *Options, branchId string) error {
@@ -79,7 +69,7 @@ func create(exe utils.Executor, options *Options, branchId string) error {
 	baseBranch := options.baseBranch
 	if baseBranch == "" {
 		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
-		stdOut, _, err := gh.Exec("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
+		stdOut, _, err := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
 		s.Stop()
 		if err != nil {
 			return errors.Wrap(err, "Failed to fetch default branch")
@@ -87,7 +77,7 @@ func create(exe utils.Executor, options *Options, branchId string) error {
 		baseBranch = strings.Trim(stdOut.String(), "\n")
 	}
 
-	pr, err := createPR(exe, branchId, baseBranch)
+	pr, err := createPR(exe, options, branchId, baseBranch)
 	if err != nil {
 		return err
 	}
@@ -95,7 +85,7 @@ func create(exe utils.Executor, options *Options, branchId string) error {
 	s = utils.StartSpinner("Processing pull request...", "Pull request "+pr.Title+" created.")
 	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", baseBranch}
 	args = append(args, generatePRArgs(options)...)
-	stdOut, _, err := gh.Exec(args...)
+	stdOut, _, err := exe.GH(args...)
 	s.Stop()
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pull request")
@@ -116,4 +106,24 @@ func generatePRArgs(options *Options) []string {
 	}
 
 	return args
+}
+
+func update(exe utils.Executor, branchId string, prId string) error {
+	// Push the current branch to the already existing git remote
+	s := utils.StartSpinner("Updating Pull Request #"+prId+"...", "Pull Request #"+prId+" has been updated.")
+	_, err := exe.Command("git", "push")
+	s.Stop()
+	if err != nil {
+		return err
+	}
+
+	// Fetching this for infor
+	stdOut, _, err := exe.GH("pr", "list", "-H", branchId, "--json", "url", "--jq", ".[].url")
+	if err != nil {
+		return err
+	}
+
+	log.Info(strings.Trim(stdOut.String(), "\n") + "\n")
+
+	return nil
 }

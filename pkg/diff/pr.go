@@ -10,6 +10,7 @@ import (
 
 func createPR(
 	exe utils.Executor,
+	options *Options,
 	branchID string,
 	mainId string,
 ) (PullRequest, error) {
@@ -32,10 +33,14 @@ func createPR(
 	if len(lines) > 0 {
 		defaultTitle = lines[0]
 	}
-	survey.AskOne(&survey.Input{
-		Message: "Title:",
-		Default: defaultTitle,
-	}, &pr.Title, survey.WithValidator(survey.Required))
+	if !options.AutoConfirm {
+		survey.AskOne(&survey.Input{
+			Message: "Title:",
+			Default: defaultTitle,
+		}, &pr.Title, survey.WithValidator(survey.Required))
+	} else {
+		pr.Title = defaultTitle
+	}
 
 	// Add a summary of the commits to the PR body
 	suggestedBody := ""
@@ -56,9 +61,11 @@ func createPR(
 	}
 
 	editBody := false
-	survey.AskOne(&survey.Confirm{
-		Message: bodySurvey,
-	}, &editBody, survey.WithValidator(survey.Required))
+	if !options.AutoConfirm {
+		survey.AskOne(&survey.Confirm{
+			Message: bodySurvey,
+		}, &editBody, survey.WithValidator(survey.Required))
+	}
 
 	if editBody {
 		editedBody := ""
@@ -77,12 +84,14 @@ func createPR(
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	issueIDString := ""
-	survey.AskOne(&survey.Input{
-		Message: "Issue ID(s):",
-	}, &issueIDString)
+	if !options.AutoConfirm {
+		survey.AskOne(&survey.Input{
+			Message: "Issue ID(s):",
+		}, &issueIDString)
 
-	if pr.Body != "" {
-		pr.Body += "\n"
+		if pr.Body != "" {
+			pr.Body += "\n"
+		}
 	}
 
 	if issueIDString != "" {
@@ -94,19 +103,22 @@ func createPR(
 	// TODO: Consider skipping this, if dealing with code where unit and integration
 	// tests are not applicable. Replace with deploy test question?
 	unitTestConfirm := false
-	survey.AskOne(&survey.Confirm{
-		Message: "Did you add new unit tests?",
-	}, &unitTestConfirm, survey.WithValidator(survey.Required))
-
 	integrationTestConfirm := false
-	survey.AskOne(&survey.Confirm{
-		Message: "Did you add new integration tests?",
-	}, &integrationTestConfirm, survey.WithValidator(survey.Required))
-
 	testCommand := ""
-	survey.AskOne(&survey.Input{
-		Message: "Test Command?",
-	}, &testCommand, survey.WithValidator(survey.Required))
+
+	if !options.AutoConfirm {
+		survey.AskOne(&survey.Confirm{
+			Message: "Did you add new unit tests?",
+		}, &unitTestConfirm, survey.WithValidator(survey.Required))
+
+		survey.AskOne(&survey.Confirm{
+			Message: "Did you add new integration tests?",
+		}, &integrationTestConfirm, survey.WithValidator(survey.Required))
+
+		survey.AskOne(&survey.Input{
+			Message: "Test Command?",
+		}, &testCommand, survey.WithValidator(survey.Required))
+	}
 
 	// TODO: Auto-Linting. If not auto-linted, ask why?
 	// TODO: Auto-Testing. If not auto-tested, ask why?
@@ -124,10 +136,14 @@ func createPR(
 	// Multi-choice: README.md, docs, storybook, no updates
 	docOptions := []string{"No updates", "README.md", "docs", "storybook"}
 	selectedDocs := []string{}
-	survey.AskOne(&survey.MultiSelect{
-		Message: "What documentation was updated?",
-		Options: docOptions,
-	}, &selectedDocs, survey.WithValidator(survey.Required))
+	if !options.AutoConfirm {
+		survey.AskOne(&survey.MultiSelect{
+			Message: "What documentation was updated?",
+			Options: docOptions,
+		}, &selectedDocs, survey.WithValidator(survey.Required))
+	} else {
+		selectedDocs = append(selectedDocs, "No updates")
+	}
 
 	pr.Body += "\nDocumentation:\n"
 	for _, doc := range selectedDocs {
