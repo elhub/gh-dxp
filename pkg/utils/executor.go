@@ -12,7 +12,7 @@ import (
 
 type Executor interface {
 	Command(name string, args ...string) (string, error)
-	GH(args ...string) (bytes.Buffer, bytes.Buffer, error)
+	GH(args ...string) (bytes.Buffer, error)
 }
 
 type LinuxExecutorImpl struct {
@@ -34,6 +34,11 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 }
 
 // GH Command
-func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, bytes.Buffer, error) {
-	return gh.Exec(args...)
+func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, error) {
+	stdOut, stdErr, err := gh.Exec(args...)
+	if err != nil {
+		log.Debug(fmt.Sprintf("Error running GH command: %s", err.Error()))
+		return stdErr, err
+	}
+	return stdOut, err
 }

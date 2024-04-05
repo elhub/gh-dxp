@@ -20,9 +20,9 @@ func (m *mocklintExecutor) Command(command string, args ...string) (string, erro
 	return argsCalled.String(0), argsCalled.Error(1)
 }
 
-func (m *mocklintExecutor) GH(arg ...string) (bytes.Buffer, bytes.Buffer, error) {
+func (m *mocklintExecutor) GH(arg ...string) (bytes.Buffer, error) {
 	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), bytes.Buffer{}, args.Error(1)
+	return *bytes.NewBufferString(args.String(0)), args.Error(1)
 }
 
 type TestMockLint struct{}

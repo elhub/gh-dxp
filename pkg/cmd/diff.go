@@ -27,7 +27,7 @@ func DiffCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		Aliases: []string{"create", "pr", "new"},
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return diff.Execute(exe, settings, opts)
+			return diff.Execute(exe, opts)
 		},
 	}
 

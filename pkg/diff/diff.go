@@ -5,12 +5,11 @@ import (
 	"strings"
 
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
 
-func Execute(exe utils.Executor, _ *config.Settings, options *Options) error {
+func Execute(exe utils.Executor, options *Options) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
@@ -19,33 +18,25 @@ func Execute(exe utils.Executor, _ *config.Settings, options *Options) error {
 	branchId := strings.Trim(currentBranch, "\n")
 
 	// Check if PR exists on branch
-	_, errCheck := CheckForExistingPR(exe, branchId)
+	prId, errCheck := checkForExistingPR(exe, branchId)
 	if errCheck != nil {
 		return errCheck
 	}
 
-	log.Info("Should not reach here.")
-	/*
-
-		if prId != "" {
-			// If the PR exists, update it by pushing to the remote
-			return update(exe, branchId, prId)
-		} else {
-			// If it doesn't exist, create a new PR
-			return create(exe, options, branchId)
-		}
-	*/
-	return nil
+	if prId != "" {
+		// If the PR exists, update it by pushing to the remote
+		return update(exe, branchId, prId)
+	} else {
+		// If it doesn't exist, create a new PR
+		return create(exe, options, branchId)
+	}
 }
 
-func CheckForExistingPR(exe utils.Executor, branchId string) (string, error) {
-	log.Info("Branch ID: " + branchId)
-	stdOut, _, err := exe.GH("pr", "list", "-H", branchId, "--json", "number", "--jq", ".[].number")
-
-	log.Info("PR list: " + stdOut.String())
+func checkForExistingPR(exe utils.Executor, branchId string) (string, error) {
+	stdOut, err := exe.GH("pr", "list", "-H", branchId, "--json", "number", "--jq", ".[].number")
 
 	if err != nil {
-		log.Info("Error: " + err.Error())
+		log.Debug("Error: " + err.Error())
 		return "", errors.New("Failed to find existing PR")
 	}
 
@@ -69,7 +60,7 @@ func create(exe utils.Executor, options *Options, branchId string) error {
 	baseBranch := options.baseBranch
 	if baseBranch == "" {
 		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
-		stdOut, _, err := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
+		stdOut, err := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
 		s.Stop()
 		if err != nil {
 			return errors.Wrap(err, "Failed to fetch default branch")
@@ -85,7 +76,7 @@ func create(exe utils.Executor, options *Options, branchId string) error {
 	s = utils.StartSpinner("Processing pull request...", "Pull request "+pr.Title+" created.")
 	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", baseBranch}
 	args = append(args, generatePRArgs(options)...)
-	stdOut, _, err := exe.GH(args...)
+	stdOut, err := exe.GH(args...)
 	s.Stop()
 	if err != nil {
 		return errors.Wrap(err, "Failed to create pull request")
@@ -117,8 +108,8 @@ func update(exe utils.Executor, branchId string, prId string) error {
 		return err
 	}
 
-	// Fetching this for infor
-	stdOut, _, err := exe.GH("pr", "list", "-H", branchId, "--json", "url", "--jq", ".[].url")
+	// Fetching this for info
+	stdOut, err := exe.GH("pr", "list", "-H", branchId, "--json", "url", "--jq", ".[].url")
 	if err != nil {
 		return err
 	}
