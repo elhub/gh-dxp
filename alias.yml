@@ -1,0 +1,4 @@
+---
+# Useful aliases for the GitHub CLI to simplify workflows
+# Usage: gh <alias> <args>
+work: dxp work $1
