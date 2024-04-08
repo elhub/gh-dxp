@@ -1,15 +1,18 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 	"strings"
 
 	"github.com/caarlos0/log"
+	"github.com/cli/go-gh/v2"
 )
 
 type Executor interface {
 	Command(name string, args ...string) (string, error)
+	GH(args ...string) (bytes.Buffer, error)
 }
 
 type LinuxExecutorImpl struct {
@@ -22,9 +25,20 @@ func LinuxExecutor() *LinuxExecutorImpl {
 	}
 }
 
+// OS command
 func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error) {
 	log.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
 	cmd := e.ExecCommand(name, args...)
 	bytes, err := cmd.CombinedOutput()
 	return string(bytes), err
+}
+
+// GH Command
+func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, error) {
+	stdOut, stdErr, err := gh.Exec(args...)
+	if err != nil {
+		log.Debug(fmt.Sprintf("Error running GH command: %s", err.Error()))
+		return stdErr, err
+	}
+	return stdOut, err
 }
