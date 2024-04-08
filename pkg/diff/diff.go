@@ -18,7 +18,7 @@ func Execute(exe utils.Executor, options *Options) error {
 	branchId := strings.Trim(currentBranch, "\n")
 
 	// Check if PR exists on branch
-	prId, errCheck := checkForExistingPR(exe, branchId)
+	prId, errCheck := CheckForExistingPR(exe, branchId)
 	if errCheck != nil {
 		return errCheck
 	}
@@ -30,19 +30,6 @@ func Execute(exe utils.Executor, options *Options) error {
 		// If it doesn't exist, create a new PR
 		return create(exe, options, branchId)
 	}
-}
-
-func checkForExistingPR(exe utils.Executor, branchId string) (string, error) {
-	stdOut, err := exe.GH("pr", "list", "-H", branchId, "--json", "number", "--jq", ".[].number")
-
-	if err != nil {
-		log.Debug("Error: " + err.Error())
-		return "", errors.New("Failed to find existing PR")
-	}
-
-	number := strings.Trim(stdOut.String(), "\n")
-
-	return number, nil
 }
 
 func create(exe utils.Executor, options *Options, branchId string) error {
