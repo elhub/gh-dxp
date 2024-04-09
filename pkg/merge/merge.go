@@ -10,7 +10,7 @@ import (
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
-func Execute(exe utils.Executor) error {
+func Execute(exe utils.Executor, options *Options) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
@@ -32,9 +32,13 @@ func Execute(exe utils.Executor) error {
 	log.Info("Merging pull request #" + prId + "(" + prTitle + ")")
 	// TODO: Add list of commits
 	doMerge := false
-	survey.AskOne(&survey.Confirm{
-		Message: "Merge these changes?",
-	}, &doMerge, survey.WithValidator(survey.Required))
+	if options.AutoConfirm {
+		doMerge = true
+	} else {
+		survey.AskOne(&survey.Confirm{
+			Message: "Merge these changes?",
+		}, &doMerge, survey.WithValidator(survey.Required))
+	}
 
 	if !doMerge { // Exit
 		return nil
@@ -48,6 +52,8 @@ func Execute(exe utils.Executor) error {
 		return errors.New("Failed to merge pull request #" + prId)
 	}
 
-	return nil
+	log.Info("Deleted local " + branchId + " and switched to branch main")
+	log.Info("Deleted remote branch " + branchId)
 
+	return nil
 }

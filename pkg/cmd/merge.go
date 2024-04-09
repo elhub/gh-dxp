@@ -9,6 +9,8 @@ import (
 )
 
 func MergeCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+	opts := &merge.Options{}
+
 	cmd := &cobra.Command{
 		Use:   "merge",
 		Short: "Merge a pull request",
@@ -24,11 +26,19 @@ func MergeCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		Aliases: []string{"land"},
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return merge.Execute(exe)
+			return merge.Execute(exe, opts)
 		},
 	}
 
 	// TODO: Support flags from gh pr
+	fl := cmd.Flags()
+	fl.BoolVarP(
+		&opts.AutoConfirm,
+		"confirm",
+		"y",
+		false,
+		"Don't ask for user input.",
+	)
 
 	return cmd
 }
