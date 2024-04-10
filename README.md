@@ -94,13 +94,13 @@ Following are some of the things we are thinking/working on.
   * Linters to use
 * Workflows:
   * new:  Create a new project with default template files.
-  * work: Create a new local branch, switch to it. If already created, switch to branch
-  * diff: Lint, Unit Test and Create a pull request from the existing branch with default info
-  * land: Squash-merge a pull request, switch back to default branch
+  * branch: Create a new local branch, switch to it. If already created, switch to branch
+  * pr: Lint, Unit Test and Create a pull request from the existing branch with default info
+  * merge: Squash-merge a pull request, switch back to default branch
   * lint: Run linters on project
   * unit: Run unit tests
-* Would-Love-To-Have:
-  * Proper Jira integration. Do some basic Jira checks (is ticket assigned, put into progress, etc).
+* Wish-List:
+  * Proper Jira integration. Do some basic Jira checks (is ticket assigned, put into progress, etc). 
 
 ## Linters and Code Analyzers
 
