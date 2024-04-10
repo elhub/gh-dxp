@@ -6,7 +6,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-dxp/pkg/diff"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
@@ -19,12 +19,12 @@ func Execute(exe utils.Executor, options *Options) error {
 	branchId := strings.Trim(currentBranch, "\n")
 
 	// Get prID
-	prId, errPr := diff.CheckForExistingPR(exe, branchId)
+	prId, errPr := pr.CheckForExistingPR(exe, branchId)
 	if errPr != nil {
 		return errPr
 	}
 
-	prTitle, errTitle := diff.GetPRTitle(exe)
+	prTitle, errTitle := pr.GetPRTitle(exe)
 	if errTitle != nil {
 		return errTitle
 	}

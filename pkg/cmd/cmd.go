@@ -45,10 +45,10 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	exe := utils.LinuxExecutor()
 
 	retCmd.AddCommand(
-		DiffCmd(exe, settings),
+		PRCmd(exe, settings),
 		LintCmd(exe, settings),
 		MergeCmd(exe, settings),
-		WorkCmd(exe),
+		BranchCmd(exe),
 	)
 
 	return retCmd
