@@ -79,7 +79,8 @@ func TestExecute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(MockExecutor)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.pushBranch, tt.pushBranchErr)
-			mockExe.On("GH", []string{"pr", "list", "-H", tt.pushBranch, "--json", "number", "--jq", ".[].number"}).Return(tt.prNumber, tt.prNumberErr)
+			mockExe.On("GH", []string{"pr", "list", "-H", tt.pushBranch, "--json", "number", "--jq", ".[].number"}).
+				Return(tt.prNumber, tt.prNumberErr)
 			mockExe.On("GH", []string{"pr", "view", "--json", "title", "--jq", ".title"}).Return(tt.prTitle, tt.prTitleErr)
 			mockExe.On("GH", []string{"pr", "merge", "--squash", "--auto", "--delete-branch"}).Return(tt.prMerge, tt.prMergeErr)
 
@@ -91,9 +92,8 @@ func TestExecute(t *testing.T) {
 				require.Error(t, err)
 				assert.Equal(t, tt.expectedErr.Error(), err.Error())
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
-
 }

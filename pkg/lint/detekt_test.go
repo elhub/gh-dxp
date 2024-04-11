@@ -40,7 +40,8 @@ func TestDetekt(t *testing.T) {
 			mockExe.On("Command", "rm", []string{"detekt.out"}).Return("", nil)
 
 			// Create a dummy detekt.out file
-			os.WriteFile("detekt.out", []byte(tt.mockReturn), 0644)
+			outErr := os.WriteFile("detekt.out", []byte(tt.mockReturn), 0644)
+			require.NoError(t, outErr)
 
 			// Call the method under test
 			outputs, err := lint.Detekt{}.Run(mockExe)

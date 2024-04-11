@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func PRCmd(exe utils.Executor) *cobra.Command {
 	opts := &pr.Options{}
 
 	cmd := &cobra.Command{

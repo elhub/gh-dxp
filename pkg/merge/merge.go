@@ -16,12 +16,12 @@ func Execute(exe utils.Executor, options *Options) error {
 	if errBranch != nil {
 		return errBranch
 	}
-	branchId := strings.Trim(currentBranch, "\n")
+	branchID := strings.Trim(currentBranch, "\n")
 
 	// Get prID
-	prId, errPr := pr.CheckForExistingPR(exe, branchId)
-	if errPr != nil {
-		return errPr
+	prID, errPR := pr.CheckForExistingPR(exe, branchID)
+	if errPR != nil {
+		return errPR
 	}
 
 	prTitle, errTitle := pr.GetPRTitle(exe)
@@ -29,15 +29,18 @@ func Execute(exe utils.Executor, options *Options) error {
 		return errTitle
 	}
 
-	log.Info("Merging pull request #" + prId + "(" + prTitle + ")")
+	log.Info("Merging pull request #" + prID + "(" + prTitle + ")")
 	// TODO: Add list of commits
 	doMerge := false
 	if options.AutoConfirm {
 		doMerge = true
 	} else {
-		survey.AskOne(&survey.Confirm{
+		errMerge := survey.AskOne(&survey.Confirm{
 			Message: "Merge these changes?",
 		}, &doMerge, survey.WithValidator(survey.Required))
+		if errMerge != nil {
+			return errMerge
+		}
 	}
 
 	if !doMerge { // Exit
@@ -49,11 +52,11 @@ func Execute(exe utils.Executor, options *Options) error {
 
 	if err != nil {
 		log.Debug("Error: " + err.Error())
-		return errors.New("Failed to merge pull request #" + prId)
+		return errors.New("Failed to merge pull request #" + prID)
 	}
 
-	log.Info("Deleted local " + branchId + " and switched to branch main")
-	log.Info("Deleted remote branch " + branchId)
+	log.Info("Deleted local " + branchID + " and switched to branch main")
+	log.Info("Deleted remote branch " + branchID)
 
 	return nil
 }

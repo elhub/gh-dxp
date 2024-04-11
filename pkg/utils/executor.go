@@ -25,7 +25,7 @@ func LinuxExecutor() *LinuxExecutorImpl {
 	}
 }
 
-// OS command
+// OS command.
 func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error) {
 	log.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
 	cmd := e.ExecCommand(name, args...)
@@ -33,7 +33,7 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 	return string(bytes), err
 }
 
-// GH Command
+// GH Command.
 func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, error) {
 	stdOut, stdErr, err := gh.Exec(args...)
 	if err != nil {
