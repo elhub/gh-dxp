@@ -41,8 +41,8 @@ func Run(exe utils.Executor, settings *config.Settings, linters map[string]Linte
 	return nil
 }
 
-func GetFiles(separator string, extensions ...string) (string, error) {
-	rootDir, rootErr := utils.LinuxExecutor().GetRootDir()
+func GetFiles(exe utils.Executor, separator string, extensions ...string) (string, error) {
+	rootDir, rootErr := getRootDir(exe)
 	if rootErr != nil {
 		return "", rootErr
 	}
@@ -73,4 +73,12 @@ func stringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func getRootDir(exe utils.Executor) (string, error) {
+	output, err := exe.Command("git", "rev-parse", "--show-toplevel")
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSuffix(output, "\n"), nil
 }

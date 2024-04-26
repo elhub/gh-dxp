@@ -17,7 +17,7 @@ func (YamlLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 	s := utils.StartSpinner("Running Yamllint...", "Yamllint done.")
 	var outputs []LinterOutput
 
-	files, filesErr := GetFiles(" ", ".yaml", ".yml")
+	files, filesErr := GetFiles(exe, " ", ".yaml", ".yml")
 
 	if filesErr != nil {
 		return nil, filesErr

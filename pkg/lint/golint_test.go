@@ -33,7 +33,8 @@ func TestGoLint(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Set up expectation
-			fileString, fileError := lint.GetFiles(" ", ".go")
+			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("./resources", nil)
+			fileString, fileError := lint.GetFiles(mockExe, ",", ".go")
 			require.NoError(t, fileError)
 			mockExe.On("Command", "golangci-lint", []string{"run", fileString}).Return(tt.mockReturn, tt.mockError)
 
