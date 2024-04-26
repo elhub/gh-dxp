@@ -19,15 +19,6 @@ func (m *mocklintExecutor) Command(command string, args ...string) (string, erro
 	return argsCalled.String(0), argsCalled.Error(1)
 }
 
-func (m *mocklintExecutor) Get(command string, args ...string) (string, error) {
-	argsCalled := m.Called(command, args)
-	return argsCalled.String(0), argsCalled.Error(1)
-}
-
-func (e *mocklintExecutor) GetRootDir() (string, error) {
-	return e.Command("git", "rev-parse", "--show-toplevel")
-}
-
 type TestMockLint struct{}
 
 func (TestMockLint) Run(_ utils.Executor) ([]lint.LinterOutput, error) {
