@@ -18,7 +18,7 @@ func (GoLint) Run(exe utils.Executor) ([]LinterOutput, error) {
 	var outputs []LinterOutput
 
 	// Run the linter
-	lintString, filesErr := GetFiles(" ", ".go")
+	lintString, filesErr := GetFiles(exe, " ", ".go")
 	if filesErr != nil {
 		return nil, filesErr
 	}

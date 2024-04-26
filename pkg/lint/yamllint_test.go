@@ -31,7 +31,8 @@ func TestYamlLint(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Set up expectation
-			files, fileError := lint.GetFiles(" ", ".yaml", ".yml")
+			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("./resources", nil)
+			files, fileError := lint.GetFiles(mockExe, " ", ".yaml", ".yml")
 			require.NoError(t, fileError)
 			mockExe.On("Command", "yamllint", []string{files, "-f", "parsable", "."}).Return(tt.mockReturn, tt.mockError)
 
