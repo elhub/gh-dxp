@@ -2,32 +2,31 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/diff"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func DiffCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &diff.Options{}
+func PRCmd(exe utils.Executor) *cobra.Command {
+	opts := &pr.Options{}
 
 	cmd := &cobra.Command{
-		Use:   "diff",
-		Short: "Create a diff (pull request)",
+		Use:   "pr",
+		Short: "Create a PR (pull request)",
 		Long: heredoc.Docf(`
-			Create a diff (pull request) for the current branch. This is an opinionated command that will:
+			Create a PR (pull request) for the current branch. This is an opinionated command that will:
 
 			* Push the current branch to git remote
 			* Generate a pull request title based on the current branch name (based upon settings)
 			* Generate a pull request body based on the current devxp template
 		`, "`"),
 		Example: heredoc.Doc(`
-			$ gh dxp diff
+			$ gh dxp pr
 		`),
-		Aliases: []string{"create", "pr", "new"},
+		Aliases: []string{"diff"},
 		Args:    cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return diff.Execute(exe, opts)
+			return pr.Execute(exe, opts)
 		},
 	}
 

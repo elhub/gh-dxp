@@ -1,10 +1,10 @@
-package diff_test
+package pr_test
 
 import (
 	"bytes"
 	"testing"
 
-	"github.com/elhub/gh-dxp/pkg/diff"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -34,7 +34,7 @@ func TestExecute(t *testing.T) {
 		pushBranchErr    error
 		prListNumber     string
 		prListNErr       error
-		prListUrl        string
+		prListURL        string
 		prListUErr       error
 		gitLog           string
 		gitLogErr        error
@@ -50,7 +50,7 @@ func TestExecute(t *testing.T) {
 			pushBranch:     "branch1",
 			prListNumber:   "",
 			prListNErr:     nil,
-			prListUrl:      "https://github.com/elhub/demo/pull/3",
+			prListURL:      "https://github.com/elhub/demo/pull/3",
 			gitLog:         "commit 1",
 			repoBranchName: "main",
 			prCreate:       "pull request created",
@@ -82,7 +82,7 @@ func TestExecute(t *testing.T) {
 			pushBranch:    "branch1",
 			pushBranchErr: errors.New("error pushing branch"),
 			prListNumber:  "1",
-			prListUrl:     "https://github.com/elhub/demo/pull/3",
+			prListURL:     "https://github.com/elhub/demo/pull/3",
 			expectedErr:   errors.New("error pushing branch"),
 		},
 		{
@@ -91,7 +91,7 @@ func TestExecute(t *testing.T) {
 			pushBranch:    "branch1",
 			prListNumber:  "1",
 			prListNErr:    nil,
-			prListUrl:     "",
+			prListURL:     "",
 			prListUErr:    errors.New("error getting PR URL"),
 			expectedErr:   errors.New("error getting PR URL"),
 		},
@@ -101,7 +101,7 @@ func TestExecute(t *testing.T) {
 			pushBranch:    "branch1",
 			pushBranchErr: errors.New("error pushing branch"),
 			prListNumber:  "",
-			prListUrl:     "https://github.com/elhub/demo/pull/3",
+			prListURL:     "https://github.com/elhub/demo/pull/3",
 			expectedErr:   errors.New("error pushing branch"),
 		},
 		{
@@ -109,7 +109,7 @@ func TestExecute(t *testing.T) {
 			currentBranch: "branch1",
 			pushBranch:    "branch1",
 			prListNumber:  "",
-			prListUrl:     "https://github.com/elhub/demo/pull/3",
+			prListURL:     "https://github.com/elhub/demo/pull/3",
 			repoBranchErr: errors.New("error fetching default branch"),
 			expectedErr:   errors.New("Failed to fetch default branch: error fetching default branch"),
 		},
@@ -118,7 +118,7 @@ func TestExecute(t *testing.T) {
 			currentBranch:  "branch1",
 			pushBranch:     "branch1",
 			prListNumber:   "",
-			prListUrl:      "https://github.com/elhub/demo/pull/3",
+			prListURL:      "https://github.com/elhub/demo/pull/3",
 			repoBranchName: "main",
 			gitLogErr:      errors.New("error fetching git log"),
 			expectedErr:    errors.New("error fetching git log"),
@@ -128,7 +128,7 @@ func TestExecute(t *testing.T) {
 			currentBranch:  "branch1",
 			pushBranch:     "branch1",
 			prListNumber:   "",
-			prListUrl:      "https://github.com/elhub/demo/pull/3",
+			prListURL:      "https://github.com/elhub/demo/pull/3",
 			gitLog:         "commit 1",
 			repoBranchName: "main",
 			prCreateErr:    errors.New("error creating PR"),
@@ -141,14 +141,21 @@ func TestExecute(t *testing.T) {
 			mockExe := new(MockExecutor)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
-			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).Return(tt.pushBranch, tt.pushBranchErr)
-			mockExe.On("Command", "git", []string{"log", "main.." + tt.currentBranch, "--oneline", "--pretty=format:%s"}).Return(tt.gitLog, tt.gitLogErr)
-			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "number", "--jq", ".[].number"}).Return(tt.prListNumber, tt.prListNErr)
-			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "url", "--jq", ".[].url"}).Return(tt.prListUrl, tt.prListUErr)
-			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "Testing:\n- [ ] Unit Tests\n- [ ] Integration Tests\n- Test Command: \n\nDocumentation:\n- No updates\n", "--base", "main"}).Return(tt.prCreate, tt.prCreateErr)
-			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).Return(tt.repoBranchName, tt.repoBranchErr)
+			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).
+				Return(tt.pushBranch, tt.pushBranchErr)
+			mockExe.On("Command", "git", []string{"log", "main.." + tt.currentBranch, "--oneline", "--pretty=format:%s"}).
+				Return(tt.gitLog, tt.gitLogErr)
+			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "number", "--jq", ".[].number"}).
+				Return(tt.prListNumber, tt.prListNErr)
+			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "url", "--jq", ".[].url"}).
+				Return(tt.prListURL, tt.prListUErr)
+			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "Testing:\n- [ ] Unit Tests\n" +
+				"- [ ] Integration Tests\n- Test Command:\n\nDocumentation:\n- No updates\n", "--base", "main"}).
+				Return(tt.prCreate, tt.prCreateErr)
+			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
+				Return(tt.repoBranchName, tt.repoBranchErr)
 
-			err := diff.Execute(mockExe, &diff.Options{
+			err := pr.Execute(mockExe, &pr.Options{
 				AutoConfirm: true,
 			})
 
@@ -156,7 +163,7 @@ func TestExecute(t *testing.T) {
 				require.Error(t, err)
 				assert.Equal(t, tt.expectedErr.Error(), err.Error())
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}

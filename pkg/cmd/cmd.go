@@ -24,8 +24,8 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	)
 
 	var retCmd = &cobra.Command{
-		Use:           "devxp",
-		Short:         "Extended Git & GitHub CLI workflows",
+		Use:           "dxp",
+		Short:         "Extended Git & GitHub CLI workflows for linting, testing, code review and merges.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Version:       version,
@@ -45,10 +45,10 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	exe := utils.LinuxExecutor()
 
 	retCmd.AddCommand(
-		DiffCmd(exe, settings),
+		PRCmd(exe),
 		LintCmd(exe, settings),
-		MergeCmd(exe, settings),
-		WorkCmd(exe),
+		MergeCmd(exe),
+		BranchCmd(exe),
 	)
 
 	return retCmd

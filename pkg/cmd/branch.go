@@ -7,9 +7,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func WorkCmd(exe utils.Executor) *cobra.Command {
+func BranchCmd(exe utils.Executor) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "work [branch-name]",
+		Use:   "branch [branch-name]",
 		Short: "Create a new branch based on an issue and checkout to it.",
 		Args:  cobra.MaximumNArgs(1),
 		Long: heredoc.Docf(`
@@ -18,7 +18,7 @@ func WorkCmd(exe utils.Executor) *cobra.Command {
 		`, "`"),
 		Example: heredoc.Doc(`
 			// Create a new branch 'wip' and checkout to it:
-			$ gh devxp work wip
+			$ gh devxp branch wip
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			branchID := ""

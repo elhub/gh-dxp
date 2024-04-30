@@ -1,4 +1,4 @@
-package diff
+package pr
 
 type Options struct {
 	AutoConfirm bool

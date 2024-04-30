@@ -50,3 +50,8 @@ func branchExists(exe utils.Executor, branchID string) (bool, error) {
 	}
 	return true, nil
 }
+
+// Get the commit messages between main and branch.
+func GetCommitMessages(exe utils.Executor, mainID string, branchID string) (string, error) {
+	return exe.Command("git", "log", mainID+".."+branchID, "--oneline", "--pretty=format:%s")
+}

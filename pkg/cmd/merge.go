@@ -2,13 +2,12 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/merge"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-func MergeCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func MergeCmd(exe utils.Executor) *cobra.Command {
 	opts := &merge.Options{}
 
 	cmd := &cobra.Command{
