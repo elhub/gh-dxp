@@ -11,7 +11,7 @@ func BranchCmd(exe utils.Executor) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "branch [branch-name]",
 		Short: "Create a new branch based on an issue and checkout to it.",
-		Args:  cobra.MaximumNArgs(1),
+		Args:  cobra.ExactArgs(1),
 		Long: heredoc.Docf(`
 			Create a new branch and checkout to it. If the branch already exists,
 			it will be checked out.
@@ -21,10 +21,7 @@ func BranchCmd(exe utils.Executor) *cobra.Command {
 			$ gh devxp branch wip
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			branchID := ""
-			if len(args) > 0 {
-				branchID = args[0]
-			}
+			branchID := args[0]
 
 			s := utils.StartSpinner("Creating new work branch...", "Work Branch "+branchID)
 			b := branch.CheckoutBranch(exe, branchID)
