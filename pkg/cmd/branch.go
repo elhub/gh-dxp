@@ -18,7 +18,7 @@ func BranchCmd(exe utils.Executor) *cobra.Command {
 		`, "`"),
 		Example: heredoc.Doc(`
 			// Create a new branch 'wip' and checkout to it:
-			$ gh devxp branch wip
+			$ gh dxp branch wip
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			branchID := args[0]

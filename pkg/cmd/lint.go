@@ -19,7 +19,7 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		`, "`"),
 		Example: heredoc.Doc(`
 			// Lint the current directory
-			$ gh devxp lint
+			$ gh dxp lint
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return lint.Run(exe, settings, lint.DefaultLinters())
