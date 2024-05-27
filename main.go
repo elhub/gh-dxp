@@ -20,7 +20,7 @@ func main() {
 	}
 
 	if cmdErr := cmd.Execute(settings, version); cmdErr != nil {
-		log.WithError(err).Error("Command failed")
+		log.WithError(cmdErr).Error("Command failed")
 		os.Exit(1)
 	}
 }
