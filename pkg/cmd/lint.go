@@ -22,7 +22,7 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			$ gh devxp lint
 		`),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return lint.Run(exe, settings, lint.DefaultLinters())
+			return lint.Run(exe, settings)
 		},
 	}
 

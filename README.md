@@ -100,23 +100,23 @@ Following are some of the things we are thinking/working on.
   * lint: Run linters on project
   * unit: Run unit tests
 * Wish-List:
-  * Proper Jira integration. Do some basic Jira checks (is ticket assigned, put into progress, etc). 
+  * Proper Jira integration. Do some basic Jira checks (is ticket assigned, put into progress, etc).
 
 ## Linters and Code Analyzers
 
-| Supported          | Language    | Linter          |
-| ------------------ | ----------- | --------------- |
-| :black_square_button: | Ansible     | ansible-lint    |
-| :black_square_button: | C#          |                 |
-| :black_square_button: | CSS         | style-lint      |
-| :white_check_mark: | Golang      | golangci-cli    |
-| :black_square_button: | Java        | checkstyle      |
-| :black_square_button: | Javascript  | eslint          |
-| :white_check_mark: | Kotlin      | detekt          |
-| :black_square_button: | Markdown    | markdownlint    |
-| :black_square_button: | OpenAPI     | spectral        |
-| :black_square_button: | Shell       | ShellCheck      |
-| :black_square_button: | SQL         | sql-lint        |
-| :black_square_button: | Terraform   | fmt             |
-| :black_square_button: | Typescript  | eslint          |
-| :white_check_mark: | YAML        | YamlLint        |
+| Supported             | Language   | Linter       |
+|-----------------------|------------|--------------|
+| :black_square_button: | Ansible    | ansible-lint |
+| :black_square_button: | C#         |              |
+| :black_square_button: | CSS        | style-lint   |
+| :white_check_mark:    | Golang     | golangci-cli |
+| :black_square_button: | Java       | checkstyle   |
+| :black_square_button: | Javascript | eslint       |
+| :white_check_mark:    | Kotlin     | detekt       |
+| :black_square_button: | Markdown   | markdownlint |
+| :black_square_button: | OpenAPI    | spectral     |
+| :black_square_button: | Shell      | ShellCheck   |
+| :black_square_button: | SQL        | sql-lint     |
+| :black_square_button: | Terraform  | fmt          |
+| :black_square_button: | Typescript | eslint       |
+| :white_check_mark:    | YAML       | YamlLint     |

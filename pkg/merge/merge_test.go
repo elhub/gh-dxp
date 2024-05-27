@@ -2,6 +2,7 @@ package merge_test
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"testing"
 
@@ -18,6 +19,11 @@ type MockExecutor struct {
 func (m *MockExecutor) Command(name string, arg ...string) (string, error) {
 	args := m.Called(name, arg)
 	return args.String(0), args.Error(1)
+}
+
+func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
+	args := m.Called(ctx, name, arg)
+	return args.Error(1)
 }
 
 func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
