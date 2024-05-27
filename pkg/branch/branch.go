@@ -1,3 +1,4 @@
+// Package branch provides functions to work with git branches.
 package branch
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CheckoutBranch checks out to the branch with the given ID.
 func CheckoutBranch(exe utils.Executor, branchID string) error {
 	// Does the branch exist?
 	branchExists, existsErr := branchExists(exe, branchID)
@@ -51,7 +53,7 @@ func branchExists(exe utils.Executor, branchID string) (bool, error) {
 	return true, nil
 }
 
-// Get the commit messages between main and branch.
+// GetCommitMessages returns the commit messages between the main branch and the branch with the given ID.
 func GetCommitMessages(exe utils.Executor, mainID string, branchID string) (string, error) {
 	return exe.Command("git", "log", mainID+".."+branchID, "--oneline", "--pretty=format:%s")
 }

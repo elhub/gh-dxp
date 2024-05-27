@@ -1,9 +1,7 @@
 ---
 lint:
   linters:
-    - name: detekt
-    - name: golint
-    - name: yamllint
+    - name: megalint
   exclude:
     - "(\\.idea$)"
     - "(\\.gradle$)"

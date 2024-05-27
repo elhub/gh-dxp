@@ -1,6 +1,8 @@
 BINARY_NAME=gh-dxp
 BUILD_DIR=build
 
+.PHONY: all clean test
+
 build:
 	go build -o ${BUILD_DIR}/${BINARY_NAME}
 

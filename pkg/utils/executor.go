@@ -2,7 +2,9 @@ package utils
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -12,6 +14,7 @@ import (
 
 type Executor interface {
 	Command(name string, args ...string) (string, error)
+	CommandContext(ctx context.Context, name string, arg ...string) error
 	GH(args ...string) (bytes.Buffer, error)
 }
 
@@ -31,6 +34,14 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 	cmd := e.ExecCommand(name, args...)
 	bytes, err := cmd.CombinedOutput()
 	return string(bytes), err
+}
+
+func (e *LinuxExecutorImpl) CommandContext(ctx context.Context, name string, arg ...string) error {
+	cmd := exec.CommandContext(ctx, name, arg...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
 }
 
 // GH Command.

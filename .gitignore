@@ -1,6 +1,14 @@
 ### Binary
 gh-dxp
 
+### Local Lint Files
+.checkmake.ini
+.jsonlintrc
+.markdownlint.json
+.prettierrc.json
+.yamllint.yml
+revive.toml
+
 ### Elhub-Ansible
 ansible/galaxy/*
 ansible/inventories/*

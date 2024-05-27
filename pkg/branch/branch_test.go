@@ -2,6 +2,7 @@ package branch_test
 
 import (
 	"bytes"
+	"context"
 	"os/exec"
 	"testing"
 
@@ -17,6 +18,11 @@ type MockExecutor struct {
 func (m *MockExecutor) Command(name string, args ...string) (string, error) {
 	argsCalled := m.Called(name, args)
 	return argsCalled.String(0), argsCalled.Error(1)
+}
+
+func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
+	args := m.Called(ctx, name, arg)
+	return args.Error(1)
 }
 
 func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
