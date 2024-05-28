@@ -49,6 +49,7 @@ func TestExecute(t *testing.T) {
 		prCreate         string
 		prCreateErr      error
 		expectedErr      error
+		currentChanges   string
 	}{
 		{
 			name:           "Test successful PR creation",
@@ -140,11 +141,25 @@ func TestExecute(t *testing.T) {
 			prCreateErr:    errors.New("error creating PR"),
 			expectedErr:    errors.New("Failed to create pull request: error creating PR"),
 		},
+		{
+			name:           "Test local has untracked changes",
+			currentBranch:  "branch1",
+			pushBranch:     "branch1",
+			prListNumber:   "",
+			prListNErr:     nil,
+			prListURL:      "https://github.com/elhub/demo/pull/3",
+			gitLog:         "commit 1",
+			repoBranchName: "main",
+			prCreate:       "pull request created",
+			expectedErr:    nil,
+			currentChanges: "?? untracked_change.go",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(MockExecutor)
+			mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).

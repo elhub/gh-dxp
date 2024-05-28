@@ -2,6 +2,7 @@
 package pr
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -34,7 +35,53 @@ func Execute(exe utils.Executor, options *Options) error {
 	return create(exe, options, branchID)
 }
 
+func filter(list []string, test func(string) bool) (ret []string) {
+	for _, s := range list {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
+}
+
+func getUntrackedChanges(exe utils.Executor) ([]string, error) {
+	changeString, err := exe.Command("git", "status", "--porcelain")
+	if err != nil {
+		return []string{}, err
+	}
+
+	re := regexp.MustCompile(`^\?\?`)
+
+	changes := strings.Split(changeString, "\n")
+	untrackedChanges := filter(changes, re.MatchString)
+
+	return untrackedChanges, nil
+}
+
+func formatFileChangesQuestion(changes []string) string {
+
+	return "You have untracked files locally \n\n" + strings.Join(changes, "\n") + "\n\nIgnore these files and continue?"
+}
+
 func create(exe utils.Executor, options *Options, branchID string) error {
+
+	// Handle presence of untracked changes - ignore or abort
+	untrackedChanges, uErr := getUntrackedChanges(exe)
+	if uErr != nil {
+		return uErr
+	}
+
+	if len(untrackedChanges) > 0 {
+		if !options.AutoConfirm {
+			res, err := askToConfirm(formatFileChangesQuestion(untrackedChanges))
+			if err != nil || !res {
+				return errors.Wrap(err, "User aborted workflow")
+			}
+		}
+	}
+
+	// TODO: Handle presence of tracked changes - commit or abort
+
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchID)
