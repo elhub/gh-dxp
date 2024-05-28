@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// BranchCmd creates a new branch based on an issue and checks out to it.
 func BranchCmd(exe utils.Executor) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "branch [branch-name]",
@@ -20,7 +21,7 @@ func BranchCmd(exe utils.Executor) *cobra.Command {
 			// Create a new branch 'wip' and checkout to it:
 			$ gh dxp branch wip
 		`),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			branchID := args[0]
 
 			s := utils.StartSpinner("Creating new work branch...", "Work Branch "+branchID)

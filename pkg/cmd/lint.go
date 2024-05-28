@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// LintCmd creates a new command to run the linters defined in the .devxp config.
 func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "lint",
@@ -21,7 +22,7 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			// Lint the current directory
 			$ gh dxp lint
 		`),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return lint.Run(exe, settings)
 		},
 	}

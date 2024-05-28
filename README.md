@@ -4,7 +4,9 @@ A GitHub (gh) CLI extension for automating daily development work, brought to yo
 
 ## Usage
 
-As mentioned, the workflow implemented by this extension is built around the Elhub's development teams opinionated workflow. It is a one-idea, one-commit workflow based around [trunk based development](https://trunkbaseddevelopment.com/). We **always** lint and unit test commits before submitting them for review in addition to CI/CD checks; there is no point in knowingly pushing bad formatting/bugs into a pull request and wasting the reviewer's time.
+As mentioned, the workflow implemented by this extension is built around the Elhub's development teams opinionated workflow. It is a one-idea, one-commit workflow based around [trunk based development](https://trunkbaseddevelopment.com/).
+
+We **always** lint and unit test commits before submitting them for review in addition to CI/CD checks; there is no point in knowingly pushing bad formatting/bugs into a pull request and wasting the reviewer's time.
 
 To start a change, we create a new local branch:
 
