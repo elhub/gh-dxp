@@ -25,33 +25,19 @@ func writeTempFile(t *testing.T, text []byte) *os.File {
 	return tmpfile
 }
 
+// TestReadConfig tests the ReadConfig function
 func TestReadConfig(t *testing.T) {
 	t.Run("valid config file", func(t *testing.T) {
 		// Create a temporary file
 		tmpfile := writeTempFile(t, []byte(`---
-lint:
-  linters:
-    - name: linter1
-      exclude:
-        - ".*\\.go$"
-    - name: linter2
-      include:
-        - ".*\\.txt$"
-  exclude:
-    - "(\\.bad$)"
-    - "(\\.break$)"`))
+projectType: "go"`))
 
 		// Read the tmpfile
 		cfg, err := config.ReadConfig(tmpfile.Name())
 
 		// Check that the settings were correctly read
 		require.NoError(t, err)
-		assert.Len(t, cfg.Lint.Linters, 2)
-		assert.Equal(t, "linter1", cfg.Lint.Linters[0].Name)
-		assert.Equal(t, "linter2", cfg.Lint.Linters[1].Name)
-		assert.Equal(t, ".*\\.txt$", cfg.Lint.Linters[1].Include[0])
-		assert.Equal(t, ".*\\.go$", cfg.Lint.Linters[0].Exclude[0])
-		assert.Len(t, cfg.Lint.Exclude, 2)
+		assert.Equal(t, "go", cfg.ProjectType)
 	})
 
 	t.Run("non existent config file", func(t *testing.T) {
@@ -62,10 +48,8 @@ lint:
 	t.Run("incorrectly formatted YAML", func(t *testing.T) {
 		// Create a temporary file
 		tmpfile := writeTempFile(t, []byte(`---
-lint:
-  linters:
-    - navn: linter1
-	- name: linter2`))
+projectTypes:
+	"go"`))
 
 		// Read the tmpfile
 		_, err := config.ReadConfig(tmpfile.Name())
@@ -73,4 +57,16 @@ lint:
 		// Check that the settings read throws an error
 		require.Error(t, err)
 	})
+}
+
+// Test the MergeSettings function
+func TestMergeSettings(t *testing.T) {
+	defaultSettings := config.DefaultSettings()
+	userSettings := &config.Settings{
+		ProjectType: "go",
+	}
+
+	mergedSettings := config.MergeSettings(defaultSettings, userSettings)
+
+	assert.Equal(t, "go", mergedSettings.ProjectType)
 }
