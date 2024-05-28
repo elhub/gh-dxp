@@ -19,3 +19,17 @@ func ReadConfig(filepath string) (*Settings, error) {
 
 	return &cfg, nil
 }
+
+func DefaultSettings() *Settings {
+	return &Settings{
+		ProjectType: "default",
+	}
+}
+
+func MergeSettings(source *Settings, user *Settings) *Settings {
+	if user.ProjectType != "" {
+		source.ProjectType = user.ProjectType
+	}
+
+	return source
+}
