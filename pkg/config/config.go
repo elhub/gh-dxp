@@ -1,3 +1,4 @@
+// Package config provides the logic for reading the configuration settings from a file.
 package config
 
 import (
@@ -6,6 +7,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// ReadConfig reads the configuration settings from the specified file and unmarshals it into a Settings struct.
 func ReadConfig(filepath string) (*Settings, error) {
 	data, readErr := os.ReadFile(filepath)
 	if readErr != nil {

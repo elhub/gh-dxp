@@ -1,7 +1,7 @@
+// Package pr contains the logic for creating and updating pull requests.
 package pr
 
 import (
-	"fmt"
 	"regexp"
 	"strings"
 
@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// Execute creates or updates a pull request, depending on its current state.
 func Execute(exe utils.Executor, options *Options) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
@@ -88,8 +89,7 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 	if err != nil {
 		return err
 	}
-	log.Info(strings.Trim(currentBranch, "\n"))
-	fmt.Println("Current Branch: ", currentBranch)
+	log.Info("Current Branch:" + currentBranch + "\n")
 
 	// Fetch the default branch
 	baseBranch := options.baseBranch
@@ -154,6 +154,7 @@ func update(exe utils.Executor, branchID string, prID string) error {
 	return nil
 }
 
+// CheckForExistingPR checks if a PR already exists for the current branch.
 func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 	stdOut, err := exe.GH("pr", "list", "-H", branchID, "--json", "number", "--jq", ".[].number")
 
@@ -167,6 +168,7 @@ func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 	return number, nil
 }
 
+// GetPRTitle gets the title of the current PR.
 func GetPRTitle(exe utils.Executor) (string, error) {
 	stdOut, err := exe.GH("pr", "view", "--json", "title", "--jq", ".title")
 

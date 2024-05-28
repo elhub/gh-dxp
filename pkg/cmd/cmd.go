@@ -1,3 +1,4 @@
+// Package cmd provides the main commands for the gh-dxp extension.
 package cmd
 
 import (
@@ -9,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Execute runs the main command of the CLI tool.
 func Execute(settings *config.Settings, version string) error {
 	mainCmd := GenerateCmd(settings, version)
 	ctx := context.Background()
@@ -18,6 +20,7 @@ func Execute(settings *config.Settings, version string) error {
 	return err
 }
 
+// GenerateCmd sets up the command structure for the CLI tool using Cobra.
 func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	var (
 		debug bool
@@ -29,7 +32,7 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 		SilenceUsage:  true,
 		SilenceErrors: true,
 		Version:       version,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		PersistentPreRun: func(_ *cobra.Command, _ []string) {
 			log.DecreasePadding()
 			log.SetLevel(log.InfoLevel)
 

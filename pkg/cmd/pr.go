@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// PRCmd handles the creation of a pull request.
 func PRCmd(exe utils.Executor) *cobra.Command {
 	opts := &pr.Options{}
 
@@ -25,7 +26,7 @@ func PRCmd(exe utils.Executor) *cobra.Command {
 		`),
 		Aliases: []string{"diff"},
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return pr.Execute(exe, opts)
 		},
 	}

@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// MergeCmd handles the merge of a pull request.
 func MergeCmd(exe utils.Executor) *cobra.Command {
 	opts := &merge.Options{}
 
@@ -24,7 +25,7 @@ func MergeCmd(exe utils.Executor) *cobra.Command {
 		`),
 		Aliases: []string{"land"},
 		Args:    cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return merge.Execute(exe, opts)
 		},
 	}

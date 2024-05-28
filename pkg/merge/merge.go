@@ -1,3 +1,4 @@
+// Package merge contains the logic for merging pull requests.
 package merge
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
+// Execute merges a pull request on the current branch.
 func Execute(exe utils.Executor, options *Options) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")

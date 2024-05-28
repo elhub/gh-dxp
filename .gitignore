@@ -4,6 +4,7 @@ gh-dxp
 ### Local Lint Files
 .checkmake.ini
 .jsonlintrc
+.golangci.yml
 .markdownlint.json
 .prettierrc.json
 .yamllint.yml

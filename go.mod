@@ -1,6 +1,6 @@
 module github.com/elhub/gh-dxp
 
-go 1.21
+go 1.21.9
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
