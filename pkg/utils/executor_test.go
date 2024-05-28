@@ -12,7 +12,7 @@ import (
 func TestLinuxExecutor_Command(t *testing.T) {
 	t.Run("should return command output", func(t *testing.T) {
 		executor := &utils.LinuxExecutorImpl{
-			ExecCommand: func(name string, args ...string) *exec.Cmd {
+			ExecCommand: func(_ string, _ ...string) *exec.Cmd {
 				return exec.Command("echo", "hello")
 			},
 		}
@@ -27,7 +27,7 @@ func TestLinuxExecutor_Command(t *testing.T) {
 
 	t.Run("should return error if command fails", func(t *testing.T) {
 		executor := &utils.LinuxExecutorImpl{
-			ExecCommand: func(name string, args ...string) *exec.Cmd {
+			ExecCommand: func(_ string, _ ...string) *exec.Cmd {
 				return exec.Command("ls", "/nonexistent")
 			},
 		}

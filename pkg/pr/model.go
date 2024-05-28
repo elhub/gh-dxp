@@ -1,5 +1,6 @@
 package pr
 
+// Options represents the options for the pr command.
 type Options struct {
 	AutoConfirm bool
 
@@ -9,6 +10,7 @@ type Options struct {
 	Assignees []string
 }
 
+// PullRequest represents a pull request.
 type PullRequest struct {
 	Title string
 	Body  string
