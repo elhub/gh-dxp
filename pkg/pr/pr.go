@@ -2,6 +2,7 @@
 package pr
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -45,35 +46,76 @@ func filter(list []string, test func(string) bool) (ret []string) {
 }
 
 func getUntrackedChanges(exe utils.Executor) ([]string, error) {
+
+	re := regexp.MustCompile(`^\?\?`)
+
+	return getChanges(exe, re)
+}
+
+func getTrackedChanges(exe utils.Executor) ([]string, error) {
+
+	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) //This regex is intended to catch all tracked changes except for unmerged conflicts
+
+	return getChanges(exe, re)
+}
+
+func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
 	changeString, err := exe.Command("git", "status", "--porcelain")
 	if err != nil {
 		return []string{}, err
 	}
 
-	re := regexp.MustCompile(`^\?\?`)
-
 	changes := strings.Split(changeString, "\n")
 	untrackedChanges := filter(changes, re.MatchString)
+
+	//Remove the regex matched part of the string, leaving only the file name
+	for i, s := range untrackedChanges {
+		untrackedChanges[i] = re.ReplaceAllString(s, "")
+	}
 
 	return untrackedChanges, nil
 }
 
-func formatFileChangesQuestion(changes []string) string {
+func addAndCommitFiles(exe utils.Executor, files []string) error {
+	commitMessage, err := askForString("Please enter a commit message", "")
+	if err != nil {
+		return err
+	} else if len(commitMessage) == 0 {
+		errors.New("Empty commit message not allowed")
+	}
+
+	_, err = exe.Command("git", "add", ".")
+	if err != nil {
+		return err
+	}
+	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func formatUntrackedFileChangesQuestion(changes []string) string {
 
 	return "You have untracked files locally \n\n" + strings.Join(changes, "\n") + "\n\nIgnore these files and continue?"
+}
+
+func formatTrackedFileChangesQuestion(changes []string) string {
+	return "You have uncommitted files locally \n\n" + strings.Join(changes, "\n") + "\n\nDo you want to create a new commit with these changes?"
 }
 
 func create(exe utils.Executor, options *Options, branchID string) error {
 
 	// Handle presence of untracked changes - ignore or abort
-	untrackedChanges, uErr := getUntrackedChanges(exe)
-	if uErr != nil {
-		return uErr
+	untrackedChanges, err := getUntrackedChanges(exe)
+	if err != nil {
+		return err
 	}
 
 	if len(untrackedChanges) > 0 {
 		if !options.AutoConfirm {
-			res, err := askToConfirm(formatFileChangesQuestion(untrackedChanges))
+			res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
 			if err != nil || !res {
 				return errors.Wrap(err, "User aborted workflow")
 			}
@@ -81,6 +123,25 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 	}
 
 	// TODO: Handle presence of tracked changes - commit or abort
+
+	trackedChanges, err := getTrackedChanges(exe)
+	if err != nil {
+		return err
+	}
+
+	if len(trackedChanges) > 0 {
+		if !options.AutoConfirm {
+			res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
+			if err != nil || !res {
+				return err
+			}
+			err = addAndCommitFiles(exe, trackedChanges)
+			if err != nil {
+				return err
+			}
+
+		}
+	}
 
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")

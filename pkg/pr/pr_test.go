@@ -154,6 +154,19 @@ func TestExecute(t *testing.T) {
 			expectedErr:    nil,
 			currentChanges: "?? untracked_change.go",
 		},
+		{
+			name:           "Test local has tracked changes",
+			currentBranch:  "branch1",
+			pushBranch:     "branch1",
+			prListNumber:   "",
+			prListNErr:     nil,
+			prListURL:      "https://github.com/elhub/demo/pull/3",
+			gitLog:         "commit 1",
+			repoBranchName: "main",
+			prCreate:       "pull request created",
+			expectedErr:    nil,
+			currentChanges: " M tracked_change.go",
+		},
 	}
 
 	for _, tt := range tests {
