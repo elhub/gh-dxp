@@ -84,7 +84,7 @@ func addAndCommitFiles(exe utils.Executor, files []string) error {
 		errors.New("Empty commit message not allowed")
 	}
 
-	_, err = exe.Command("git", "add", ".")
+	_, err = exe.Command("git", "add", strings.Join(files, " "))
 	if err != nil {
 		return err
 	}
