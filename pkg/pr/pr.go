@@ -36,75 +36,6 @@ func Execute(exe utils.Executor, options *Options) error {
 	return create(exe, options, branchID)
 }
 
-func filter(list []string, test func(string) bool) (ret []string) {
-	for _, s := range list {
-		if test(s) {
-			ret = append(ret, s)
-		}
-	}
-	return ret
-}
-
-func getUntrackedChanges(exe utils.Executor) ([]string, error) {
-
-	re := regexp.MustCompile(`^\?\?`)
-
-	return getChanges(exe, re)
-}
-
-func getTrackedChanges(exe utils.Executor) ([]string, error) {
-
-	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) //This regex is intended to catch all tracked changes except for unmerged conflicts
-
-	return getChanges(exe, re)
-}
-
-func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
-	changeString, err := exe.Command("git", "status", "--porcelain")
-	if err != nil {
-		return []string{}, err
-	}
-
-	changes := strings.Split(changeString, "\n")
-	untrackedChanges := filter(changes, re.MatchString)
-
-	//Remove the regex matched part of the string, leaving only the file name
-	for i, s := range untrackedChanges {
-		untrackedChanges[i] = re.ReplaceAllString(s, "")
-	}
-
-	return untrackedChanges, nil
-}
-
-func addAndCommitFiles(exe utils.Executor, files []string) error {
-	commitMessage, err := askForString("Please enter a commit message", "")
-	if err != nil {
-		return err
-	} else if len(commitMessage) == 0 {
-		errors.New("Empty commit message not allowed")
-	}
-
-	_, err = exe.Command("git", "add", strings.Join(files, " "))
-	if err != nil {
-		return err
-	}
-	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func formatUntrackedFileChangesQuestion(changes []string) string {
-
-	return "You have untracked files locally \n\n" + strings.Join(changes, "\n") + "\n\nIgnore these files and continue?"
-}
-
-func formatTrackedFileChangesQuestion(changes []string) string {
-	return "You have uncommitted files locally \n\n" + strings.Join(changes, "\n") + "\n\nDo you want to create a new commit with these changes?"
-}
-
 func create(exe utils.Executor, options *Options, branchID string) error {
 
 	// Handle presence of untracked changes - ignore or abort
@@ -483,4 +414,73 @@ func getCheckboxMark(confirm bool) string {
 
 func logPullRequest(pr PullRequest) {
 	log.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
+}
+
+func filter(list []string, test func(string) bool) (ret []string) {
+	for _, s := range list {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
+}
+
+func getUntrackedChanges(exe utils.Executor) ([]string, error) {
+
+	re := regexp.MustCompile(`^\?\?`)
+
+	return getChanges(exe, re)
+}
+
+func getTrackedChanges(exe utils.Executor) ([]string, error) {
+
+	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) //This regex is intended to catch all tracked changes except for unmerged conflicts
+
+	return getChanges(exe, re)
+}
+
+func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
+	changeString, err := exe.Command("git", "status", "--porcelain")
+	if err != nil {
+		return []string{}, err
+	}
+
+	changes := strings.Split(changeString, "\n")
+	untrackedChanges := filter(changes, re.MatchString)
+
+	//Remove the regex matched part of the string, leaving only the file name
+	for i, s := range untrackedChanges {
+		untrackedChanges[i] = re.ReplaceAllString(s, "")
+	}
+
+	return untrackedChanges, nil
+}
+
+func addAndCommitFiles(exe utils.Executor, files []string) error {
+	commitMessage, err := askForString("Please enter a commit message", "")
+	if err != nil {
+		return err
+	} else if len(commitMessage) == 0 {
+		errors.New("Empty commit message not allowed")
+	}
+
+	_, err = exe.Command("git", "add", strings.Join(files, " "))
+	if err != nil {
+		return err
+	}
+	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func formatUntrackedFileChangesQuestion(changes []string) string {
+
+	return "You have untracked files locally \n\n" + strings.Join(changes, "\n") + "\n\nIgnore these files and continue?"
+}
+
+func formatTrackedFileChangesQuestion(changes []string) string {
+	return "You have uncommitted files locally \n\n" + strings.Join(changes, "\n") + "\n\nDo you want to create a new commit with these changes?"
 }
