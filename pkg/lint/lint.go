@@ -15,7 +15,16 @@ func Run(exe utils.Executor, _ *config.Settings) error {
 	// Run mega-linter-runner with the cupcake flavor.
 	ctx := context.Background()
 
-	err := exe.CommandContext(ctx, "npx", "mega-linter-runner", "--flavor", "cupcake")
+	args := []string{"npx", "mega-linter-runner", "--flavor", "cupcake"}
+
+	// Check if mega-lint configuration is present in the repository.
+	if !utils.FileExists(".mega-linter.yml") {
+		log.Info("Using the default Elhub mega-linter configuration.\n")
+		// Append the default configuration file to the args.
+		args = append(args, "-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml")
+	}
+
+	err := exe.CommandContext(ctx, args[0], args[1:]...)
 	if err != nil {
 		log.Info("The Lint Process returned an error: " + err.Error() + "\n")
 		return err
