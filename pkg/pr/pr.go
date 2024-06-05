@@ -122,8 +122,7 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 		}
 	}
 
-	// TODO: Handle presence of tracked changes - commit or abort
-
+	//Handle presence of tracked changes - commit or abort
 	trackedChanges, err := getTrackedChanges(exe)
 	if err != nil {
 		return err
