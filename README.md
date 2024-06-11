@@ -41,7 +41,7 @@ In addition, there are some convenience operations available to support our dail
 This runs the installed linters on the given repository. Linters need to be configured, either locally in the repository, or with a config file in your home directory.
 
    ```sh
-   gh dxp unit
+   gh dxp test
    ```
 
 This runs unit tests on the given repository. The extension will try to guess the unit test framework to run based on project type, but it can also be configured in the configuration files.
