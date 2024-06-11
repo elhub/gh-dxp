@@ -133,9 +133,16 @@ func generatePRArgs(options *Options) []string {
 }
 
 func update(exe utils.Executor, branchID string, prID string) error {
+
+	//Run tests
+	err := test.RunTest(exe)
+	if err != nil {
+		return err
+	}
+
 	// Push the current branch to the already existing git remote
 	s := utils.StartSpinner("Updating Pull Request #"+prID+"...", "Pull Request #"+prID+" has been updated.")
-	_, err := exe.Command("git", "push")
+	_, err = exe.Command("git", "push")
 	s.Stop()
 	if err != nil {
 		return err
