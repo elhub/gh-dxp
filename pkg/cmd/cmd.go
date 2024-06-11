@@ -52,6 +52,7 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 		LintCmd(exe, settings),
 		MergeCmd(exe),
 		BranchCmd(exe),
+		TestCmd(exe),
 	)
 
 	return retCmd

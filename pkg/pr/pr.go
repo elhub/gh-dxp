@@ -9,6 +9,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/branch"
+	"github.com/elhub/gh-dxp/pkg/test"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
@@ -71,6 +72,12 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 			}
 
 		}
+	}
+
+	//Run tests
+	err = test.RunTest(exe)
+	if err != nil {
+		return err
 	}
 
 	// Push the current branch to git remote
