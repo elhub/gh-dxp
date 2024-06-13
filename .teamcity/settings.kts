@@ -1,6 +1,7 @@
 import no.elhub.devxp.build.configuration.pipeline.ElhubProject.Companion.elhubProject
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 
@@ -22,6 +23,11 @@ elhubProject(DEVXP, "devxp-jira-scripts") {
 
     pipeline {
 >>>>>>> 0b2cd29 (Test local GO params)
+=======
+
+elhubProject(DEVXP, "devxp-jira-scripts") {
+    pipeline {
+>>>>>>> 0ba05c5 (Update TC settings)
         sequential {
             makeVerify {
                 disableSonarScan = true
