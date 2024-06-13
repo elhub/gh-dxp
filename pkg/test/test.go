@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -9,20 +10,19 @@ import (
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
+// FileExists checks to see whether a file exists in the file system. Exported to allow mocking during tests.
 var FileExists = utils.FileExists
 
+// RunTest runs a workflow to automatically determine relevant tests in the current repo and run them.
 func RunTest(exe utils.Executor) error {
-
 	cmd, err := resolveTestCommand(exe)
 	if err != nil {
-		switch e := err.(type) {
-		case *NoTestCommandError:
-			log.Warn(e.Msg)
+		var ntcErr *NoTestCommandError
+		if errors.As(err, &ntcErr) {
+			log.Warn(err.Error())
 			return nil
-		default:
-			return err
 		}
-
+		return err
 	}
 
 	ctx := context.Background()
@@ -35,7 +35,6 @@ func RunTest(exe utils.Executor) error {
 }
 
 func resolveTestCommand(exe utils.Executor) (string, error) {
-
 	root, err := getGitRootDirectory(exe)
 	if err != nil {
 		return "", err
@@ -58,8 +57,8 @@ func resolveTestCommand(exe utils.Executor) (string, error) {
 }
 
 func getGitRootDirectory(exe utils.Executor) (string, error) {
-	//Locate the root directory of current git repo
-	//Fails if not in a repo
+	// Locate the root directory of current git repo
+	// Fails if not in a repo
 
 	root, err := exe.Command("git", "rev-parse", "--show-toplevel")
 	if err != nil {
@@ -85,18 +84,22 @@ func npmTestInGitRoot(root string) bool {
 	return FileExists(fmt.Sprintf("%s/package.json", root))
 }
 
+// NoTestCommandError signifies that no valid test command was found in the current git repo.
 type NoTestCommandError struct {
 	Msg string
 }
 
+// NotAGitRepoError signifies that the current working directory is not a git repo.
 type NotAGitRepoError struct {
 	Msg string
 }
 
+// Signifies that the current working directory is not a git repo.
 func (e *NotAGitRepoError) Error() string {
 	return e.Msg
 }
 
+// Signifies that no valid test command was found in the current git repo.
 func (e *NoTestCommandError) Error() string {
 	return e.Msg
 }

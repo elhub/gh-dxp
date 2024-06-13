@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// TestCmd handles the running of tests.
 func TestCmd(exe utils.Executor) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "test",
@@ -14,10 +15,9 @@ func TestCmd(exe utils.Executor) *cobra.Command {
 		Args:  cobra.ExactArgs(0),
 		Long: heredoc.Docf(`
 			Run tests based on project type`, "`"),
-		RunE: func(_ *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			res := test.RunTest(exe)
 			return res
-
 		},
 	}
 	return cmd

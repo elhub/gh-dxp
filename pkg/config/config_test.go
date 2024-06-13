@@ -25,7 +25,7 @@ func writeTempFile(t *testing.T, text []byte) *os.File {
 	return tmpfile
 }
 
-// TestReadConfig tests the ReadConfig function
+// TestReadConfig tests the ReadConfig function.
 func TestReadConfig(t *testing.T) {
 	t.Run("valid config file", func(t *testing.T) {
 		// Create a temporary file
@@ -59,7 +59,7 @@ projectTypes:
 	})
 }
 
-// Test the MergeSettings function
+// Test the MergeSettings function.
 func TestMergeSettings(t *testing.T) {
 	defaultSettings := config.DefaultSettings()
 	userSettings := &config.Settings{

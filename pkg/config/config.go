@@ -22,12 +22,14 @@ func ReadConfig(filepath string) (*Settings, error) {
 	return &cfg, nil
 }
 
+// DefaultSettings loads the default .devxp settings.
 func DefaultSettings() *Settings {
 	return &Settings{
 		ProjectType: "",
 	}
 }
 
+// MergeSettings merges two settings.
 func MergeSettings(source *Settings, newSettings *Settings) *Settings {
 	if newSettings.ProjectType != "" {
 		source.ProjectType = newSettings.ProjectType

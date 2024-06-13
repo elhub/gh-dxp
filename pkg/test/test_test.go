@@ -31,7 +31,6 @@ func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
 }
 
 func TestExecute(t *testing.T) {
-
 	tests := []struct {
 		name         string
 		gitRoot      string
@@ -77,7 +76,6 @@ func TestExecute(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-
 			test.FileExists = func(path string) bool {
 				return path == tt.testFile
 			}

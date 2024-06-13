@@ -38,43 +38,13 @@ func Execute(exe utils.Executor, options *Options) error {
 }
 
 func create(exe utils.Executor, options *Options, branchID string) error {
-
-	// Handle presence of untracked changes - ignore or abort
-	untrackedChanges, err := getUntrackedChanges(exe)
+	// Handle uncommitted changes
+	err := handleUncommittedChanges(exe, options)
 	if err != nil {
 		return err
 	}
 
-	if len(untrackedChanges) > 0 {
-		if !options.AutoConfirm {
-			res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
-			if err != nil || !res {
-				return errors.Wrap(err, "User aborted workflow")
-			}
-		}
-	}
-
-	//Handle presence of tracked changes - commit or abort
-	trackedChanges, err := getTrackedChanges(exe)
-	if err != nil {
-		return err
-	}
-
-	if len(trackedChanges) > 0 {
-		if !options.AutoConfirm {
-			res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
-			if err != nil || !res {
-				return err
-			}
-			err = addAndCommitFiles(exe, trackedChanges)
-			if err != nil {
-				return err
-			}
-
-		}
-	}
-
-	//Run tests
+	// Run tests
 	err = test.RunTest(exe)
 	if err != nil {
 		return err
@@ -133,8 +103,7 @@ func generatePRArgs(options *Options) []string {
 }
 
 func update(exe utils.Executor, branchID string, prID string) error {
-
-	//Run tests
+	// Run tests
 	err := test.RunTest(exe)
 	if err != nil {
 		return err
@@ -342,6 +311,41 @@ func testingChanges(options *Options) (string, error) {
 	return body, nil
 }
 
+func handleUncommittedChanges(exe utils.Executor, options *Options) error {
+	// Handle presence of untracked changes - ignore or abort
+	untrackedChanges, err := getUntrackedChanges(exe)
+	if err != nil {
+		return err
+	}
+
+	if len(untrackedChanges) > 0 {
+		if !options.AutoConfirm {
+			res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
+			if err != nil || !res {
+				return errors.Wrap(err, "User aborted workflow")
+			}
+		}
+	}
+
+	// Handle presence of tracked changes - commit or abort
+	trackedChanges, err := getTrackedChanges(exe)
+	if err != nil {
+		return err
+	}
+
+	if len(trackedChanges) > 0 && !options.AutoConfirm {
+		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
+		if err != nil || !res {
+			return err
+		}
+		err = addAndCommitFiles(exe, trackedChanges)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func documentationChanges(options *Options) (string, error) {
 	// Documentation
 	// Multi-choice: README.md, docs, storybook, no updates
@@ -430,7 +434,8 @@ func logPullRequest(pr PullRequest) {
 	log.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
 }
 
-func filter(list []string, test func(string) bool) (ret []string) {
+func filter(list []string, test func(string) bool) []string {
+	ret := []string{}
 	for _, s := range list {
 		if test(s) {
 			ret = append(ret, s)
@@ -440,16 +445,13 @@ func filter(list []string, test func(string) bool) (ret []string) {
 }
 
 func getUntrackedChanges(exe utils.Executor) ([]string, error) {
-
 	re := regexp.MustCompile(`^\?\?`)
 
 	return getChanges(exe, re)
 }
 
 func getTrackedChanges(exe utils.Executor) ([]string, error) {
-
-	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) //This regex is intended to catch all tracked changes except for unmerged conflicts
-
+	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) // This regex is intended to catch all tracked changes except for unmerged conflicts
 	return getChanges(exe, re)
 }
 
@@ -462,7 +464,7 @@ func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
 	changes := strings.Split(changeString, "\n")
 	untrackedChanges := filter(changes, re.MatchString)
 
-	//Remove the regex matched part of the string, leaving only the file name
+	// Remove the regex matched part of the string, leaving only the file name
 	for i, s := range untrackedChanges {
 		untrackedChanges[i] = re.ReplaceAllString(s, "")
 	}
@@ -475,7 +477,7 @@ func addAndCommitFiles(exe utils.Executor, files []string) error {
 	if err != nil {
 		return err
 	} else if len(commitMessage) == 0 {
-		errors.New("Empty commit message not allowed")
+		return errors.New("Empty commit message not allowed")
 	}
 
 	_, err = exe.Command("git", "add", strings.Join(files, " "))
@@ -491,7 +493,6 @@ func addAndCommitFiles(exe utils.Executor, files []string) error {
 }
 
 func formatUntrackedFileChangesQuestion(changes []string) string {
-
 	return "You have untracked files locally \n\n" + strings.Join(changes, "\n") + "\n\nIgnore these files and continue?"
 }
 
