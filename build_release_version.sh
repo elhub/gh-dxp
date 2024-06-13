@@ -19,7 +19,7 @@ compile() {
 
   GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${OUTPUT}" .
   
-  if [ $? -ne 0 ]; then
+  if ! GOOS; then
     echo "Error building for ${GOOS}/${GOARCH}"
     exit 1
   fi
