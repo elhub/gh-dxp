@@ -17,10 +17,12 @@ func Execute(workingDir string, settings *config.Settings) error {
 
 	// Get the current working directory
 
-	// Create the .github directory
+	// Create the .github directory if it does not exist
 	ghDir := filepath.Join(workingDir, ".github")
-	if err := os.Mkdir(ghDir, 0755); err != nil {
-		return fmt.Errorf("could not create .github directory: %w", err)
+	if _, errStat := os.Stat(ghDir); os.IsNotExist(errStat) {
+		if err := os.Mkdir(ghDir, 0755); err != nil {
+			return fmt.Errorf("could not create .github directory: %w", err)
+		}
 	}
 
 	// Download files
@@ -47,22 +49,32 @@ func Execute(workingDir string, settings *config.Settings) error {
 		{
 			fileName:  "README-template.md",
 			path:      filepath.Join(workingDir, "README.md"),
-			overwrite: true,
+			overwrite: false,
 		},
 		{
-			fileName:  "./github/CODEOWNERS-template",
+			fileName:  ".github/CODEOWNERS-template",
 			path:      filepath.Join(ghDir, "CODEOWNERS"),
-			overwrite: true,
+			overwrite: false,
 		},
 		{
-			fileName:  "./github/CONTRIBUTING-template.md",
+			fileName:  ".github/CONTRIBUTING-template.md",
 			path:      filepath.Join(ghDir, "CONTRIBUTING"),
 			overwrite: true,
 		},
 	}
 
-	for _, f := range files {
-		writeFile(uri+f.fileName, f.path)
+	// Only write file if overwrite = true or file does not exist
+	for _, file := range files {
+		// Check if the file exists
+		_, err := os.Stat(file.path)
+
+		// If the file does not exist or overwrite is true, write the file
+		if os.IsNotExist(err) || file.overwrite {
+			err = writeFile(uri+file.fileName, file.path)
+			if err != nil {
+				return fmt.Errorf("failed to write file: %w", err)
+			}
+		}
 	}
 
 	return nil
