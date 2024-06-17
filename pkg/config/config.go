@@ -24,12 +24,14 @@ func ReadConfig(filepath string) (*Settings, error) {
 
 func DefaultSettings() *Settings {
 	return &Settings{
-		ProjectType: "",
+		ProjectTemplateUri: "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
+		ProjectType:        "",
 	}
 }
 
 func MergeSettings(source *Settings, newSettings *Settings) *Settings {
 	if newSettings.ProjectType != "" {
+		source.ProjectTemplateUri = newSettings.ProjectTemplateUri
 		source.ProjectType = newSettings.ProjectType
 	}
 
