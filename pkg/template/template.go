@@ -45,18 +45,18 @@ func Execute(workingDir string, settings *config.Settings) error {
 			overwrite: true,
 		},
 		{
-			fileName:  "CODEOWNERS-template",
+			fileName:  "README-template.md",
+			path:      filepath.Join(workingDir, "README.md"),
+			overwrite: true,
+		},
+		{
+			fileName:  "./github/CODEOWNERS-template",
 			path:      filepath.Join(ghDir, "CODEOWNERS"),
 			overwrite: true,
 		},
 		{
-			fileName:  "CONTRIBUTING-template.md",
+			fileName:  "./github/CONTRIBUTING-template.md",
 			path:      filepath.Join(ghDir, "CONTRIBUTING"),
-			overwrite: true,
-		},
-		{
-			fileName:  "README-template.md",
-			path:      filepath.Join(workingDir, "README.md"),
 			overwrite: true,
 		},
 	}
