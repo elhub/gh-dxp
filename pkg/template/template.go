@@ -69,7 +69,7 @@ func Execute(workingDir string, settings *config.Settings) error {
 		_, err := os.Stat(file.path)
 
 		// If the file does not exist or overwrite is true, write the file
-		if os.IsNotExist(err) || file.overwrite {
+		if file.overwrite || os.IsNotExist(err) {
 			err = writeFile(uri+file.fileName, file.path)
 			if err != nil {
 				return fmt.Errorf("failed to write file: %w", err)
