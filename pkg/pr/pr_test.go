@@ -172,6 +172,7 @@ func TestExecute(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(MockExecutor)
+			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("/home/repo-name", nil)
 			mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)

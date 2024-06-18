@@ -17,9 +17,9 @@ compile() {
 
   echo "Building for ${GOOS}/${GOARCH}..."
 
-  GOOS=${GOOS} GOARCH=${GOARCH} go build -o ${OUTPUT} .
+  GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${OUTPUT}" .
   
-  if [ $? -ne 0 ]; then
+  if ! GOOS; then
     echo "Error building for ${GOOS}/${GOARCH}"
     exit 1
   fi
@@ -28,7 +28,7 @@ compile() {
 # Iterate over platforms and compile for each
 for PLATFORM in "${PLATFORMS[@]}"; do
   IFS="/" read -r GOOS GOARCH <<< "${PLATFORM}"
-  compile ${GOOS} ${GOARCH}
+  compile "${GOOS}" "${GOARCH}"
 done
 
 echo "All builds completed successfully."

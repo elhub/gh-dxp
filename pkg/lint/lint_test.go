@@ -52,7 +52,8 @@ func TestRun(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(mockExecutor)
-			args := []string{"mega-linter-runner", "--flavor", "cupcake", "-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
+			args := []string{"mega-linter-runner", "--flavor", "cupcake", "-e",
+				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 			mockExe.On("CommandContext", mock.Anything, "npx", args).Return(nil, tt.mockError)
 
 			err := lint.Run(mockExe, &config.Settings{})
