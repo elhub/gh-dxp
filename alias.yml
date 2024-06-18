@@ -1,17 +1,21 @@
 ---
 # Useful aliases for the GitHub CLI to simplify workflows
 # Usage: gh <alias> <args>
-co: pr checkout
+
+# Repos
+clone: repo clone
+
+# Pull Requests
 prc: dxp pr
 prm: dxp merge
 prs: pr list
 prv: pr view
-lint: dxp lint
-test: dxp test
 
 # Arcanist aliases
 diff: dxp pr
 land: dxp merge
+lint: dxp lint
 patch: pr checkout
+test: dxp test
 unit: dxp test
 work: dxp branch
