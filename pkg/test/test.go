@@ -15,7 +15,7 @@ var FileExists = utils.FileExists
 
 // RunTest runs a workflow to automatically determine relevant tests in the current repo and run them.
 func RunTest(exe utils.Executor) error {
-	cmd, err := resolveTestCommand(exe)
+	cmd, args, err := resolveTestCommand(exe)
 	if err != nil {
 		var ntcErr *NoTestCommandError
 		if errors.As(err, &ntcErr) {
@@ -26,7 +26,7 @@ func RunTest(exe utils.Executor) error {
 	}
 
 	ctx := context.Background()
-	err = exe.CommandContext(ctx, cmd, "test")
+	err = exe.CommandContext(ctx, cmd, args...)
 	if err != nil {
 		return err
 	}
@@ -34,26 +34,26 @@ func RunTest(exe utils.Executor) error {
 	return nil
 }
 
-func resolveTestCommand(exe utils.Executor) (string, error) {
+func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 	root, err := getGitRootDirectory(exe)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	if makeTestInGitRoot(root) {
-		return "make", nil
+		return "make", []string{"check"}, nil
 	}
 
 	if gradleTestInGitRoot(root) {
-		return "./gradlew", nil
+		return "./gradlew", []string{"test"}, nil
 	}
 	if mavenTestInGitRoot(root) {
-		return "mvn", nil
+		return "mvn", []string{"test"}, nil
 	}
 	if npmTestInGitRoot(root) {
-		return "npm", nil
+		return "npm", []string{"test"}, nil
 	}
-	return "", &NoTestCommandError{Msg: "No test command found"}
+	return "", []string{}, &NoTestCommandError{Msg: "No test command found"}
 }
 
 func getGitRootDirectory(exe utils.Executor) (string, error) {
