@@ -84,7 +84,7 @@ func TestExecute(t *testing.T) {
 
 			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return(tt.gitRoot, tt.gitRootError)
 			mockExe.On("CommandContext", mock.Anything, "gradlew", []string{"test"}).Return(nil, tt.expectedErr)
-			mockExe.On("CommandContext", mock.Anything, "make", []string{"test"}).Return(nil, tt.expectedErr)
+			mockExe.On("CommandContext", mock.Anything, "make", []string{"check"}).Return(nil, tt.expectedErr)
 			mockExe.On("CommandContext", mock.Anything, "npm", []string{"test"}).Return(nil, tt.expectedErr)
 			mockExe.On("CommandContext", mock.Anything, "mvn", []string{"test"}).Return(nil, tt.expectedErr)
 
