@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"errors"
+	"os"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -10,8 +10,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// LintCmd creates a new command to run the linters defined in the .devxp config.
-func OwnerCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+// OwnerCmd creates a new cobra command for retrieving code owner information.
+func OwnerCmd(exe utils.Executor, _ *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "owner",
 		Short: "Determines the owner of the specified file.",
@@ -29,35 +29,22 @@ func OwnerCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			if len(args) > 1 {
 				path = args[0]
 			} else {
-				rootDir, err := utils.GetGitRootDirectory(exe)
+				defaultPath, err := owner.GetDefaultFile(exe)
 				if err != nil {
 					return err
 				}
 
-				readmeFile := rootDir + "README.md"
-
-				if utils.FileExists(readmeFile) {
-					path = readmeFile
-				} else {
-					// Get the first file in the root directory
-					files, err := utils.ListFilesInDirectory(exe, rootDir)
-					if err != nil {
-						return err
-					}
-					if len(files) > 0 {
-						path = rootDir + files[0]
-					} else {
-						return errors.New("no files found in the root directory")
-					}
-
-				}
+				path = defaultPath
 			}
 
 			owners, err := owner.Execute(path, exe)
 
 			// Output the owners
 			for _, owner := range owners {
-				println(owner)
+				_, err := os.Stdout.Write([]byte(owner + "\n"))
+				if err != nil {
+					return err
+				}
 			}
 
 			return err

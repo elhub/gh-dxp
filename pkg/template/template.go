@@ -2,6 +2,7 @@
 package template
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,11 +12,10 @@ import (
 	"github.com/elhub/gh-dxp/pkg/config"
 )
 
+// Execute downloads the project template files and writes them to the working directory.
 func Execute(workingDir string, settings *config.Settings) error {
 	// Get the project template URI
-	uri := settings.ProjectTemplateUri
-
-	// Get the current working directory
+	uri := settings.ProjectTemplateURI
 
 	// Create the .github directory if it does not exist
 	ghDir := filepath.Join(workingDir, ".github")
@@ -80,10 +80,16 @@ func Execute(workingDir string, settings *config.Settings) error {
 	return nil
 }
 
-// Downloads a file from an URI and writes it to path
+// Downloads a file from an URI and writes it to path.
 func writeFile(uri string, filepath string) error {
-	// Get the data
-	resp, err := http.Get(uri)
+	// Create a new request
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, uri, nil)
+	if err != nil {
+		return err
+	}
+
+	// Create a new HTTP client and send the request
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}

@@ -9,8 +9,8 @@ import (
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
-// FileExists checks to see whether a file exists in the file system. Exported to allow mocking during tests.
-var FileExists = utils.FileExists
+// FileExists checks to see whether a file exists in the file system.
+var FileExists = utils.FileExists //nolint: gochecknoglobals // Exported to allow mocking during tests.
 
 // RunTest runs a workflow to automatically determine relevant tests in the current repo and run them.
 func RunTest(exe utils.Executor) error {
