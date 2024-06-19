@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/utils"
@@ -56,18 +55,6 @@ func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 	return "", []string{}, &NoTestCommandError{Msg: "No test command found"}
 }
 
-func getGitRootDirectory(exe utils.Executor) (string, error) {
-	// Locate the root directory of current git repo
-	// Fails if not in a repo
-
-	root, err := exe.Command("git", "rev-parse", "--show-toplevel")
-	if err != nil {
-		return "", &NotAGitRepoError{Msg: "Not a git repo"}
-	}
-
-	return strings.TrimSuffix(root, "\n"), nil
-}
-
 func gradleTestInGitRoot(root string) bool {
 	return FileExists(fmt.Sprintf("%s/gradlew", root))
 }
@@ -87,16 +74,6 @@ func npmTestInGitRoot(root string) bool {
 // NoTestCommandError signifies that no valid test command was found in the current git repo.
 type NoTestCommandError struct {
 	Msg string
-}
-
-// NotAGitRepoError signifies that the current working directory is not a git repo.
-type NotAGitRepoError struct {
-	Msg string
-}
-
-// Signifies that the current working directory is not a git repo.
-func (e *NotAGitRepoError) Error() string {
-	return e.Msg
 }
 
 // Signifies that no valid test command was found in the current git repo.

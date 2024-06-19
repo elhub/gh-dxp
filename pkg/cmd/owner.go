@@ -24,7 +24,7 @@ func OwnerCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		`),
 		RunE: func(_ *cobra.Command, args []string) error {
 			path := args[0]
-			return owner.Execute(path)
+			return owner.Execute(path, exe)
 		},
 	}
 

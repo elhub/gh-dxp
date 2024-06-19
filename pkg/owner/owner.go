@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/hmarr/codeowners"
 )
 
-func Execute(path string) error {
-	codeownersFile, err := os.Open(".github/CODEOWNERS")
+func Execute(path string, exe utils.Executor) error {
+	gitRoot, err := utils.GetGitRootDirectory(exe)
+	if err != nil {
+		return err
+	}
+
+	codeownersFile, err := os.Open(gitRoot + "/.github/CODEOWNERS")
 	if err != nil {
 		return err
 	}

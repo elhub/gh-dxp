@@ -1,22 +1,25 @@
-### Binary
-gh-dxp
-
 ### Local Lint Files
 .checkmake.ini
 .jsonlintrc
 .golangci.yml
 .markdownlint.json
 .prettierrc.json
+.stylelintrc.json
 .yamllint.yml
 revive.toml
 
 ### Elhub-Ansible
-ansible/galaxy/*
-ansible/inventories/*
-ansible/vault_ids/*
-!ansible/galaxy/.gitkeep
-!ansible/inventories/.gitkeep
-!ansible/vault_ids/.gitkeep
+**/galaxy/*
+**/inventories/*
+!**/galaxy/.gitkeep
+!**/inventories/.gitkeep
+
+### Backup files
+**/*.bkp
+**/*.bak
+
+### Env files
+*.env
 
 ### Intellij+all Patch ###
 # Ignores the whole .idea folder and all .iml files
@@ -50,9 +53,6 @@ gradle-app.setting
 
 ### Gradle Patch ###
 **/build/
-# do not remove
-!src/main/kotlin/no/elhub/devxp/build
-!src/test/kotlin/no/elhub/devxp/build
 
 ### Maven ###
 target/
@@ -114,8 +114,3 @@ dist/
 /coverage
 /allure-report
 /allure-results
-
-### Python ###
-__pycache__/
-*.py[cod]
-*$py.class
