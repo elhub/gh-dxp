@@ -1,4 +1,4 @@
-// Package init provides utilities to set up new repositories
+// Package template provides utilities to set up new repositories using our project template.
 package template
 
 import (

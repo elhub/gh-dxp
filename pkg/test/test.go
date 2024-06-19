@@ -34,7 +34,7 @@ func RunTest(exe utils.Executor) error {
 }
 
 func resolveTestCommand(exe utils.Executor) (string, []string, error) {
-	root, err := getGitRootDirectory(exe)
+	root, err := utils.GetGitRootDirectory(exe)
 	if err != nil {
 		return "", nil, err
 	}

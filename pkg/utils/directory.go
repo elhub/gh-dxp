@@ -25,3 +25,15 @@ type NotAGitRepoError struct {
 func (e *NotAGitRepoError) Error() string {
 	return e.Msg
 }
+
+func ListFilesInDirectory(exe Executor, directory string) ([]string, error) {
+	// List all files in a directory
+	// Fails if directory does not exist
+
+	files, err := exe.Command("ls", directory)
+	if err != nil {
+		return nil, err
+	}
+
+	return strings.Split(files, "\n"), nil
+}
