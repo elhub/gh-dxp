@@ -26,7 +26,7 @@ func OwnerCmd(exe utils.Executor, _ *config.Settings) *cobra.Command {
 		`),
 		RunE: func(_ *cobra.Command, args []string) error {
 			var path string
-			if len(args) > 1 {
+			if len(args) > 0 {
 				path = args[0]
 			} else {
 				defaultPath, err := owner.GetDefaultFile(exe)

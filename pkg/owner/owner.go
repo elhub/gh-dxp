@@ -48,19 +48,11 @@ func GetDefaultFile(exe utils.Executor) (string, error) {
 		return "", err
 	}
 
-	readmeFile := rootDir + "README.md"
+	ownersFile := rootDir + ".github/CODEOWNERS"
 
-	if utils.FileExists(readmeFile) {
-		return readmeFile, nil
+	if utils.FileExists(ownersFile) {
+		return ownersFile, nil
 	}
 
-	// Get the first file in the root directory
-	files, err := utils.ListFilesInDirectory(exe, rootDir)
-	if err != nil {
-		return "", err
-	}
-	if len(files) > 0 {
-		return rootDir + files[0], nil
-	}
-	return "", errors.New("no files found in the root directory")
+	return "", errors.New("could not find CODEOWNERS file in .github directory")
 }
