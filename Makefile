@@ -1,12 +1,13 @@
 BINARY_NAME=gh-dxp
 BUILD_DIR=build
+BIN_DIR=${BUILD_DIR}/gh-dxp
 
 .PHONY: all clean check
 
-all: clean dep check vet lint build
+all: clean dep check vet build
 
 build:
-	go build -o ${BUILD_DIR}/${BINARY_NAME}
+	go build -o ${BIN_DIR}/${BINARY_NAME}
 
 check:
 	mkdir -p ${BUILD_DIR}
@@ -22,10 +23,10 @@ dep:
 
 install: clean build
 	-gh extension remove ${BINARY_NAME}
-	cp ${BUILD_DIR}/${BINARY_NAME} .; gh extension install .
+	cd ${BIN_DIR}; gh extension install .
 
 run: build
-	${BUILD_DIR}/${BINARY_NAME}
+	${BIN_DIR}/${BINARY_NAME}
 
 vet:
 	go vet

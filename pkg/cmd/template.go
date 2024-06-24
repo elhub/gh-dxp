@@ -13,7 +13,7 @@ import (
 )
 
 // TemplateCmd initializes a repository with default files.
-func TemplateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
 	opts := &pr.Options{}
 
 	cmd := &cobra.Command{
