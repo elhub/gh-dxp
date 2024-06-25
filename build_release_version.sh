@@ -18,8 +18,10 @@ compile() {
   echo "Building for ${GOOS}/${GOARCH}..."
 
   GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${OUTPUT}" .
+
+  EXIT_CODE=$?
   
-  if ! GOOS; then
+  if [ $EXIT_CODE -ne 0 ]; then
     echo "Error building for ${GOOS}/${GOARCH}"
     exit 1
   fi
