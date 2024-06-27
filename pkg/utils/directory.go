@@ -8,13 +8,14 @@ import (
 func GetGitRootDirectory(exe Executor) (string, error) {
 	// Locate the root directory of current git repo
 	// Fails if not in a repo
-
 	root, err := exe.Command("git", "rev-parse", "--show-toplevel")
 	if err != nil {
 		return "", &NotAGitRepoError{Msg: "Not a git repo"}
 	}
 
-	return strings.TrimSuffix(root, "\n"), nil
+	formattedRoot := strings.TrimSuffix(root, "\n") + "/"
+
+	return formattedRoot, nil
 }
 
 // NotAGitRepoError signifies that the current working directory is not a git repo.

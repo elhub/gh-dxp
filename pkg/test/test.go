@@ -56,19 +56,19 @@ func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 }
 
 func gradleTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%s/gradlew", root))
+	return FileExists(fmt.Sprintf("%sgradlew", root))
 }
 
 func makeTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%s/Makefile", root))
+	return FileExists(fmt.Sprintf("%sMakefile", root))
 }
 
 func mavenTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%s/pom.xml", root))
+	return FileExists(fmt.Sprintf("%spom.xml", root))
 }
 
 func npmTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%s/package.json", root))
+	return FileExists(fmt.Sprintf("%spackage.json", root))
 }
 
 // NoTestCommandError signifies that no valid test command was found in the current git repo.
