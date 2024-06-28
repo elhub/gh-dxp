@@ -3,7 +3,7 @@ package test
 import (
 	"context"
 	"errors"
-	"fmt"
+	"path/filepath"
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/utils"
@@ -56,19 +56,19 @@ func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 }
 
 func gradleTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%sgradlew", root))
+	return FileExists(filepath.Join(root, ".gradlew"))
 }
 
 func makeTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%sMakefile", root))
+	return FileExists(filepath.Join(root, "Makefile"))
 }
 
 func mavenTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%spom.xml", root))
+	return FileExists(filepath.Join(root, "pom.xml"))
 }
 
 func npmTestInGitRoot(root string) bool {
-	return FileExists(fmt.Sprintf("%spackage.json", root))
+	return FileExists(filepath.Join(root, "package.json"))
 }
 
 // NoTestCommandError signifies that no valid test command was found in the current git repo.

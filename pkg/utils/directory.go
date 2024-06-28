@@ -13,7 +13,7 @@ func GetGitRootDirectory(exe Executor) (string, error) {
 		return "", &NotAGitRepoError{Msg: "Not a git repo"}
 	}
 
-	formattedRoot := strings.TrimSuffix(root, "\n") + "/"
+	formattedRoot := strings.TrimSuffix(root, "\n")
 
 	return formattedRoot, nil
 }
