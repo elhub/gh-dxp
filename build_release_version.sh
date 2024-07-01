@@ -2,6 +2,9 @@
 
 # Set the plugin name
 PLUGIN_NAME="gh-dxp"
+PLUGIN_VERSION=$1
+
+echo "Building as version $PLUGIN_VERSION"
 
 # Create the dist directory if it doesn't exist
 mkdir -p dist
@@ -16,8 +19,7 @@ compile() {
   local OUTPUT="dist/${PLUGIN_NAME}-${GOOS}-${GOARCH}"
 
   echo "Building for ${GOOS}/${GOARCH}..."
-
-  GOOS=${GOOS} GOARCH=${GOARCH} go build -o "${OUTPUT}" .
+  GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags="-X 'main.version=${PLUGIN_VERSION}'" -o "${OUTPUT}" .
 
   EXIT_CODE=$?
   
