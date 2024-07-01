@@ -248,6 +248,12 @@ func createBody(options *Options, commits string) (string, error) {
 
 	// TODO: Auto-Linting. If not auto-linted, ask why?
 	// TODO: Auto-Testing. If not auto-tested, ask why?
+	if options.NoUnit {
+		body = addDocSection(body, "🚩🚩🚩 **This PR has not been unit tested!**")
+	}
+	if options.NoLint {
+		body = addDocSection(body, "🚩🚩🚩 **This PR has not been linted!**")
+	}
 
 	testSection, err := testingChanges(options)
 	if err != nil {
