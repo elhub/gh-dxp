@@ -5,6 +5,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -50,6 +51,7 @@ func TestExecute(t *testing.T) {
 		prCreateErr      error
 		expectedErr      error
 		currentChanges   string
+		expectedLintErr  error
 	}{
 		{
 			name:           "Test successful PR creation",
@@ -167,6 +169,11 @@ func TestExecute(t *testing.T) {
 			expectedErr:    nil,
 			currentChanges: " M tracked_change.go",
 		},
+		{
+			name:            "Test lint is failing",
+			expectedLintErr: errors.New("exit status 1"),
+			expectedErr:     errors.New("exit status 1"),
+		},
 	}
 
 	for _, tt := range tests {
@@ -176,6 +183,10 @@ func TestExecute(t *testing.T) {
 			mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
+			mockExe.On("CommandContext", mock.Anything, "npx",
+				[]string{"mega-linter-runner", "--flavor", "cupcake", "-e",
+					"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}).
+				Return("", tt.expectedLintErr)
 			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).
 				Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("Command", "git", []string{"log", "main.." + tt.currentBranch, "--oneline", "--pretty=format:%s"}).
@@ -190,9 +201,11 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
 
-			err := pr.Execute(mockExe, &pr.Options{
-				AutoConfirm: true,
-			})
+			err := pr.Execute(mockExe,
+				&config.Settings{},
+				&pr.Options{
+					AutoConfirm: true,
+				})
 
 			if tt.expectedErr != nil {
 				require.Error(t, err)
