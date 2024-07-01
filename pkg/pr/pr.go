@@ -9,13 +9,15 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/branch"
+	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/test"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
 
 // Execute creates or updates a pull request, depending on its current state.
-func Execute(exe utils.Executor, options *Options) error {
+func Execute(exe utils.Executor, settings *config.Settings, options *Options) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
@@ -29,6 +31,11 @@ func Execute(exe utils.Executor, options *Options) error {
 		return errCheck
 	}
 
+	err := performPreCommitOperations(exe, settings, options)
+	if err != nil {
+		return err
+	}
+
 	if prID != "" {
 		// If the PR exists, update it by pushing to the remote
 		return update(exe, branchID, prID)
@@ -37,7 +44,7 @@ func Execute(exe utils.Executor, options *Options) error {
 	return create(exe, options, branchID)
 }
 
-func create(exe utils.Executor, options *Options, branchID string) error {
+func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *Options) error {
 	// Handle uncommitted changes
 	err := handleUncommittedChanges(exe, options)
 	if err != nil {
@@ -45,11 +52,25 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 	}
 
 	// Run tests
-	err = test.RunTest(exe)
-	if err != nil {
-		return err
+	if !options.NoUnit {
+		err = test.RunTest(exe)
+		if err != nil {
+			return err
+		}
 	}
 
+	// Run lint
+	if !options.NoLint {
+		err = lint.Run(exe, settings)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func create(exe utils.Executor, options *Options, branchID string) error {
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchID)
@@ -103,15 +124,9 @@ func generatePRArgs(options *Options) []string {
 }
 
 func update(exe utils.Executor, branchID string, prID string) error {
-	// Run tests
-	err := test.RunTest(exe)
-	if err != nil {
-		return err
-	}
-
 	// Push the current branch to the already existing git remote
 	s := utils.StartSpinner("Updating Pull Request #"+prID+"...", "Pull Request #"+prID+" has been updated.")
-	_, err = exe.Command("git", "push")
+	_, err := exe.Command("git", "push")
 	s.Stop()
 	if err != nil {
 		return err
@@ -233,6 +248,12 @@ func createBody(options *Options, commits string) (string, error) {
 
 	// TODO: Auto-Linting. If not auto-linted, ask why?
 	// TODO: Auto-Testing. If not auto-tested, ask why?
+	if options.NoUnit {
+		body = addDocSection(body, "🚩🚩🚩 **This PR has not been unit tested!**")
+	}
+	if options.NoLint {
+		body = addDocSection(body, "🚩🚩🚩 **This PR has not been linted!**")
+	}
 
 	testSection, err := testingChanges(options)
 	if err != nil {

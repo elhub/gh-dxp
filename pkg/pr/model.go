@@ -3,6 +3,8 @@ package pr
 // Options represents the options for the pr command.
 type Options struct {
 	AutoConfirm bool
+	NoLint      bool
+	NoUnit      bool
 
 	baseBranch string
 
