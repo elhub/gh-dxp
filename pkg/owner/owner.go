@@ -4,6 +4,7 @@ package owner
 import (
 	"errors"
 	"os"
+	"path/filepath"
 
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/hmarr/codeowners"
@@ -48,7 +49,7 @@ func GetDefaultFile(exe utils.Executor) (string, error) {
 		return "", err
 	}
 
-	ownersFile := rootDir + ".github/CODEOWNERS"
+	ownersFile := filepath.Join(rootDir, ".github/CODEOWNERS")
 
 	if utils.FileExists(ownersFile) {
 		return ownersFile, nil
