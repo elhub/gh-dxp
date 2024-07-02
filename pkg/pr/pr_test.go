@@ -196,7 +196,7 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "url", "--jq", ".[].url"}).
 				Return(tt.prListURL, tt.prListUErr)
 			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "Testing:\n- [ ] Unit Tests\n" +
-				"- [ ] Integration Tests\n- Test Command:\n\nDocumentation:\n- No updates\n", "--base", "main"}).
+				"- [ ] Integration Tests\n\n\nDocumentation:\n- No updates\n", "--base", "main"}).
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
