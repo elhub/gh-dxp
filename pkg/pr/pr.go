@@ -314,19 +314,13 @@ func testingChanges(options *Options) (string, error) {
 			return "", err
 		}
 
-		testCommand, err := askForString("Test Command?", "")
-		if err != nil {
-			return "", err
-		}
 		body += "Testing:\n"
 		body += "- [" + getCheckboxMark(unitTestConfirm) + "] Unit Tests\n"
 		body += "- [" + getCheckboxMark(integrationTestConfirm) + "] Integration Tests\n"
-		body += "- Test Command: " + testCommand + "\n"
 	} else {
 		body += "Testing:\n"
 		body += "- [ ] Unit Tests\n"
 		body += "- [ ] Integration Tests\n"
-		body += "- Test Command:"
 	}
 
 	return body, nil
