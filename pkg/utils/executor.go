@@ -42,8 +42,9 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 
 // CommandContext runs an OS command with a context and returns an error.
 // The output is printed to stdout and stderr.
-func (e *LinuxExecutorImpl) CommandContext(ctx context.Context, name string, arg ...string) error {
-	cmd := exec.CommandContext(ctx, name, arg...)
+func (e *LinuxExecutorImpl) CommandContext(ctx context.Context, name string, args ...string) error {
+	log.Debug(fmt.Sprintf("Running with context '%s %s'", name, strings.Join(args, " ")))
+	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -52,6 +53,7 @@ func (e *LinuxExecutorImpl) CommandContext(ctx context.Context, name string, arg
 
 // GH runs a GitHub CLI command and returns its output.
 func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, error) {
+	log.Debug(fmt.Sprintf("Running gh '%s'", strings.Join(args, " ")))
 	stdOut, stdErr, err := gh.Exec(args...)
 	if err != nil {
 		log.Debug(fmt.Sprintf("Error running GH command: %s", err.Error()))
