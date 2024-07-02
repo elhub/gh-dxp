@@ -2,13 +2,14 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc"
+	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 // PRCmd handles the creation of a pull request.
-func PRCmd(exe utils.Executor) *cobra.Command {
+func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	opts := &pr.Options{}
 
 	cmd := &cobra.Command{
@@ -27,7 +28,7 @@ func PRCmd(exe utils.Executor) *cobra.Command {
 		Aliases: []string{"diff"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			return pr.Execute(exe, opts)
+			return pr.Execute(exe, settings, opts)
 		},
 	}
 
@@ -53,6 +54,18 @@ func PRCmd(exe utils.Executor) *cobra.Command {
 		"a",
 		nil,
 		"Assign people by their id. Use \"@me\" to self-assign.",
+	)
+	fl.BoolVar(
+		&opts.NoUnit,
+		"nounit",
+		false,
+		"Do not run tests",
+	)
+	fl.BoolVar(
+		&opts.NoLint,
+		"nolint",
+		false,
+		"Do not run linting",
 	)
 
 	return cmd

@@ -52,7 +52,7 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 		LintCmd(exe, settings),
 		MergeCmd(exe),
 		OwnerCmd(exe, settings),
-		PRCmd(exe),
+		PRCmd(exe, settings),
 		TestCmd(exe),
 		TemplateCmd(exe, settings),
 	)
