@@ -32,7 +32,7 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		},
 	}
 
-	// TODO: Support flags from gh pr
+	// TODO: Support flags from gh prs
 	fl := cmd.Flags()
 	fl.BoolVarP(
 		&opts.AutoConfirm,
