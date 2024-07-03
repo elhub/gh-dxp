@@ -1,0 +1,8 @@
+# The CODEOWNERS file defines which team has responsibility and expertise on the code
+# in this repository.
+#
+# Team definitions:
+# https://github.com/orgs/elhub/teams
+
+# Default Repository Owner
+* @elhub/devxp

@@ -25,7 +25,7 @@ func ReadConfig(filepath string) (*Settings, error) {
 // DefaultSettings loads the default .devxp settings.
 func DefaultSettings() *Settings {
 	return &Settings{
-		ProjectTemplateUri: "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
+		ProjectTemplateURI: "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
 		ProjectType:        "",
 	}
 }
@@ -33,7 +33,7 @@ func DefaultSettings() *Settings {
 // MergeSettings merges two settings.
 func MergeSettings(source *Settings, newSettings *Settings) *Settings {
 	if newSettings.ProjectType != "" {
-		source.ProjectTemplateUri = newSettings.ProjectTemplateUri
+		source.ProjectTemplateURI = newSettings.ProjectTemplateURI
 		source.ProjectType = newSettings.ProjectType
 	}
 

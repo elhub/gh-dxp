@@ -18,7 +18,7 @@ func TestExecute(t *testing.T) {
 
 	// Set up the test settings
 	settings := &config.Settings{
-		ProjectTemplateUri: "http://example.com/template/",
+		ProjectTemplateURI: "http://example.com/template/",
 	}
 
 	// Set up the expected file paths
@@ -43,5 +43,4 @@ func TestExecute(t *testing.T) {
 
 	// Clean up the temporary directory
 	os.RemoveAll(tempDir)
-
 }
