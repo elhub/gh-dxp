@@ -3,6 +3,7 @@ package pr
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -495,10 +496,25 @@ func addAndCommitFiles(exe utils.Executor, files []string) error {
 		return errors.New("Empty commit message not allowed")
 	}
 
-	_, err = exe.Command("git", "add", strings.Join(files, " "))
+	// Get git root directory and add to files to get fully qualified paths
+	root, err := utils.GetGitRootDirectory(exe)
 	if err != nil {
 		return err
 	}
+
+	var fullPaths []string
+	for _, filePath := range files {
+		fullPaths = append(fullPaths, filepath.Join(root, filePath))
+	}
+
+	addCommandArgs := append([]string{"add"}, fullPaths...)
+
+	_, err = exe.Command("git", addCommandArgs...)
+	if err != nil {
+		return err
+	}
+
+	// Commit files
 	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
 	if err != nil {
 		return err
