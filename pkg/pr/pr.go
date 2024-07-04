@@ -51,8 +51,6 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 		return err
 	}
 
-	panic("What in tarnation")
-
 	// Run tests
 	if !options.NoUnit {
 		err = test.RunTest(exe)
