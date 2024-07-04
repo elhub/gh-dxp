@@ -29,6 +29,6 @@ func Run(exe utils.Executor, _ *config.Settings) error {
 		log.Info("The Lint Process returned an error: " + err.Error() + "\n")
 		return err
 	}
-
+	// say some thing funny
 	return nil
 }
