@@ -37,7 +37,6 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 
 		args = append(args, "--filesonly")
 		args = append(args, changedFiles...)
-
 	}
 
 	err := exe.CommandContext(ctx, args[0], args[1:]...)
@@ -49,7 +48,6 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 }
 
 func getChangedFiles(exe utils.Executor) ([]string, error) {
-
 	changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
 	if err != nil {
 		return []string{}, err
@@ -58,7 +56,7 @@ func getChangedFiles(exe utils.Executor) ([]string, error) {
 	return ConvertChangedFilesIntoList(changedFilesString), nil
 }
 
-// ConvertChangedFilesIntoList converts the output string of a git diff --name-only into a list of file paths
+// ConvertChangedFilesIntoList converts the output string of a git diff --name-only into a list of file paths.
 func ConvertChangedFilesIntoList(changedFilesString string) []string {
 	if len(changedFilesString) == 0 {
 		return []string{}
