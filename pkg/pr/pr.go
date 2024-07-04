@@ -51,6 +51,8 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 		return err
 	}
 
+	panic("What in tarnation")
+
 	// Run tests
 	if !options.NoUnit {
 		err = test.RunTest(exe)
@@ -336,8 +338,11 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) error {
 	if len(untrackedChanges) > 0 {
 		if !options.AutoConfirm {
 			res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
-			if err != nil || !res {
-				return errors.Wrap(err, "User aborted workflow")
+			if err != nil {
+				return err
+			}
+			if !res {
+				return errors.New("User aborted workflow")
 			}
 		}
 	}
@@ -350,9 +355,14 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) error {
 
 	if len(trackedChanges) > 0 && !options.AutoConfirm {
 		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
-		if err != nil || !res {
+		if err != nil {
 			return err
 		}
+
+		if !res {
+			return errors.New("User aborted workflow")
+		}
+
 		err = addAndCommitFiles(exe, trackedChanges)
 		if err != nil {
 			return err
