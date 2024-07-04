@@ -61,7 +61,7 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 
 	// Run lint
 	if !options.NoLint {
-		err = lint.Run(exe, settings)
+		err = lint.Run(exe, settings, &lint.Options{})
 		if err != nil {
 			return err
 		}
