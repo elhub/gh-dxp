@@ -13,6 +13,7 @@ type Status struct {
     Executor utils.Executor // Use utils.Executor from the utils package
 }
 
+// NewStatus creates a new Status instance with the provided executor.
 func NewStatus(executor utils.Executor) *Status {
     return &Status{Executor: executor}
 }

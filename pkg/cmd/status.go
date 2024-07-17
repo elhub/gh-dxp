@@ -9,7 +9,7 @@ import (
     "github.com/spf13/cobra"
 )
 
-// NewStatusCmd creates a new cobra.Command for the status functionality.
+// StatusCmd creates a new cobra.Command for the status functionality.
 func StatusCmd(exec utils.Executor) *cobra.Command {
     var all, current, pr, branches, assigned bool
 
