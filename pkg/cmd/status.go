@@ -2,7 +2,7 @@ package cmd
 
 import (
     "fmt"
-	"github.com/MakeNowJust/heredoc"
+    "github.com/MakeNowJust/heredoc"
     "github.com/AlecAivazis/survey/v2"
     "github.com/elhub/gh-dxp/pkg/status"
     "github.com/elhub/gh-dxp/pkg/utils"
@@ -37,7 +37,7 @@ func StatusCmd(exec utils.Executor) *cobra.Command {
             # Interactive mode
             $ gh dxp status
         `),
-        RunE: func(cmd *cobra.Command, args []string) error {
+        RunE: func(_ *cobra.Command, _ []string) error {
             statusChecker := status.NewStatus(exec)
             var statusType string
 
