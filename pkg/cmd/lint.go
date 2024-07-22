@@ -10,22 +10,35 @@ import (
 
 // LintCmd creates a new command to run the linters defined in the .devxp config.
 func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+	opts := &lint.Options{}
+
 	cmd := &cobra.Command{
 		Use:   "lint",
-		Short: "Run the set of linters defined in the .devxp config.",
+		Short: "Run MegaLinter on modified files in the repository.",
 		Args:  cobra.MaximumNArgs(0),
 		Long: heredoc.Docf(`
-			Run the set of linters defined in the .devxp config file. If no linters are defined,
-			the command will do nothing.
+			Run linters on files in the repository. By default, only files that have been modified in relation to the main branch are included in the lint.
 		`, "`"),
 		Example: heredoc.Doc(`
-			// Lint the current directory
+			// Lint modified files in the repository
 			$ gh dxp lint
+
+			// Lint all files in repository
+			$ gh dxp lint --all
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
-			return lint.Run(exe, settings)
+			return lint.Run(exe, settings, opts)
 		},
 	}
+
+	fl := cmd.Flags()
+	fl.BoolVarP(
+		&opts.LintAll,
+		"all",
+		"a",
+		false,
+		"Lint all files in the repository",
+	)
 
 	return cmd
 }

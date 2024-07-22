@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -52,6 +53,7 @@ func TestExecute(t *testing.T) {
 		expectedErr      error
 		currentChanges   string
 		expectedLintErr  error
+		modifiedFiles    string
 	}{
 		{
 			name:           "Test successful PR creation",
@@ -64,6 +66,7 @@ func TestExecute(t *testing.T) {
 			repoBranchName: "main",
 			prCreate:       "pull request created",
 			expectedErr:    nil,
+			modifiedFiles:  "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:          "Test successful PR update",
@@ -71,11 +74,13 @@ func TestExecute(t *testing.T) {
 			pushBranch:    "branch1",
 			prListNumber:  "3",
 			expectedErr:   nil,
+			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in getting current branch",
 			currentBranchErr: errors.New("error getting current branch"),
 			expectedErr:      errors.New("error getting current branch"),
+			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:          "Test error in checking for existing PR",
@@ -84,6 +89,7 @@ func TestExecute(t *testing.T) {
 			prListNumber:  "",
 			prListNErr:    errors.New("error checking for existing PR"),
 			expectedErr:   errors.New("Failed to find existing PR"),
+			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:          "Test error in update flow - git push",
@@ -93,6 +99,7 @@ func TestExecute(t *testing.T) {
 			prListNumber:  "1",
 			prListURL:     "https://github.com/elhub/demo/pull/3",
 			expectedErr:   errors.New("error pushing branch"),
+			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:          "Test error in update flow - list URL",
@@ -103,6 +110,7 @@ func TestExecute(t *testing.T) {
 			prListURL:     "",
 			prListUErr:    errors.New("error getting PR URL"),
 			expectedErr:   errors.New("error getting PR URL"),
+			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:          "Test error in create flow - git push",
@@ -112,6 +120,7 @@ func TestExecute(t *testing.T) {
 			prListNumber:  "",
 			prListURL:     "https://github.com/elhub/demo/pull/3",
 			expectedErr:   errors.New("error pushing branch"),
+			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:          "Test error in create flow - fetch default",
@@ -121,6 +130,7 @@ func TestExecute(t *testing.T) {
 			prListURL:     "https://github.com/elhub/demo/pull/3",
 			repoBranchErr: errors.New("error fetching default branch"),
 			expectedErr:   errors.New("Failed to fetch default branch: error fetching default branch"),
+			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:           "Test error in create flow - git log",
@@ -131,6 +141,7 @@ func TestExecute(t *testing.T) {
 			repoBranchName: "main",
 			gitLogErr:      errors.New("error fetching git log"),
 			expectedErr:    errors.New("error fetching git log"),
+			modifiedFiles:  "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:           "Test error in create flow - create PR",
@@ -142,6 +153,7 @@ func TestExecute(t *testing.T) {
 			repoBranchName: "main",
 			prCreateErr:    errors.New("error creating PR"),
 			expectedErr:    errors.New("Failed to create pull request: error creating PR"),
+			modifiedFiles:  "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:           "Test local has untracked changes",
@@ -155,6 +167,7 @@ func TestExecute(t *testing.T) {
 			prCreate:       "pull request created",
 			expectedErr:    nil,
 			currentChanges: "?? untracked_change.go",
+			modifiedFiles:  "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:           "Test local has tracked changes",
@@ -168,6 +181,7 @@ func TestExecute(t *testing.T) {
 			prCreate:       "pull request created",
 			expectedErr:    nil,
 			currentChanges: " M tracked_change.go",
+			modifiedFiles:  "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
 			name:           "Test local has multiple tracked changes",
@@ -186,20 +200,27 @@ func TestExecute(t *testing.T) {
 			name:            "Test lint is failing",
 			expectedLintErr: errors.New("exit status 1"),
 			expectedErr:     errors.New("exit status 1"),
+			modifiedFiles:   "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake", "-e",
+				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
+
+			linterArgs = append(linterArgs, "--filesonly")
+			linterArgs = append(linterArgs, lint.ConvertChangedFilesIntoList(tt.modifiedFiles)...)
+
 			mockExe := new(MockExecutor)
 			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("/home/repo-name", nil)
 			mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)
+			mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
-			mockExe.On("CommandContext", mock.Anything, "npx",
-				[]string{"mega-linter-runner", "--flavor", "cupcake", "-e",
-					"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}).
-				Return("", tt.expectedLintErr)
+			mockExe.On("Command", "git", []string{"add", "tracked_change.go"}).Return("", nil)
+			mockExe.On("Command", "git", []string{"commit", "-m", "\"default commit message\""}).Return("", nil)
+			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return("", tt.expectedLintErr)
 			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).
 				Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("Command", "git", []string{"log", "main.." + tt.currentBranch, "--oneline", "--pretty=format:%s"}).

@@ -47,7 +47,7 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 
 func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *Options) error {
 	// Handle uncommitted changes
-	err := handleUncommittedChanges(exe, options)
+	filesToCommit, err := handleUncommittedChanges(exe, options)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,14 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 
 	// Run lint
 	if !options.NoLint {
-		err = lint.Run(exe, settings)
+		err = lint.Run(exe, settings, &lint.Options{})
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(filesToCommit) > 0 {
+		err = addAndCommitFiles(exe, filesToCommit, options)
 		if err != nil {
 			return err
 		}
@@ -327,39 +334,40 @@ func testingChanges(options *Options) (string, error) {
 	return body, nil
 }
 
-func handleUncommittedChanges(exe utils.Executor, options *Options) error {
+func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
 	// Handle presence of untracked changes - ignore or abort
 	untrackedChanges, err := getUntrackedChanges(exe)
 	if err != nil {
-		return err
+		return []string{}, err
 	}
 
-	if len(untrackedChanges) > 0 {
-		if !options.AutoConfirm {
-			res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
-			if err != nil || !res {
-				return errors.Wrap(err, "User aborted workflow")
-			}
+	if len(untrackedChanges) > 0 && !options.AutoConfirm {
+		res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
+		if err != nil {
+			return []string{}, err
+		}
+		if !res {
+			return []string{}, errors.New("User aborted workflow")
 		}
 	}
 
 	// Handle presence of tracked changes - commit or abort
 	trackedChanges, err := getTrackedChanges(exe)
 	if err != nil {
-		return err
+		return []string{}, err
 	}
 
 	if len(trackedChanges) > 0 && !options.AutoConfirm {
 		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
-		if err != nil || !res {
-			return err
-		}
-		err = addAndCommitFiles(exe, trackedChanges)
 		if err != nil {
-			return err
+			return []string{}, err
+		}
+
+		if !res {
+			return []string{}, errors.New("User aborted workflow")
 		}
 	}
-	return nil
+	return trackedChanges, nil
 }
 
 func documentationChanges(options *Options) (string, error) {
@@ -488,13 +496,20 @@ func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
 	return untrackedChanges, nil
 }
 
-func addAndCommitFiles(exe utils.Executor, files []string) error {
-	commitMessage, err := askForString("Please enter a commit message", "")
-	if err != nil {
-		return err
-	} else if len(commitMessage) == 0 {
-		return errors.New("Empty commit message not allowed")
+func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {
+	var commitMessage string
+
+	if !options.AutoConfirm {
+		commitMessage, err := askForString("Please enter a commit message", "")
+		if err != nil {
+			return err
+		} else if len(commitMessage) == 0 {
+			return errors.New("Empty commit message not allowed")
+		}
+	} else {
+		commitMessage = "default commit message"
 	}
+
 
 	// Get git root directory and add to files to get fully qualified paths
 	root, err := utils.GetGitRootDirectory(exe)
