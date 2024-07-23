@@ -2,7 +2,6 @@
 package pr
 
 import (
-	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -498,9 +497,10 @@ func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
 
 func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {
 	var commitMessage string
+	var err error
 
 	if !options.AutoConfirm {
-		commitMessage, err := askForString("Please enter a commit message", "")
+		commitMessage, err = askForString("Please enter a commit message: ", "")
 		if err != nil {
 			return err
 		} else if len(commitMessage) == 0 {
@@ -509,8 +509,6 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 	} else {
 		commitMessage = "default commit message"
 	}
-
-
 	// Get git root directory and add to files to get fully qualified paths
 	root, err := utils.GetGitRootDirectory(exe)
 	if err != nil {
@@ -530,7 +528,7 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 	}
 
 	// Commit files
-	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
+	_, err = exe.Command("git", "commit", "-m", commitMessage)
 	if err != nil {
 		return err
 	}
