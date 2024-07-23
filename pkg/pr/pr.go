@@ -2,7 +2,6 @@
 package pr
 
 import (
-	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -510,7 +509,6 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 		commitMessage = "default commit message"
 	}
 
-
 	// Get git root directory and add to files to get fully qualified paths
 	root, err := utils.GetGitRootDirectory(exe)
 	if err != nil {
@@ -530,7 +528,7 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 	}
 
 	// Commit files
-	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
+	_, err = exe.Command("git", "commit", "-m", commitMessage)
 	if err != nil {
 		return err
 	}

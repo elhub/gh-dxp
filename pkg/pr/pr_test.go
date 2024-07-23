@@ -220,7 +220,7 @@ func TestExecute(t *testing.T) {
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("Command", "git", []string{"add", "/home/repo-name/tracked_change.go"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"add", "/home/repo-name/tracked_change.go", "/home/repo-name/tracked_change2.go"}).Return("", nil)
-			mockExe.On("Command", "git", []string{"commit", "-m", "\"default commit message\""}).Return("", nil)
+			mockExe.On("Command", "git", []string{"commit", "-m", "default commit message"}).Return("", nil)
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return("", tt.expectedLintErr)
 			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).
 				Return(tt.pushBranch, tt.pushBranchErr)
