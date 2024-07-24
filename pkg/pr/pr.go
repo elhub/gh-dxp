@@ -25,13 +25,39 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 	}
 	branchID := strings.Trim(currentBranch, "\n")
 
+	baseBranch, err := setBaseBranch(exe, options)
+	if err != nil {
+		return err
+	}
+
+	// If we're currently in the base branch, we need to make a new temporary branch to contain the diff
+	if branchID == baseBranch {
+		newBranchName, err := getNewBranchName(options)
+		if err != nil {
+			return err
+		}
+
+		branchExists, err := branch.Exists(exe, newBranchName)
+		if err != nil {
+			return err
+		}
+		if branchExists {
+			return errors.New("Branch already exists. Please delete it or specify another one")
+		}
+		_, err = exe.Command("git", "checkout", "-b", newBranchName)
+		if err != nil {
+			return err
+		}
+		branchID = newBranchName
+	}
+
 	// Check if PR exists on branch
 	prID, errCheck := CheckForExistingPR(exe, branchID)
 	if errCheck != nil {
 		return errCheck
 	}
 
-	err := performPreCommitOperations(exe, settings, options)
+	err = performPreCommitOperations(exe, settings, options)
 	if err != nil {
 		return err
 	}
@@ -86,26 +112,13 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 		return err
 	}
 	log.Info("Current Branch:" + currentBranch + "\n")
-
-	// Fetch the default branch
-	baseBranch := options.baseBranch
-	if baseBranch == "" {
-		s = utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
-		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
-		s.Stop()
-		if errV != nil {
-			return errors.Wrap(errV, "Failed to fetch default branch")
-		}
-		baseBranch = strings.Trim(stdOut.String(), "\n")
-	}
-
-	pr, err := createPR(exe, options, branchID, baseBranch)
+	pr, err := createPR(exe, options, branchID, options.baseBranch)
 	if err != nil {
 		return err
 	}
 
 	s = utils.StartSpinner("Processing pull request...", "Pull request "+pr.Title+" created.")
-	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", baseBranch}
+	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", options.baseBranch}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
 	s.Stop()
@@ -184,7 +197,6 @@ func createPR(
 	mainID string,
 ) (PullRequest, error) {
 	pr := PullRequest{}
-
 	// Get the commit messages between the current branch and the main branch and put them in the PR body.
 	commits, err := branch.GetCommitMessages(exe, mainID, branchID)
 	if err != nil {
@@ -542,4 +554,36 @@ func formatUntrackedFileChangesQuestion(changes []string) string {
 
 func formatTrackedFileChangesQuestion(changes []string) string {
 	return "You have uncommitted files locally \n\n" + strings.Join(changes, "\n") + "\n\nDo you want to create a new commit with these changes?"
+}
+
+// If the baseBranch option is not set, set it to the base branch of the remote.
+func setBaseBranch(exe utils.Executor, options *Options) (string, error) {
+	// Fetch the default branch
+	baseBranch := options.baseBranch
+	if baseBranch == "" {
+		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
+		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
+		s.Stop()
+		if errV != nil {
+			return "", errors.Wrap(errV, "Failed to fetch default branch")
+		}
+		baseBranch = strings.Trim(stdOut.String(), "\n")
+		options.baseBranch = baseBranch
+	}
+	return baseBranch, nil
+}
+
+func getNewBranchName(options *Options) (string, error) {
+	var newBranchName = "branch1"
+	if !options.AutoConfirm {
+		inputBranchName, err := askForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
+		if err != nil {
+			return "", err
+		}
+		if inputBranchName == "" {
+			return "", errors.New("Branch name cannot be empty")
+		}
+		newBranchName = inputBranchName
+	}
+	return newBranchName, nil
 }
