@@ -14,7 +14,7 @@ var (
 )
 
 func main() {
-	// If there is a config file in ~/.local/devxp/config.yml, use that.
+	// If there is a config file in ~/.local/devxp/config.yml, use that, right?.
 	// Otherwise, use the default .devxp file in the current directory.
 	// If neither is found, use default settings.
 	settings := config.DefaultSettings()
