@@ -119,7 +119,7 @@ func TestExecute(t *testing.T) {
 			pushBranchErr: errors.New("error pushing branch"),
 			prListNumber:  "",
 			prListURL:     "https://github.com/elhub/demo/pull/3",
-			expectedErr:   errors.New("error pushing branch"),
+			expectedErr:   errors.New("Failed to push. This could be caused by a conflicting branch already existing on remote: error pushing branch"),
 			modifiedFiles: "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{

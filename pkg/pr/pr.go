@@ -83,7 +83,7 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchID)
 	s.Stop()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to push. This could be caused by a conflicting branch already existing on remote")
 	}
 	log.Info("Current Branch:" + currentBranch + "\n")
 
