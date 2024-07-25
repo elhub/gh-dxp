@@ -1,9 +1,7 @@
 package cmd
 
 import (
-    // "fmt"
     "github.com/MakeNowJust/heredoc"
-    // "github.com/AlecAivazis/survey/v2"
     "github.com/elhub/gh-dxp/pkg/status"
     "github.com/elhub/gh-dxp/pkg/utils"
     "github.com/spf13/cobra"
@@ -11,7 +9,6 @@ import (
 
 // StatusCmd creates a new cobra.Command for the status functionality.
 func StatusCmd(exe utils.Executor) *cobra.Command {
-    // var all, current, pr, branches, assigned bool
     opts := &status.Options{}
 
     cmd := &cobra.Command{
@@ -74,45 +71,6 @@ func StatusCmd(exe utils.Executor) *cobra.Command {
         false,
         "Get all relavant Issues",
     )
-
-
-
-    //     RunE: func(_ *cobra.Command, _ []string) error {
-    //         var statusType string
-
-    //         if all {
-    //             statusType.all = true
-    //         } else if current {
-    //             statusType = "Current repository"
-    //         } else if pr {
-    //             statusType = "PR status"
-    //         } else if branches {
-    //             statusType = "List branches"
-    //         } else if assigned {
-    //             statusType = "Assigned PRs/Review Requests"
-    //         } else {
-    //             // Interactive dialogue flow
-    //             statusOptions := []string{"All", "Current repository", "PR status", "List branches", "Get all relavant Issues"}
-    //             survey.AskOne(&survey.Select{
-    //                 Message: "Choose the status type:",
-    //                 Options: statusOptions,
-    //             }, &statusType)
-    //         }
-
-    //         statusReport, err := status.Excecute(exe, statusType)
-    //         if err != nil {
-    //             return err
-    //         }
-    //         fmt.Println(statusReport)
-    //         return nil
-    //     },
-    // }
-
-    // Adding flags
-    // cmd.Flags().BoolVarP(&all, "all", "a", false, "Get all statuses")
-    // cmd.Flags().BoolVar(&pr, "pr", false, "Get the PR status")
-    // cmd.Flags().BoolVar(&branches, "branches", false, "List all branches")
-    // cmd.Flags().BoolVar(&assigned, "assigned", false, "Get all relavant Issues")
 
     return cmd
 }

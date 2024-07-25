@@ -52,9 +52,7 @@ To use the status command, simply run:
 gh dxp status
 ```
 
-This command will display information about the current branch, uncommitted changes, and any changes that are committed but not yet pushed to the remote repository. It's a handy way to ensure that your work is organized and ready for review.
-
-Remember, staying informed about the status of your work helps streamline the development process and facilitates collaboration with your team.
+This command will display information about the current branch, uncommitted changes, and any changes that are committed but not yet pushed to the remote repository.
 
 ### Configuration options
 
