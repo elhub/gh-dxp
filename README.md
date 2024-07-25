@@ -46,6 +46,14 @@ This runs the installed linters on the given repository. Linters need to be conf
 
 This runs unit tests on the given repository. The extension will try to guess the unit test framework to run based on project type, but it can also be configured in the configuration files.
 
+To use the status command, simply run:
+
+```sh
+gh dxp status
+```
+
+This command will display information about the current branch, uncommitted changes, and any changes that are committed but not yet pushed to the remote repository.
+
 ### Configuration options
 
 !!! TODO: Describe configurations options using the .devxp file.
