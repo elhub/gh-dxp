@@ -28,6 +28,16 @@ func (e *NotAGitRepoError) Error() string {
 	return e.Msg
 }
 
+// NotAGitHubRepoError signifies that the current working directory is not a GitHub repo.
+type NotAGitHubRepoError struct {
+	Msg string
+}
+
+// Signifies that the current working directory is not a GitHub repo.
+func (e *NotAGitHubRepoError) Error() string {
+	return e.Msg
+}
+
 // ListFilesInDirectory returns a list of files in a given directory.
 func ListFilesInDirectory(exe Executor, directory string) ([]string, error) {
 	// List all files in a directory
@@ -39,4 +49,22 @@ func ListFilesInDirectory(exe Executor, directory string) ([]string, error) {
 	}
 
 	return strings.Split(files, "\n"), nil
+}
+
+// IsInGitHubRepo checks whether the current working directory is in a GitHub repo.
+func IsInGitHubRepo(exe Executor) (bool, error) {
+	url, err := exe.Command("git", "remote", "get-url", "origin")
+
+	if err != nil {
+		return false, &NotAGitRepoError{Msg: "Not a git repo"}
+	}
+	if !urlIsGitHubRepo(url) {
+		return false, &NotAGitHubRepoError{Msg: "Current origin is not a GitHub repository"}
+	}
+
+	return false, nil
+}
+
+func urlIsGitHubRepo(url string) bool {
+	return (strings.HasPrefix(url, "https://github.com") || strings.HasPrefix(url, "git@github.com"))
 }
