@@ -32,44 +32,44 @@ func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
 
 func TestStatusAll(t *testing.T) {
 	tests := []struct {
-		name       string
-		expected   string
+		name        string
+		expected    string
 		expectedErr error
-		all bool
-		repo bool
-		pr bool
-		branches bool
-		issue bool
+		all         bool
+		repo        bool
+		pr          bool
+		branches    bool
+		issue       bool
 	}{
 		{
-			name:       "Test PRs",
-			expected:   "PR Status:\nRelevant pull requests in repo-name\n",
+			name:        "Test PRs",
+			expected:    "PR Status:\nRelevant pull requests in repo-name\n",
 			expectedErr: nil,
-			pr : true,
+			pr:          true,
 		},
 		{
-			name:       "Test branches",
-			expected:   "branch1\nbranch2\n",
+			name:        "Test branches",
+			expected:    "branch1\nbranch2\n",
 			expectedErr: nil,
-			branches : true,
+			branches:    true,
 		},
 		{
-			name:       "Test repo",
-			expected:   "Repository: git@github.com:elhub/repo-name.git\n",
+			name:        "Test repo",
+			expected:    "Repository: git@github.com:elhub/repo-name.git\n",
 			expectedErr: nil,
-			repo : true,
+			repo:        true,
 		},
 		{
-			name:       "Test issue",
-			expected:   "Assigned PRs/Review Requests:\n",
+			name:        "Test issue",
+			expected:    "Assigned PRs/Review Requests:\n",
 			expectedErr: nil,
-			issue : true,
+			issue:       true,
 		},
 		{
-			name:       "Test all",
-			expected:   "Repository: git@github.com:elhub/repo-name.git\nPR Status:",
+			name:        "Test all",
+			expected:    "Repository: git@github.com:elhub/repo-name.git\nPR Status:",
 			expectedErr: nil,
-			all : true,
+			all:         true,
 		},
 	}
 
@@ -84,11 +84,11 @@ func TestStatusAll(t *testing.T) {
 
 			err := status.Execute(mockExec,
 				&status.Options{
-					All : tt.all,
-					Repo : tt.repo,
-					Pr : tt.pr,
-					Branches : tt.branches,
-					Issue : tt.issue,
+					All:      tt.all,
+					Repo:     tt.repo,
+					Pr:       tt.pr,
+					Branches: tt.branches,
+					Issue:    tt.issue,
 				},
 			)
 

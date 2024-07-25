@@ -11,7 +11,7 @@ import (
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
-// GetStatus retrieves the status of the current repository.
+// Execute retrieves the status of the current repository.
 func Execute(exe utils.Executor, opts *Options) error {
 	var statusReport strings.Builder
 
