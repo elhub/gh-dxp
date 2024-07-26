@@ -31,6 +31,10 @@ func StatusCmd(exe utils.Executor) *cobra.Command {
         `),
 		Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
+			_, err := utils.IsInGitHubRepo(exe)
+			if err != nil {
+				return err
+			}
 			return status.Execute(exe, opts)
 		},
 	}
