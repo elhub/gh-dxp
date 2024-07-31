@@ -37,6 +37,9 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 	log.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
 	cmd := e.ExecCommand(name, args...)
 	bytes, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Error(string(bytes))
+	}
 	return string(bytes), err
 }
 
@@ -56,6 +59,7 @@ func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, error) {
 	log.Debug(fmt.Sprintf("Running gh '%s'", strings.Join(args, " ")))
 	stdOut, stdErr, err := gh.Exec(args...)
 	if err != nil {
+		log.Error(stdErr.String())
 		log.Debug(fmt.Sprintf("Error running GH command: %s", err.Error()))
 		return stdErr, err
 	}
