@@ -88,7 +88,7 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.pushBranch, "--json", "number", "--jq", ".[].number"}).
 				Return(tt.prNumber, tt.prNumberErr)
 			mockExe.On("GH", []string{"pr", "view", "--json", "title", "--jq", ".title"}).Return(tt.prTitle, tt.prTitleErr)
-			mockExe.On("GH", []string{"pr", "merge", "--squash", "--auto", "--delete-branch"}).Return(tt.prMerge, tt.prMergeErr)
+			mockExe.On("GH", []string{"pr", "merge", "--squash", "--delete-branch"}).Return(tt.prMerge, tt.prMergeErr)
 
 			err := merge.Execute(mockExe, &merge.Options{
 				AutoConfirm: true,
