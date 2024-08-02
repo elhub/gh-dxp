@@ -110,6 +110,9 @@ screenshots/*
 ### NPM ###
 dist/
 
+### MegaLint ###
+megalinter-reports/
+
 ### Testing ###
 /coverage
 /allure-report

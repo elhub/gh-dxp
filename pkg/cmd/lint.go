@@ -39,6 +39,13 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		false,
 		"Lint all files in the repository",
 	)
+	fl.BoolVarP(
+		&opts.Fix,
+		"fix",
+		"f",
+		false,
+		"Automatically fix linting errors",
+	)
 
 	return cmd
 }

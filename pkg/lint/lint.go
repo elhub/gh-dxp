@@ -38,6 +38,9 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 		args = append(args, "--filesonly")
 		args = append(args, changedFiles...)
 	}
+	if opts.Fix {
+		args = append(args, "--fix")
+	}
 
 	err := exe.CommandContext(ctx, args[0], args[1:]...)
 	if err != nil {
