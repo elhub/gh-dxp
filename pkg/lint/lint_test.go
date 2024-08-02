@@ -38,6 +38,7 @@ func TestRun(t *testing.T) {
 		expectErr      bool
 		modifiedFiles  string
 		lintAllFiles   bool
+		fixFiles       bool
 	}{
 		{
 			name:           "lint has no errors",
@@ -57,6 +58,13 @@ func TestRun(t *testing.T) {
 			expectErr:      false,
 			lintAllFiles:   true,
 		},
+		{
+			name:           "lint with --fix flag",
+			executionError: nil,
+			expectErr:      false,
+			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
+			fixFiles:       true,
+		},
 	}
 
 	for _, tt := range tests {
@@ -70,20 +78,23 @@ func TestRun(t *testing.T) {
 				linterArgs = append(linterArgs, lint.ConvertChangedFilesIntoList(tt.modifiedFiles)...)
 			}
 
+			if tt.fixFiles {
+				linterArgs = append(linterArgs, "--fix")
+			}
+
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, tt.executionError)
 
 			if !tt.lintAllFiles {
 				mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
 			}
 
-			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles})
+			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles})
 
 			if tt.expectErr {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
 			}
-
 			mockExe.AssertExpectations(t)
 		})
 	}

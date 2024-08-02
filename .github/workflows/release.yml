@@ -19,10 +19,10 @@ jobs:
         id: version
         uses: paulhatch/semantic-version@v5.4.0
         with:
-          version_format: "v${major}.${minor}.${patch}"
-          major_pattern: "[major]"
-          minor_pattern: "[minor]"
-          bump_each_commit_patch_pattern: "[patch]"
+          version_format: 'v${major}.${minor}.${patch}'
+          major_pattern: '[major]'
+          minor_pattern: '[minor]'
+          bump_each_commit_patch_pattern: '[patch]'
 
       - name: Tag commit
         uses: actions/github-script@v7
@@ -41,5 +41,5 @@ jobs:
       - uses: cli/gh-extension-precompile@v1
         name: Create extension release
         with:
-          go_version: "1.22"
-          build_script_override: "build_release_version.sh"
+          go_version: '1.22'
+          build_script_override: 'build_release_version.sh'
