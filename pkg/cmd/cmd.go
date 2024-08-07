@@ -56,6 +56,7 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 		TestCmd(exe),
 		TemplateCmd(exe, settings),
 		StatusCmd(exe),
+		CleanCmd(exe),
 	)
 
 	return retCmd
