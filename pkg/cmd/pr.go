@@ -59,6 +59,20 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		nil,
 		"Assign people by their id. Use \"@me\" to self-assign.",
 	)
+	fl.StringVarP(
+		&opts.CommitMessage,
+		"commitmessage",
+		"m",
+		"",
+		"Commit message, if there are uncommitted changes.",
+	)
+	fl.StringVarP(
+		&opts.Branch,
+		"branch",
+		"b",
+		"",
+		"Temporary branch to switch to if currently on the default branch",
+	)
 	fl.BoolVar(
 		&opts.NoUnit,
 		"nounit",
