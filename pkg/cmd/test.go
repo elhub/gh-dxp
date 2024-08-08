@@ -16,6 +16,10 @@ func TestCmd(exe utils.Executor) *cobra.Command {
 		Long: heredoc.Docf(`
 			Run tests based on project type`, "`"),
 		RunE: func(_ *cobra.Command, _ []string) error {
+			err := utils.SetWorkDirToGitHubRoot(exe)
+			if err != nil {
+				return err
+			}
 			res := test.RunTest(exe)
 			return res
 		},

@@ -26,10 +26,11 @@ func MergeCmd(exe utils.Executor) *cobra.Command {
 		Aliases: []string{"land"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			_, err := utils.IsInGitHubRepo(exe)
+			err := utils.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
+
 			return merge.Execute(exe, opts)
 		},
 	}
