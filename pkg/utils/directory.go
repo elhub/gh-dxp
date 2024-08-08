@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"os"
 	"strings"
 )
 
@@ -16,6 +17,27 @@ func GetGitRootDirectory(exe Executor) (string, error) {
 	formattedRoot := strings.TrimSuffix(root, "\n")
 
 	return formattedRoot, nil
+}
+
+// SetWorkDirToGitHubRoot checks whether the current working directory is in a GitHub repo. If false, an error is raised. If true, the working directory is set to the root of that repo.
+func SetWorkDirToGitHubRoot(exe Executor) error {
+	_, err := isInGitHubRepo(exe)
+	if err != nil {
+		return err
+	}
+	err = setWorkingDirectoryToGitRoot(exe)
+	return err
+}
+
+// setWorkingDirectoryToGitRoot sets the working directory to be the git root directory.
+func setWorkingDirectoryToGitRoot(exe Executor) error {
+	root, err := GetGitRootDirectory(exe)
+	if err != nil {
+		return err
+	}
+
+	err = os.Chdir(root)
+	return err
 }
 
 // NotAGitRepoError signifies that the current working directory is not a git repo.
@@ -51,8 +73,8 @@ func ListFilesInDirectory(exe Executor, directory string) ([]string, error) {
 	return strings.Split(files, "\n"), nil
 }
 
-// IsInGitHubRepo checks whether the current working directory is in a GitHub repo.
-func IsInGitHubRepo(exe Executor) (bool, error) {
+// isInGitHubRepo checks whether the current working directory is in a GitHub repo.
+func isInGitHubRepo(exe Executor) (bool, error) {
 	url, err := exe.Command("git", "remote", "get-url", "origin")
 
 	if err != nil {
@@ -62,7 +84,7 @@ func IsInGitHubRepo(exe Executor) (bool, error) {
 		return false, &NotAGitHubRepoError{Msg: "Current origin is not a GitHub repository"}
 	}
 
-	return false, nil
+	return true, nil
 }
 
 func urlIsGitHubRepo(url string) bool {

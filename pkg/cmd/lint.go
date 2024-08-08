@@ -27,6 +27,10 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			$ gh dxp lint --all
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
+			err := utils.SetWorkDirToGitHubRoot(exe)
+			if err != nil {
+				return err
+			}
 			return lint.Run(exe, settings, opts)
 		},
 	}

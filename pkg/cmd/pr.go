@@ -28,7 +28,7 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		Aliases: []string{"diff"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			_, err := utils.IsInGitHubRepo(exe)
+			err := utils.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}

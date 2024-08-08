@@ -22,6 +22,10 @@ func BranchCmd(exe utils.Executor) *cobra.Command {
 			$ gh dxp branch wip
 		`),
 		RunE: func(_ *cobra.Command, args []string) error {
+			err := utils.SetWorkDirToGitHubRoot(exe)
+			if err != nil {
+				return err
+			}
 			branchID := args[0]
 
 			s := utils.StartSpinner("Creating new work branch...", "Work Branch "+branchID)
