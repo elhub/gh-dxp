@@ -6,6 +6,9 @@ type Options struct {
 	NoLint      bool
 	NoUnit      bool
 
+	Branch        string
+	CommitMessage string
+
 	baseBranch string
 
 	Reviewers []string

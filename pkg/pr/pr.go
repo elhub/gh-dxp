@@ -49,6 +49,10 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 			return err
 		}
 		branchID = newBranchName
+	} else {
+		if options.Branch != "" {
+			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + branchID)
+		}
 	}
 
 	// Check if PR exists on branch
@@ -511,15 +515,20 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 	var commitMessage string
 	var err error
 
-	if !options.AutoConfirm {
-		commitMessage, err = askForString("Please enter a commit message: ", "")
-		if err != nil {
-			return err
-		} else if len(commitMessage) == 0 {
-			return errors.New("Empty commit message not allowed")
-		}
+	if options.CommitMessage != "" {
+		commitMessage = options.CommitMessage
 	} else {
-		commitMessage = "default commit message"
+
+		if !options.AutoConfirm {
+			commitMessage, err = askForString("Please enter a commit message: ", "")
+			if err != nil {
+				return err
+			} else if len(commitMessage) == 0 {
+				return errors.New("Empty commit message not allowed")
+			}
+		} else {
+			commitMessage = "default commit message"
+		}
 	}
 	// Get git root directory and add to files to get fully qualified paths
 	root, err := utils.GetGitRootDirectory(exe)
@@ -575,6 +584,11 @@ func setBaseBranch(exe utils.Executor, options *Options) (string, error) {
 
 func getNewBranchName(options *Options) (string, error) {
 	var newBranchName = "branch1"
+
+	if options.Branch != "" {
+		return options.Branch, nil
+	}
+
 	if !options.AutoConfirm {
 		inputBranchName, err := askForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
 		if err != nil {
