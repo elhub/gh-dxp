@@ -38,13 +38,6 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 
 	// TODO: Support flags from gh pr
 	fl := cmd.Flags()
-	fl.BoolVarP(
-		&opts.AutoConfirm,
-		"confirm",
-		"y",
-		false,
-		"Don't ask for user input.",
-	)
 	fl.StringSliceVarP(
 		&opts.Reviewers,
 		"reviewer",

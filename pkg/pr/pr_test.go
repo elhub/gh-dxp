@@ -241,7 +241,7 @@ func TestExecute(t *testing.T) {
 			err := pr.Execute(mockExe,
 				&config.Settings{},
 				&pr.Options{
-					AutoConfirm: true,
+					TestRun: true,
 				})
 
 			if tt.expectedErr != nil {
