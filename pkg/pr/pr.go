@@ -372,7 +372,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 		return []string{}, err
 	}
 
-	if len(trackedChanges) > 0 && !options.TestRun {
+	if len(trackedChanges) > 0 && !options.TestRun && options.CommitMessage == "" {
 		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
 		if err != nil {
 			return []string{}, err
