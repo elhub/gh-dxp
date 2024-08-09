@@ -209,7 +209,7 @@ func createPR(
 
 	// Get the title
 	pr.Title = getDefaultTitle(commits)
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		pr.Title, err = askForString("Title", pr.Title)
 		if err != nil {
 			return pr, err
@@ -244,7 +244,7 @@ func createBody(options *Options, commits string) (string, error) {
 		bodySurvey = "Do you want to change the summary?"
 	}
 
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		editBody, err := askToConfirm(bodySurvey)
 		if err != nil {
 			return "", err
@@ -299,7 +299,7 @@ func issuesChanges(options *Options) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		issueIDString, errI := askForString("Issue IDs (seperate with commas):", "")
 		if errI != nil {
 			return "", errI
@@ -326,7 +326,7 @@ func testingChanges(options *Options) (string, error) {
 	// TODO: Consider skipping this, if dealing with code where unit and integration
 	// tests are not applicable. Replace with deploy test question?
 	body := ""
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		unitTestConfirm, err := askToConfirm("Did you add new unit tests?")
 		if err != nil {
 			return "", err
@@ -356,7 +356,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 		return []string{}, err
 	}
 
-	if len(untrackedChanges) > 0 && !options.AutoConfirm {
+	if len(untrackedChanges) > 0 && !options.TestRun {
 		res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
 		if err != nil {
 			return []string{}, err
@@ -372,7 +372,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 		return []string{}, err
 	}
 
-	if len(trackedChanges) > 0 && !options.AutoConfirm {
+	if len(trackedChanges) > 0 && !options.TestRun {
 		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
 		if err != nil {
 			return []string{}, err
@@ -390,7 +390,7 @@ func documentationChanges(options *Options) (string, error) {
 	// Multi-choice: README.md, docs, storybook, no updates
 	docOptions := []string{"No updates", "README.md", "docs", "storybook"}
 	selectedDocs := []string{}
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		err := survey.AskOne(&survey.MultiSelect{
 			Message: "What documentation was updated?",
 			Options: docOptions,
@@ -519,7 +519,7 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 		commitMessage = options.CommitMessage
 	} else {
 
-		if !options.AutoConfirm {
+		if !options.TestRun {
 			commitMessage, err = askForString("Please enter a commit message: ", "")
 			if err != nil {
 				return err
@@ -589,7 +589,7 @@ func getNewBranchName(options *Options) (string, error) {
 		return options.Branch, nil
 	}
 
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		inputBranchName, err := askForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
 		if err != nil {
 			return "", err
