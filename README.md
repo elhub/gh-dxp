@@ -2,6 +2,10 @@
 
 A GitHub (gh) CLI extension for automating daily development work, brought to you by Elhub's DevXP team. It implements an opinionated workflow based around small and frequent commits, squash merge, and mandatory linting and unit testing. To view more detailed documentation, please refer to the gh-dxp page in docs-support.
 
+### User Guide
+Using the `-h` flag with any command will display relevant documentation.
+In addition to that, a user guide for `gh dxp` can be found under docs-support.
+
 ### Aliases
 
 To avoid having to type `gh dxp` constantly, we recommend running:
@@ -21,9 +25,9 @@ On the `alias.yml` file that follows this project. This installs a number of use
     ```
 
 <details>
-   <summary><strong>Manual Install</strong></summary>
+   <summary><strong>Install from source</strong></summary>
 
-If you want to install this extension **manually**, follow these steps:
+If you want to install this extension **from source**, such as for development, follow these steps:
 
 1. Clone the repo
 
