@@ -4,4 +4,5 @@ package config
 type Settings struct {
 	ProjectTemplateURI string `yaml:"projectTemplateUri"`
 	ProjectType        string `yaml:"projectType"`
+	TicketingBaseURL   string `yaml:"ticketingBaseUrl"`
 }
