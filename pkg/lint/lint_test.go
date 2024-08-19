@@ -33,37 +33,68 @@ func (m *mockExecutor) GH(arg ...string) (bytes.Buffer, error) {
 
 func TestRun(t *testing.T) {
 	tests := []struct {
-		name      string
-		mockError error
-		expectErr bool
+		name           string
+		executionError error
+		expectErr      bool
+		modifiedFiles  string
+		lintAllFiles   bool
+		fixFiles       bool
 	}{
 		{
-			name:      "command runs successfully",
-			mockError: nil,
-			expectErr: false,
+			name:           "lint has no errors",
+			executionError: nil,
+			expectErr:      false,
+			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
 		},
 		{
-			name:      "command returns an error",
-			mockError: errors.New("command error"),
-			expectErr: true,
+			name:           "lint has errors",
+			executionError: errors.New("command error"),
+			expectErr:      true,
+			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
+		},
+		{
+			name:           "lint with --all flag",
+			executionError: nil,
+			expectErr:      false,
+			lintAllFiles:   true,
+		},
+		{
+			name:           "lint with --fix flag",
+			executionError: nil,
+			expectErr:      false,
+			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
+			fixFiles:       true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(mockExecutor)
-			args := []string{"mega-linter-runner", "--flavor", "cupcake", "-e",
+			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake", "-e",
 				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
-			mockExe.On("CommandContext", mock.Anything, "npx", args).Return(nil, tt.mockError)
 
-			err := lint.Run(mockExe, &config.Settings{})
+			if !tt.lintAllFiles {
+				linterArgs = append(linterArgs, "--filesonly")
+				linterArgs = append(linterArgs, lint.ConvertChangedFilesIntoList(tt.modifiedFiles)...)
+			}
+
+			if tt.fixFiles {
+				linterArgs = append(linterArgs, "--fix")
+			}
+
+			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, tt.executionError)
+
+			if !tt.lintAllFiles {
+				mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
+			}
+
+			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles})
 
 			if tt.expectErr {
 				require.Error(t, err)
 			} else {
 				require.NoError(t, err)
 			}
-
 			mockExe.AssertExpectations(t)
 		})
 	}

@@ -13,7 +13,7 @@ import (
 // CheckoutBranch checks out to the branch with the given ID.
 func CheckoutBranch(exe utils.Executor, branchID string) error {
 	// Does the branch exist?
-	branchExists, existsErr := branchExists(exe, branchID)
+	branchExists, existsErr := Exists(exe, branchID)
 	if existsErr != nil {
 		return existsErr
 	}
@@ -37,7 +37,8 @@ func CheckoutBranch(exe utils.Executor, branchID string) error {
 	return nil
 }
 
-func branchExists(exe utils.Executor, branchID string) (bool, error) {
+// Exists checks whether a specified branch exists.
+func Exists(exe utils.Executor, branchID string) (bool, error) {
 	_, err := exe.Command("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branchID)
 	if err != nil {
 		var exitErr *exec.ExitError

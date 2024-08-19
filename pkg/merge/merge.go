@@ -49,7 +49,7 @@ func Execute(exe utils.Executor, options *Options) error {
 		return nil
 	}
 
-	stdOut, err := exe.GH("pr", "merge", "--squash", "--auto", "--delete-branch")
+	stdOut, err := exe.GH("pr", "merge", "--squash", "--delete-branch")
 	log.Info(stdOut.String())
 
 	if err != nil {

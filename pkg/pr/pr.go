@@ -2,7 +2,6 @@
 package pr
 
 import (
-	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -26,13 +25,43 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 	}
 	branchID := strings.Trim(currentBranch, "\n")
 
+	baseBranch, err := setBaseBranch(exe, options)
+	if err != nil {
+		return err
+	}
+
+	// If we're currently in the base branch, we need to make a new temporary branch to contain the diff
+	if branchID == baseBranch {
+		newBranchName, err := getNewBranchName(options)
+		if err != nil {
+			return err
+		}
+
+		branchExists, err := branch.Exists(exe, newBranchName)
+		if err != nil {
+			return err
+		}
+		if branchExists {
+			return errors.New("Branch already exists. Please delete it or specify another one")
+		}
+		_, err = exe.Command("git", "checkout", "-b", newBranchName)
+		if err != nil {
+			return err
+		}
+		branchID = newBranchName
+	} else {
+		if options.Branch != "" {
+			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + branchID)
+		}
+	}
+
 	// Check if PR exists on branch
 	prID, errCheck := CheckForExistingPR(exe, branchID)
 	if errCheck != nil {
 		return errCheck
 	}
 
-	err := performPreCommitOperations(exe, settings, options)
+	err = performPreCommitOperations(exe, settings, options)
 	if err != nil {
 		return err
 	}
@@ -47,7 +76,7 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 
 func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *Options) error {
 	// Handle uncommitted changes
-	err := handleUncommittedChanges(exe, options)
+	filesToCommit, err := handleUncommittedChanges(exe, options)
 	if err != nil {
 		return err
 	}
@@ -62,7 +91,14 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 
 	// Run lint
 	if !options.NoLint {
-		err = lint.Run(exe, settings)
+		err = lint.Run(exe, settings, &lint.Options{})
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(filesToCommit) > 0 {
+		err = addAndCommitFiles(exe, filesToCommit, options)
 		if err != nil {
 			return err
 		}
@@ -80,26 +116,13 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 		return err
 	}
 	log.Info("Current Branch:" + currentBranch + "\n")
-
-	// Fetch the default branch
-	baseBranch := options.baseBranch
-	if baseBranch == "" {
-		s = utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
-		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
-		s.Stop()
-		if errV != nil {
-			return errors.Wrap(errV, "Failed to fetch default branch")
-		}
-		baseBranch = strings.Trim(stdOut.String(), "\n")
-	}
-
-	pr, err := createPR(exe, options, branchID, baseBranch)
+	pr, err := createPR(exe, options, branchID, options.baseBranch)
 	if err != nil {
 		return err
 	}
 
 	s = utils.StartSpinner("Processing pull request...", "Pull request "+pr.Title+" created.")
-	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", baseBranch}
+	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", options.baseBranch}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
 	s.Stop()
@@ -178,7 +201,6 @@ func createPR(
 	mainID string,
 ) (PullRequest, error) {
 	pr := PullRequest{}
-
 	// Get the commit messages between the current branch and the main branch and put them in the PR body.
 	commits, err := branch.GetCommitMessages(exe, mainID, branchID)
 	if err != nil {
@@ -187,7 +209,7 @@ func createPR(
 
 	// Get the title
 	pr.Title = getDefaultTitle(commits)
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		pr.Title, err = askForString("Title", pr.Title)
 		if err != nil {
 			return pr, err
@@ -222,7 +244,7 @@ func createBody(options *Options, commits string) (string, error) {
 		bodySurvey = "Do you want to change the summary?"
 	}
 
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		editBody, err := askToConfirm(bodySurvey)
 		if err != nil {
 			return "", err
@@ -277,7 +299,7 @@ func issuesChanges(options *Options) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		issueIDString, errI := askForString("Issue IDs (seperate with commas):", "")
 		if errI != nil {
 			return "", errI
@@ -304,7 +326,7 @@ func testingChanges(options *Options) (string, error) {
 	// TODO: Consider skipping this, if dealing with code where unit and integration
 	// tests are not applicable. Replace with deploy test question?
 	body := ""
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		unitTestConfirm, err := askToConfirm("Did you add new unit tests?")
 		if err != nil {
 			return "", err
@@ -327,39 +349,40 @@ func testingChanges(options *Options) (string, error) {
 	return body, nil
 }
 
-func handleUncommittedChanges(exe utils.Executor, options *Options) error {
+func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
 	// Handle presence of untracked changes - ignore or abort
 	untrackedChanges, err := getUntrackedChanges(exe)
 	if err != nil {
-		return err
+		return []string{}, err
 	}
 
-	if len(untrackedChanges) > 0 {
-		if !options.AutoConfirm {
-			res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
-			if err != nil || !res {
-				return errors.Wrap(err, "User aborted workflow")
-			}
+	if len(untrackedChanges) > 0 && !options.TestRun {
+		res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
+		if err != nil {
+			return []string{}, err
+		}
+		if !res {
+			return []string{}, errors.New("User aborted workflow")
 		}
 	}
 
 	// Handle presence of tracked changes - commit or abort
 	trackedChanges, err := getTrackedChanges(exe)
 	if err != nil {
-		return err
+		return []string{}, err
 	}
 
-	if len(trackedChanges) > 0 && !options.AutoConfirm {
+	if len(trackedChanges) > 0 && !options.TestRun && options.CommitMessage == "" {
 		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
-		if err != nil || !res {
-			return err
-		}
-		err = addAndCommitFiles(exe, trackedChanges)
 		if err != nil {
-			return err
+			return []string{}, err
+		}
+
+		if !res {
+			return []string{}, errors.New("User aborted workflow")
 		}
 	}
-	return nil
+	return trackedChanges, nil
 }
 
 func documentationChanges(options *Options) (string, error) {
@@ -367,7 +390,7 @@ func documentationChanges(options *Options) (string, error) {
 	// Multi-choice: README.md, docs, storybook, no updates
 	docOptions := []string{"No updates", "README.md", "docs", "storybook"}
 	selectedDocs := []string{}
-	if !options.AutoConfirm {
+	if !options.TestRun {
 		err := survey.AskOne(&survey.MultiSelect{
 			Message: "What documentation was updated?",
 			Options: docOptions,
@@ -488,14 +511,25 @@ func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
 	return untrackedChanges, nil
 }
 
-func addAndCommitFiles(exe utils.Executor, files []string) error {
-	commitMessage, err := askForString("Please enter a commit message", "")
-	if err != nil {
-		return err
-	} else if len(commitMessage) == 0 {
-		return errors.New("Empty commit message not allowed")
-	}
+func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {
+	var commitMessage string
+	var err error
 
+	if options.CommitMessage != "" {
+		commitMessage = options.CommitMessage
+	} else {
+
+		if !options.TestRun {
+			commitMessage, err = askForString("Please enter a commit message: ", "")
+			if err != nil {
+				return err
+			} else if len(commitMessage) == 0 {
+				return errors.New("Empty commit message not allowed")
+			}
+		} else {
+			commitMessage = "default commit message"
+		}
+	}
 	// Get git root directory and add to files to get fully qualified paths
 	root, err := utils.GetGitRootDirectory(exe)
 	if err != nil {
@@ -515,7 +549,7 @@ func addAndCommitFiles(exe utils.Executor, files []string) error {
 	}
 
 	// Commit files
-	_, err = exe.Command("git", "commit", "-m", fmt.Sprintf(`"%s"`, commitMessage))
+	_, err = exe.Command("git", "commit", "-m", commitMessage)
 	if err != nil {
 		return err
 	}
@@ -529,4 +563,41 @@ func formatUntrackedFileChangesQuestion(changes []string) string {
 
 func formatTrackedFileChangesQuestion(changes []string) string {
 	return "You have uncommitted files locally \n\n" + strings.Join(changes, "\n") + "\n\nDo you want to create a new commit with these changes?"
+}
+
+// If the baseBranch option is not set, set it to the base branch of the remote.
+func setBaseBranch(exe utils.Executor, options *Options) (string, error) {
+	// Fetch the default branch
+	baseBranch := options.baseBranch
+	if baseBranch == "" {
+		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
+		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
+		s.Stop()
+		if errV != nil {
+			return "", errors.Wrap(errV, "Failed to fetch default branch")
+		}
+		baseBranch = strings.Trim(stdOut.String(), "\n")
+		options.baseBranch = baseBranch
+	}
+	return baseBranch, nil
+}
+
+func getNewBranchName(options *Options) (string, error) {
+	var newBranchName = "branch1"
+
+	if options.Branch != "" {
+		return options.Branch, nil
+	}
+
+	if !options.TestRun {
+		inputBranchName, err := askForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
+		if err != nil {
+			return "", err
+		}
+		if inputBranchName == "" {
+			return "", errors.New("Branch name cannot be empty")
+		}
+		newBranchName = inputBranchName
+	}
+	return newBranchName, nil
 }

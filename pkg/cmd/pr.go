@@ -28,19 +28,16 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		Aliases: []string{"diff"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
+			err := utils.SetWorkDirToGitHubRoot(exe)
+			if err != nil {
+				return err
+			}
 			return pr.Execute(exe, settings, opts)
 		},
 	}
 
 	// TODO: Support flags from gh pr
 	fl := cmd.Flags()
-	fl.BoolVarP(
-		&opts.AutoConfirm,
-		"confirm",
-		"y",
-		false,
-		"Don't ask for user input.",
-	)
 	fl.StringSliceVarP(
 		&opts.Reviewers,
 		"reviewer",
@@ -54,6 +51,20 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"a",
 		nil,
 		"Assign people by their id. Use \"@me\" to self-assign.",
+	)
+	fl.StringVarP(
+		&opts.CommitMessage,
+		"commitmessage",
+		"m",
+		"",
+		"Commit message, if there are uncommitted changes.",
+	)
+	fl.StringVarP(
+		&opts.Branch,
+		"branch",
+		"b",
+		"",
+		"Temporary branch to switch to if currently on the default branch",
 	)
 	fl.BoolVar(
 		&opts.NoUnit,
