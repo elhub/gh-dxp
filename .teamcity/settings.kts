@@ -10,7 +10,7 @@ elhubProject(DEVXP, "gh-dxp") {
         param("env.GOROOT", "/opt/go/1.21.6")
     }
 
-    pipeline {
+    pipeline(withReleaseVersion = false) {
         sequential {
             makeVerify {
                 disableSonarScan = true
