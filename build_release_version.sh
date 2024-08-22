@@ -19,7 +19,7 @@ compile() {
   local OUTPUT="dist/${PLUGIN_NAME}-${GOOS}-${GOARCH}"
 
   echo "Building for ${GOOS}/${GOARCH}..."
-  GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags="-X 'main.version=${PLUGIN_VERSION}'" -o "${OUTPUT}" .
+  GOOS=${GOOS} GOARCH=${GOARCH} jf go build -ldflags="-X 'main.version=${PLUGIN_VERSION}'" -o "${OUTPUT}" .
 
   EXIT_CODE=$?
   
