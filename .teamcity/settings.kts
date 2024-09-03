@@ -6,11 +6,11 @@ import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
 elhubProject(DEVXP, "gh-dxp") {
 
     params {
-        param("env.PATH", "\$PATH:/opt/go/1.21.6/bin")
-        param("env.GOROOT", "/opt/go/1.21.6")
+        param("env.PATH", "\$PATH:/usr/local/go/bin:/usr/bin")
+        param("env.GOROOT", "/usr/local/go")
     }
 
-    pipeline {
+    pipeline(withReleaseVersion = false) {
         sequential {
             makeVerify {
                 disableSonarScan = true
