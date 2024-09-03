@@ -7,6 +7,7 @@
 branch: dxp branch
 clone: repo clone
 lint: dxp lint
+<<<<<<< HEAD
 owner: dxp owner
 pr-create: dxp pr-create
 pr-list: pr list
@@ -17,6 +18,11 @@ template: dxp template
 test: dxp test
 
 # More concise PR aliases
+=======
+test: dxp test
+
+# Pull Requests
+>>>>>>> d9c9180 (Update command names and documentation)
 prc: dxp pr-create
 prl: pr list
 prm: dxp pr-merge
