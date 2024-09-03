@@ -3,20 +3,21 @@
 # Usage: gh <alias> <args>
 
 # Workflow
+# These commands basically save you from typing the full "dxp" command each time.
 branch: dxp branch
 clone: repo clone
 lint: dxp lint
+owner: dxp owner
+pr-create: dxp pr-create
+pr-list: pr list
+pr-merge: dxp pr-merge
+pr-view: pr view
+status: dxp status
+template: dxp template
 test: dxp test
 
-# Pull Requests
+# More concise PR aliases
 prc: dxp pr-create
 prl: pr list
 prm: dxp pr-merge
 prv: pr view
-
-# Arcanist aliases
-diff: dxp pr
-land: dxp merge
-patch: pr checkout
-unit: dxp test
-work: dxp branch
