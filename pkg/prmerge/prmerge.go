@@ -7,7 +7,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-dxp/pkg/pr"
+	pr "github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 

@@ -6,13 +6,12 @@
 branch: dxp branch
 clone: repo clone
 lint: dxp lint
-merge: dxp merge
 test: dxp test
 
 # Pull Requests
-prc: dxp pr
-prm: dxp merge
-prs: pr list
+prc: dxp pr-create
+prl: pr list
+prm: dxp pr-merge
 prv: pr view
 
 # Arcanist aliases

@@ -2,18 +2,18 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	"github.com/elhub/gh-dxp/pkg/merge"
+	merge "github.com/elhub/gh-dxp/pkg/prmerge"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 // MergeCmd handles the merge of a pull request.
-func MergeCmd(exe utils.Executor) *cobra.Command {
+func PRMergeCmd(exe utils.Executor) *cobra.Command {
 	opts := &merge.Options{}
 
 	cmd := &cobra.Command{
-		Use:   "merge",
-		Short: "Merge a pull request",
+		Use:   "pr-merge",
+		Short: "Merge a PR (Pull Request)",
 		Long: heredoc.Docf(`
 			Merge the pull request on the current branch. This is an opinionated command that will:
 
@@ -21,9 +21,10 @@ func MergeCmd(exe utils.Executor) *cobra.Command {
 			* Delete both the local and remote branches
 		`, "`"),
 		Example: heredoc.Doc(`
-			$ gh dxp merge
+			# Merge the current branch if it is a GitHub PR
+			$ gh dxp pr-merge
 		`),
-		Aliases: []string{"land"},
+		Aliases: []string{"land", "merge"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			err := utils.SetWorkDirToGitHubRoot(exe)
