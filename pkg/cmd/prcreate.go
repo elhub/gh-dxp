@@ -3,14 +3,14 @@ package cmd
 import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
-	pr "github.com/elhub/gh-dxp/pkg/prcreate"
+	"github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-// PRCmd handles the creation of a pull request.
+// PRCreateCmd handles the creation of a pull request.
 func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &pr.Options{}
+	opts := &prcreate.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "pr",
@@ -33,7 +33,7 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			return pr.Execute(exe, settings, opts)
+			return prcreate.Execute(exe, settings, opts)
 		},
 	}
 

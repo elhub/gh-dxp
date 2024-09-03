@@ -1,4 +1,4 @@
-package merge_test
+package prmerge_test
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package pr_test
+package prcreate_test
 
 import (
 	"bytes"

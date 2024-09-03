@@ -2,14 +2,14 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc"
-	merge "github.com/elhub/gh-dxp/pkg/prmerge"
+	"github.com/elhub/gh-dxp/pkg/prmerge"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
-// MergeCmd handles the merge of a pull request.
+// PRMergeCmd handles the merge of a pull request.
 func PRMergeCmd(exe utils.Executor) *cobra.Command {
-	opts := &merge.Options{}
+	opts := &prmerge.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "pr-merge",
@@ -32,7 +32,7 @@ func PRMergeCmd(exe utils.Executor) *cobra.Command {
 				return err
 			}
 
-			return merge.Execute(exe, opts)
+			return prmerge.Execute(exe, opts)
 		},
 	}
 
