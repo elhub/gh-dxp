@@ -7,7 +7,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/pr"
+	pr "github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

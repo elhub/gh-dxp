@@ -50,9 +50,9 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	retCmd.AddCommand(
 		BranchCmd(exe),
 		LintCmd(exe, settings),
-		MergeCmd(exe),
 		OwnerCmd(exe, settings),
-		PRCmd(exe, settings),
+		PRCreateCmd(exe, settings),
+		PRMergeCmd(exe),
 		TestCmd(exe),
 		TemplateCmd(exe, settings),
 		StatusCmd(exe),

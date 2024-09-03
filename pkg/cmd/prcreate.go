@@ -3,18 +3,18 @@ package cmd
 import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/pr"
+	pr "github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 // PRCmd handles the creation of a pull request.
-func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	opts := &pr.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "pr",
-		Short: "Create a PR (pull request)",
+		Short: "Create a PR (Pull Request)",
 		Long: heredoc.Docf(`
 			Create a PR (pull request) for the current branch. This is an opinionated command that will:
 
@@ -23,9 +23,10 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			* Generate a pull request body based on the current devxp template
 		`, "`"),
 		Example: heredoc.Doc(`
-			$ gh dxp pr
+			# Create a PR from the current branch
+			$ gh dxp pr-create
 		`),
-		Aliases: []string{"diff"},
+		Aliases: []string{"diff", "pr"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			err := utils.SetWorkDirToGitHubRoot(exe)
