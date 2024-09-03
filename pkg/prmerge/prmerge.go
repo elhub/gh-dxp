@@ -1,5 +1,5 @@
-// Package merge contains the logic for merging pull requests.
-package merge
+// Package prmerge contains the logic for merging pull requests.
+package prmerge
 
 import (
 	"errors"
