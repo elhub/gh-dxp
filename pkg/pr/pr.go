@@ -3,7 +3,6 @@ package pr
 
 import (
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -351,7 +350,7 @@ func testingChanges(options *Options) (string, error) {
 
 func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
 	// Handle presence of untracked changes - ignore or abort
-	untrackedChanges, err := getUntrackedChanges(exe)
+	untrackedChanges, err := utils.GetUntrackedChanges(exe)
 	if err != nil {
 		return []string{}, err
 	}
@@ -367,7 +366,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	}
 
 	// Handle presence of tracked changes - commit or abort
-	trackedChanges, err := getTrackedChanges(exe)
+	trackedChanges, err := utils.GetTrackedChanges(exe)
 	if err != nil {
 		return []string{}, err
 	}
@@ -471,44 +470,6 @@ func getCheckboxMark(confirm bool) string {
 
 func logPullRequest(pr PullRequest) {
 	log.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
-}
-
-func filter(list []string, test func(string) bool) []string {
-	ret := []string{}
-	for _, s := range list {
-		if test(s) {
-			ret = append(ret, s)
-		}
-	}
-	return ret
-}
-
-func getUntrackedChanges(exe utils.Executor) ([]string, error) {
-	re := regexp.MustCompile(`^\?\?`)
-
-	return getChanges(exe, re)
-}
-
-func getTrackedChanges(exe utils.Executor) ([]string, error) {
-	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) // This regex is intended to catch all tracked changes except for unmerged conflicts
-	return getChanges(exe, re)
-}
-
-func getChanges(exe utils.Executor, re *regexp.Regexp) ([]string, error) {
-	changeString, err := exe.Command("git", "status", "--porcelain")
-	if err != nil {
-		return []string{}, err
-	}
-
-	changes := strings.Split(changeString, "\n")
-	untrackedChanges := filter(changes, re.MatchString)
-
-	// Remove the regex matched part of the string, leaving only the file name
-	for i, s := range untrackedChanges {
-		untrackedChanges[i] = re.ReplaceAllString(s, "")
-	}
-
-	return untrackedChanges, nil
 }
 
 func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {

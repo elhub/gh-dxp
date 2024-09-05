@@ -53,6 +53,8 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 func getChangedFiles(exe utils.Executor) ([]string, error) {
 	changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
 	if err != nil {
+		log.Info("Skibidi")
+		log.Info(err.Error())
 		return []string{}, err
 	}
 

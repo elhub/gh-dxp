@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -89,4 +90,44 @@ func isInGitHubRepo(exe Executor) (bool, error) {
 
 func urlIsGitHubRepo(url string) bool {
 	return (strings.HasPrefix(url, "https://github.com") || strings.HasPrefix(url, "git@github.com"))
+}
+
+// GetUntrackedChanges returns a list of file names for unchanged files in the current repo
+func GetUntrackedChanges(exe Executor) ([]string, error) {
+	re := regexp.MustCompile(`^\?\?`)
+
+	return getChanges(exe, re)
+}
+
+// GetTrackedChanges returns a list of file names for changed files in the current repo
+func GetTrackedChanges(exe Executor) ([]string, error) {
+	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) // This regex is intended to catch all tracked changes except for unmerged conflicts
+	return getChanges(exe, re)
+}
+
+func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
+	changeString, err := exe.Command("git", "status", "--porcelain")
+	if err != nil {
+		return []string{}, err
+	}
+
+	changes := strings.Split(changeString, "\n")
+	untrackedChanges := filter(changes, re.MatchString)
+
+	// Remove the regex matched part of the string, leaving only the file name
+	for i, s := range untrackedChanges {
+		untrackedChanges[i] = re.ReplaceAllString(s, "")
+	}
+
+	return untrackedChanges, nil
+}
+
+func filter(list []string, test func(string) bool) []string {
+	ret := []string{}
+	for _, s := range list {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
 }
