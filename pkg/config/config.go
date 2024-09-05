@@ -4,6 +4,7 @@ package config
 import (
 	"os"
 
+	"github.com/caarlos0/log"
 	"gopkg.in/yaml.v3"
 )
 
@@ -18,7 +19,7 @@ func ReadConfig(filepath string) (*Settings, error) {
 	if yamlErr := yaml.Unmarshal(data, &cfg); yamlErr != nil {
 		return nil, yamlErr
 	}
-
+	log.Info(cfg.TicketingBaseURL)
 	return &cfg, nil
 }
 
@@ -27,6 +28,7 @@ func DefaultSettings() *Settings {
 	return &Settings{
 		ProjectTemplateURI: "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
 		ProjectType:        "",
+		TicketingBaseURL:   "https://jira.elhub.cloud/browse/",
 	}
 }
 
@@ -35,6 +37,7 @@ func MergeSettings(source *Settings, newSettings *Settings) *Settings {
 	if newSettings.ProjectType != "" {
 		source.ProjectTemplateURI = newSettings.ProjectTemplateURI
 		source.ProjectType = newSettings.ProjectType
+		source.TicketingBaseURL = newSettings.TicketingBaseURL
 	}
 
 	return source

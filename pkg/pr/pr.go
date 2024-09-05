@@ -2,6 +2,7 @@
 package pr
 
 import (
+	"fmt"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -18,6 +19,9 @@ import (
 
 // Execute creates or updates a pull request, depending on its current state.
 func Execute(exe utils.Executor, settings *config.Settings, options *Options) error {
+	log.Info("greetings!")
+	log.Info(settings.TicketingBaseURL)
+
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
@@ -71,7 +75,7 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 		return update(exe, branchID, prID)
 	}
 	// If it doesn't exist, create a new PR
-	return create(exe, options, branchID)
+	return create(exe, options, settings, branchID)
 }
 
 func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *Options) error {
@@ -107,7 +111,7 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 	return nil
 }
 
-func create(exe utils.Executor, options *Options, branchID string) error {
+func create(exe utils.Executor, options *Options, settings *config.Settings, branchID string) error {
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchID)
@@ -116,7 +120,7 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 		return err
 	}
 	log.Info("Current Branch:" + currentBranch + "\n")
-	pr, err := createPR(exe, options, branchID, options.baseBranch)
+	pr, err := createPR(exe, options, settings, branchID, options.baseBranch)
 	if err != nil {
 		return err
 	}
@@ -197,6 +201,7 @@ func GetPRTitle(exe utils.Executor) (string, error) {
 func createPR(
 	exe utils.Executor,
 	options *Options,
+	settings *config.Settings,
 	branchID string,
 	mainID string,
 ) (PullRequest, error) {
@@ -216,7 +221,7 @@ func createPR(
 		}
 	}
 
-	pr.Body, err = createBody(options, commits)
+	pr.Body, err = createBody(options, settings, commits)
 	if err != nil {
 		return pr, err
 	}
@@ -226,7 +231,7 @@ func createPR(
 	return pr, nil
 }
 
-func createBody(options *Options, commits string) (string, error) {
+func createBody(options *Options, settings *config.Settings, commits string) (string, error) {
 	body := ""
 
 	// Add a summary of the commits to the PR body
@@ -262,7 +267,7 @@ func createBody(options *Options, commits string) (string, error) {
 	// TODO: What type of PR is this?
 	// Multi-choice: Feature, Bug Fix, Documentation, Test, Refactor, Style, Build, Chore
 	// Type should be set as a label.
-	issueSection, err := issuesChanges(options)
+	issueSection, err := issuesChanges(options, settings)
 	if err != nil {
 		return "", err
 	}
@@ -295,7 +300,7 @@ func createBody(options *Options, commits string) (string, error) {
 	return body, nil
 }
 
-func issuesChanges(options *Options) (string, error) {
+func issuesChanges(options *Options, settings *config.Settings) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
@@ -314,11 +319,23 @@ func issuesChanges(options *Options) (string, error) {
 			for i, id := range issueIDs {
 				issueIDs[i] = strings.TrimSpace(id)
 			}
-			body += "Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
+
+			formattedIssues := formatIssues(issueIDs, settings)
+
+			body += "Issue ID(s): " + strings.Join(formattedIssues, ", ") + "\n"
 		}
 	}
 
 	return body, nil
+}
+
+func formatIssues(issues []string, settings *config.Settings) []string {
+	formattedIssues := make([]string, len(issues))
+
+	for i, issue := range issues {
+		formattedIssues[i] = fmt.Sprintf("[%s](%s%s)", issue, settings.TicketingBaseURL, issue)
+	}
+	return formattedIssues
 }
 
 func testingChanges(options *Options) (string, error) {

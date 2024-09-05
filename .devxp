@@ -8,3 +8,4 @@ lint:
     - "(^build/)"
     - "(^gradle/)"
     - "(target/)"
+ticketingBaseUrl: "https://lol"

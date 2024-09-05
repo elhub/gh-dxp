@@ -18,9 +18,12 @@ func main() {
 	// Otherwise, use the default .devxp file in the current directory.
 	// If neither is found, use default settings.
 	settings := config.DefaultSettings()
+	log.Info(settings.TicketingBaseURL)
 	if userSettings, err := config.ReadConfig("~/.local/devxp/config.yml"); err == nil {
+		log.Info("Base config")
 		settings = config.MergeSettings(settings, userSettings)
 	} else if localSettings, err := config.ReadConfig(".devxp"); err == nil {
+		log.Info("local config")
 		settings = config.MergeSettings(settings, localSettings)
 	}
 
