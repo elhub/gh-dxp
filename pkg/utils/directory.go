@@ -112,14 +112,14 @@ func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
 	}
 
 	changes := strings.Split(changeString, "\n")
-	untrackedChanges := filter(changes, re.MatchString)
+	matchedChanges := filter(changes, re.MatchString)
 
 	// Remove the regex matched part of the string, leaving only the file name
-	for i, s := range untrackedChanges {
-		untrackedChanges[i] = re.ReplaceAllString(s, "")
+	for i, s := range matchedChanges {
+		matchedChanges[i] = re.ReplaceAllString(s, "")
 	}
 
-	return untrackedChanges, nil
+	return matchedChanges, nil
 }
 
 func filter(list []string, test func(string) bool) []string {
