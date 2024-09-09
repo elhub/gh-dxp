@@ -7,6 +7,10 @@
 .stylelintrc.json
 .yamllint.yml
 revive.toml
+.ansible-lint
+.flake8
+.pylintrc
+pyproject.toml
 
 ### Elhub-Ansible
 **/galaxy/*
