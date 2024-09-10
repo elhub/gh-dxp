@@ -2,6 +2,7 @@ package utils
 
 import (
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -11,7 +12,7 @@ func GetGitRootDirectory(exe Executor) (string, error) {
 	// Fails if not in a repo
 	root, err := exe.Command("git", "rev-parse", "--show-toplevel")
 	if err != nil {
-		return "", &NotAGitRepoError{Msg: "Not a git repo"}
+		return "", err
 	}
 
 	formattedRoot := strings.TrimSuffix(root, "\n")
@@ -38,16 +39,6 @@ func setWorkingDirectoryToGitRoot(exe Executor) error {
 
 	err = os.Chdir(root)
 	return err
-}
-
-// NotAGitRepoError signifies that the current working directory is not a git repo.
-type NotAGitRepoError struct {
-	Msg string
-}
-
-// Signifies that the current working directory is not a git repo.
-func (e *NotAGitRepoError) Error() string {
-	return e.Msg
 }
 
 // NotAGitHubRepoError signifies that the current working directory is not a GitHub repo.
@@ -78,7 +69,7 @@ func isInGitHubRepo(exe Executor) (bool, error) {
 	url, err := exe.Command("git", "remote", "get-url", "origin")
 
 	if err != nil {
-		return false, &NotAGitRepoError{Msg: "Not a git repo"}
+		return false, err
 	}
 	if !urlIsGitHubRepo(url) {
 		return false, &NotAGitHubRepoError{Msg: "Current origin is not a GitHub repository"}
@@ -89,4 +80,44 @@ func isInGitHubRepo(exe Executor) (bool, error) {
 
 func urlIsGitHubRepo(url string) bool {
 	return (strings.HasPrefix(url, "https://github.com") || strings.HasPrefix(url, "git@github.com"))
+}
+
+// GetUntrackedChanges returns a list of file names for unchanged files in the current repo
+func GetUntrackedChanges(exe Executor) ([]string, error) {
+	re := regexp.MustCompile(`^\?\?`)
+
+	return getChanges(exe, re)
+}
+
+// GetTrackedChanges returns a list of file names for changed files in the current repo
+func GetTrackedChanges(exe Executor) ([]string, error) {
+	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) // This regex is intended to catch all tracked changes except for unmerged conflicts
+	return getChanges(exe, re)
+}
+
+func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
+	changeString, err := exe.Command("git", "status", "--porcelain")
+	if err != nil {
+		return []string{}, err
+	}
+
+	changes := strings.Split(changeString, "\n")
+	matchedChanges := filter(changes, re.MatchString)
+
+	// Remove the regex matched part of the string, leaving only the file name
+	for i, s := range matchedChanges {
+		matchedChanges[i] = re.ReplaceAllString(s, "")
+	}
+
+	return matchedChanges, nil
+}
+
+func filter(list []string, test func(string) bool) []string {
+	ret := []string{}
+	for _, s := range list {
+		if test(s) {
+			ret = append(ret, s)
+		}
+	}
+	return ret
 }

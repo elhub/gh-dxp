@@ -11,14 +11,14 @@ import (
 func BranchCmd(exe utils.Executor) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "branch [branch-name]",
-		Short: "Create a new branch based on an issue and checkout to it.",
+		Short: "Checkout or Create+Checkout a git branch.",
 		Args:  cobra.ExactArgs(1),
 		Long: heredoc.Docf(`
 			Create a new branch and checkout to it. If the branch already exists,
 			it will be checked out.
 		`, "`"),
 		Example: heredoc.Doc(`
-			// Create a new branch 'wip' and checkout to it:
+			# Create a new branch 'wip' and checkout to it:
 			$ gh dxp branch wip
 		`),
 		RunE: func(_ *cobra.Command, args []string) error {

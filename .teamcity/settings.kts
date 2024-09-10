@@ -2,7 +2,6 @@ import no.elhub.devxp.build.configuration.pipeline.ElhubProject.Companion.elhubP
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
 
-
 elhubProject(DEVXP, "gh-dxp") {
 
     params {

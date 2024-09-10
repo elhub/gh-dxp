@@ -33,37 +33,51 @@ func (m *mockExecutor) GH(arg ...string) (bytes.Buffer, error) {
 
 func TestRun(t *testing.T) {
 	tests := []struct {
-		name           string
-		executionError error
-		expectErr      bool
-		modifiedFiles  string
-		lintAllFiles   bool
-		fixFiles       bool
+		name             string
+		executionError   error
+		expectErr        bool
+		modifiedFiles    string
+		lintAllFiles     bool
+		fixFiles         bool
+		existingBranches string
+		currentChanges   string
 	}{
 		{
-			name:           "lint has no errors",
-			executionError: nil,
-			expectErr:      false,
-			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
+			name:             "lint has no errors",
+			executionError:   nil,
+			expectErr:        false,
+			modifiedFiles:    "/pkg/source.go\n/pkg/source2.go",
+			existingBranches: "main\ndifferentBranch\n",
 		},
 		{
-			name:           "lint has errors",
-			executionError: errors.New("command error"),
-			expectErr:      true,
-			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
+			name:             "lint has errors",
+			executionError:   errors.New("command error"),
+			expectErr:        true,
+			existingBranches: "main\ndifferentBranch\n",
+			modifiedFiles:    "/pkg/source.go\n/pkg/source2.go",
 		},
 		{
-			name:           "lint with --all flag",
-			executionError: nil,
-			expectErr:      false,
-			lintAllFiles:   true,
+			name:             "lint with --all flag",
+			executionError:   nil,
+			expectErr:        false,
+			existingBranches: "main\ndifferentBranch\n",
+			lintAllFiles:     true,
 		},
 		{
-			name:           "lint with --fix flag",
-			executionError: nil,
-			expectErr:      false,
-			modifiedFiles:  "/pkg/source.go\n/pkg/source2.go",
-			fixFiles:       true,
+			name:             "lint with --fix flag",
+			executionError:   nil,
+			expectErr:        false,
+			modifiedFiles:    "/pkg/source.go\n/pkg/source2.go",
+			existingBranches: "main\ndifferentBranch\n",
+			fixFiles:         true,
+		},
+		{
+			name:             "lint with no existing branches",
+			executionError:   nil,
+			expectErr:        false,
+			existingBranches: "",
+			currentChanges:   " M /pkg/source.go\n M /pkg/source2.go",
+			modifiedFiles:    "/pkg/source.go\n/pkg/source2.go",
 		},
 	}
 
@@ -75,7 +89,7 @@ func TestRun(t *testing.T) {
 
 			if !tt.lintAllFiles {
 				linterArgs = append(linterArgs, "--filesonly")
-				linterArgs = append(linterArgs, lint.ConvertChangedFilesIntoList(tt.modifiedFiles)...)
+				linterArgs = append(linterArgs, lint.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
 			}
 
 			if tt.fixFiles {
@@ -85,7 +99,14 @@ func TestRun(t *testing.T) {
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, tt.executionError)
 
 			if !tt.lintAllFiles {
-				mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
+				mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
+
+				if len(tt.existingBranches) == 0 {
+					mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
+				} else {
+					mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
+				}
+
 			}
 
 			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles})

@@ -6,7 +6,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/pr"
+	pr "github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/elhub/gh-dxp/pkg/template"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"

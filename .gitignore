@@ -1,24 +1,39 @@
-### Local Lint Files
+### Local Lint Files ###
+# This is required to avoid megalinter spamming each repository with lint configurations
+.ansible-lint
 .checkmake.ini
-.jsonlintrc
+.flake8
 .golangci.yml
+.htmlhintrc
+.jsonlintrc
 .markdownlint.json
 .prettierrc.json
+.pylintrc
 .stylelintrc.json
 .yamllint.yml
+pyproject.toml
 revive.toml
+.ansible-lint
+.flake8
+.pylintrc
+pyproject.toml
 
-### Elhub-Ansible
+### Ansible ###
 **/galaxy/*
 **/inventories/*
 !**/galaxy/.gitkeep
 !**/inventories/.gitkeep
+ansible/*.log
+ansible/*.retry
 
-### Backup files
+### Backup files ###
 **/*.bkp
 **/*.bak
 
-### Env files
+### CMake ###
+cmake-build-*/
+
+### Env files ###
 *.env
 
 ### Intellij+all Patch ###
@@ -27,32 +42,19 @@ revive.toml
 modules.xml
 *.iml
 *.ipr
-
-# IntelliJ
 out/
-
-# CMake
-cmake-build-*/
-
 # JIRA plugin
 atlassian-ide-plugin.xml
-
-# SonarQube
+# SonarQube Plugin
 .idea/sonarlint
 .scannerwork/
 
 ### Gradle ###
 .gradle
 build/
-
-# Ignore Gradle GUI config
-gradle-app.setting
-
-# Cache of project
-.gradletasknamecache
-
-### Gradle Patch ###
 **/build/
+gradle-app.setting
+.gradletasknamecache
 
 ### Maven ###
 target/
@@ -70,11 +72,9 @@ buildNumber.properties
 ### Java ###
 # Compiled class file
 *.class
-
-# Log file
+# Log files
 *.log
 *.log*
-
 # Package Files #
 *.jar
 *.war
@@ -83,37 +83,39 @@ buildNumber.properties
 *.zip
 *.tar.gz
 *.rar
-
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
-
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 ### React ###
 .DS_*
+dist/
 logs
 **/*.backup.*
 **/*.back.*
-
 node_modules
 bower_components
-
 *.sublime*
-
 psd
 thumb
 sketch
 screenshots/*
 !screenshots/.gitkeep
 
-### NPM ###
-dist/
+### TeamCity ###
+.teamcity/bin/
 
-### MegaLint ###
-megalinter-reports/
+### Terraform ###
+terraform/.terraform
+terraform/*.tfstate*
+terraform/*.tfvars
 
 ### Testing ###
 /coverage
 /allure-report
 /allure-results
+
+### Visual Studio Code ###
+.vscode/
+*.code-workspace

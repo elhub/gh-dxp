@@ -21,7 +21,7 @@ func OwnerCmd(exe utils.Executor, _ *config.Settings) *cobra.Command {
 			no CODEOWNERS is found in the .github directory, it will return undefined.
 		`, "`"),
 		Example: heredoc.Doc(`
-			// Check the owner of the README.md file
+			# Check the owner of the README.md file
 			$ gh dxp owner README.md
 		`),
 		RunE: func(_ *cobra.Command, args []string) error {
