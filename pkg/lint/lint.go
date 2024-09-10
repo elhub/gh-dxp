@@ -51,16 +51,34 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 }
 
 func getChangedFiles(exe utils.Executor) ([]string, error) {
-	changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
+
+	branchString, err := exe.Command("git", "branch")
 	if err != nil {
 		return []string{}, err
 	}
 
-	return ConvertChangedFilesIntoList(changedFilesString), nil
+	branchList := ConvertTerminalOutputIntoList(branchString)
+
+	var changedFiles []string
+
+	if len(branchList) > 0 {
+
+		changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
+		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
+		if err != nil {
+			return []string{}, err
+		}
+	} else {
+		changedFiles, err = utils.GetTrackedChanges(exe)
+		if err != nil {
+			return []string{}, err
+		}
+	}
+	return changedFiles, nil
 }
 
-// ConvertChangedFilesIntoList converts the output string of a git diff --name-only into a list of file paths.
-func ConvertChangedFilesIntoList(changedFilesString string) []string {
+// ConvertTerminalOutputIntoList converts terminal output on multiple lines to a list of strings
+func ConvertTerminalOutputIntoList(changedFilesString string) []string {
 	if len(changedFilesString) == 0 {
 		return []string{}
 	}
