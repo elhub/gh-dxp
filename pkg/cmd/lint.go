@@ -14,17 +14,25 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "lint",
-		Short: "Run MegaLinter on modified files in the repository.",
+		Short: "Run linters on modified files in the repository.",
 		Args:  cobra.MaximumNArgs(0),
 		Long: heredoc.Docf(`
-			Run linters on files in the repository. By default, only files that have been modified in relation to the main branch are included in the lint.
+			Run linters on files in the repository. We use MegaLinter (an open-source lint aggregator) to run linting
+			on the repository. By default, only files that have been modified in relation to the main branch are
+			included in the lint.
+
+			Some linters (e.g., prettier) provide auto-fix capabilities. To resolve linting errors automatically, use
+			the --fix flag.
 		`, "`"),
 		Example: heredoc.Doc(`
-			// Lint modified files in the repository
+			# Lint modified files in the repository
 			$ gh dxp lint
 
-			// Lint all files in repository
+			# Lint all files in repository
 			$ gh dxp lint --all
+
+			# Lint modified files in repository and fix errors
+			$ gh dxp lint --fix
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
 			err := utils.SetWorkDirToGitHubRoot(exe)

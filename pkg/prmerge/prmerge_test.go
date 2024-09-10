@@ -1,4 +1,4 @@
-package merge_test
+package prmerge_test
 
 import (
 	"bytes"
@@ -6,7 +6,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/elhub/gh-dxp/pkg/merge"
+	merge "github.com/elhub/gh-dxp/pkg/prmerge"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	version = "locally compiled development build"
+	version = "SNAPSHOT"
 )
 
 func main() {

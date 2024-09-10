@@ -1,5 +1,5 @@
-// Package pr contains the logic for creating and updating pull requests.
-package pr
+// Package prcreate contains the logic for creating and updating pull requests.
+package prcreate
 
 import (
 	"path/filepath"

@@ -1,5 +1,5 @@
-// Package merge contains the logic for merging pull requests.
-package merge
+// Package prmerge contains the logic for merging pull requests.
+package prmerge
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
-	"github.com/elhub/gh-dxp/pkg/pr"
+	pr "github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 

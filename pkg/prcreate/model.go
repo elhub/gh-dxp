@@ -1,4 +1,4 @@
-package pr
+package prcreate
 
 // Options represents the options for the pr command.
 type Options struct {
