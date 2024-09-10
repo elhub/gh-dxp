@@ -98,6 +98,13 @@ func TestRun(t *testing.T) {
 				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
 			if !tt.lintAllFiles && tt.directory == "" {
+				mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
+
+				if len(tt.existingBranches) == 0 {
+					mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
+				} else {
+					mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
+				}
 				linterArgs = append(linterArgs, "--filesonly")
 				linterArgs = append(linterArgs, lint.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
 			} else if tt.directory != "" {
@@ -109,17 +116,6 @@ func TestRun(t *testing.T) {
 			}
 
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, tt.executionError)
-
-			if !tt.lintAllFiles && tt.directory == "" {
-				mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
-
-				if len(tt.existingBranches) == 0 {
-					mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
-				} else {
-					mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
-				}
-
-			}
 
 			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles, Directory: tt.directory})
 
