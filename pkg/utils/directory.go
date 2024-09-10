@@ -95,6 +95,7 @@ func GetTrackedChanges(exe Executor) ([]string, error) {
 	return getChanges(exe, re)
 }
 
+// Checks the current repo state for any changes matching a given regex 're'
 func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
 	changeString, err := exe.Command("git", "status", "--porcelain")
 	if err != nil {
@@ -109,6 +110,11 @@ func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
 		matchedChanges[i] = re.ReplaceAllString(s, "")
 	}
 
+	// Split string on '->' and capture the last element, in order to catch changes of type 'oldfilename.txt -> newfilename.txt'
+	for i, s := range matchedChanges {
+		macgyver := strings.Split(s, "->")
+		matchedChanges[i] = strings.TrimSpace(macgyver[len(macgyver)-1])
+	}
 	return matchedChanges, nil
 }
 
