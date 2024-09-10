@@ -14,7 +14,6 @@ import (
 // Run runs the linting process using megalinter (https://github.com/oxsecurity/megalinter).
 // Megalinter is an open-source linter aggregator that runs multiple linters in parallel. It requires NodeJS (npx) to be installed.
 func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
-	log.Info(opts.Directory)
 	// Run mega-linter-runner with the cupcake flavor.
 	ctx := context.Background()
 
@@ -45,7 +44,6 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	if opts.Fix {
 		args = append(args, "--fix")
 	}
-	log.Info(strings.Join(args, ", "))
 	err := exe.CommandContext(ctx, args[0], args[1:]...)
 	if err != nil {
 		log.Info("The Lint Process returned an error: " + err.Error() + "\n")
