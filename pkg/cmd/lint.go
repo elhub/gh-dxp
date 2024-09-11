@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"path/filepath"
+	"strings"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
@@ -33,12 +36,31 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 
 			# Lint modified files in repository and fix errors
 			$ gh dxp lint --fix
+
+			# Lint all files in the current directory
+			$ gh dxp lint -d .
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
+
+			currentPath, _ := filepath.Abs("./")
+
 			err := utils.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
+
+			// Convert relative path provided in Directory into a path relative to the git root
+			if opts.Directory != "" {
+				fullPath := filepath.Join(currentPath, opts.Directory)
+
+				gitRoot, err := utils.GetGitRootDirectory(exe)
+				if err != nil {
+					return err
+				}
+
+				opts.Directory = strings.TrimPrefix(fullPath, gitRoot)
+			}
+
 			return lint.Run(exe, settings, opts)
 		},
 	}
@@ -57,6 +79,13 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"f",
 		false,
 		"Automatically fix linting errors",
+	)
+	fl.StringVarP(
+		&opts.Directory,
+		"directory",
+		"d",
+		"",
+		"Lint all files under the given directory",
 	)
 
 	return cmd
