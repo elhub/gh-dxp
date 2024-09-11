@@ -1,39 +1,18 @@
-package prcreate_test
+package pr_test
 
 import (
-	"bytes"
-	"context"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/prcreate"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-type MockExecutor struct {
-	mock.Mock
-}
-
-func (m *MockExecutor) Command(name string, arg ...string) (string, error) {
-	args := m.Called(name, arg)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
-
-func TestExecute(t *testing.T) {
+func TestExecuteUpdate(t *testing.T) {
 	tests := []struct {
 		name             string
 		currentBranch    string
@@ -56,20 +35,6 @@ func TestExecute(t *testing.T) {
 		modifiedFiles    string
 		existingBranches string
 	}{
-		{
-			name:             "Test successful PR creation",
-			currentBranch:    "branch1",
-			pushBranch:       "branch1",
-			prListNumber:     "",
-			prListNErr:       nil,
-			prListURL:        "https://github.com/elhub/demo/pull/3",
-			gitLog:           "commit 1",
-			repoBranchName:   "main",
-			prCreate:         "pull request created",
-			expectedErr:      nil,
-			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			existingBranches: "main\ndifferentBranch\n",
-		},
 		{
 			name:             "Test successful PR update",
 			currentBranch:    "branch1",
@@ -120,57 +85,10 @@ func TestExecute(t *testing.T) {
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
 		{
-			name:             "Test error in create flow - git push",
-			currentBranch:    "branch1",
-			pushBranch:       "branch1",
-			pushBranchErr:    errors.New("error pushing branch"),
-			prListNumber:     "",
-			prListURL:        "https://github.com/elhub/demo/pull/3",
-			expectedErr:      errors.New("error pushing branch"),
-			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			existingBranches: "main\ndifferentBranch\n",
-		},
-		{
-			name:             "Test error in create flow - fetch default",
-			currentBranch:    "branch1",
-			pushBranch:       "branch1",
-			prListNumber:     "",
-			prListURL:        "https://github.com/elhub/demo/pull/3",
-			repoBranchErr:    errors.New("error fetching default branch"),
-			expectedErr:      errors.New("Failed to fetch default branch: error fetching default branch"),
-			existingBranches: "main\ndifferentBranch\n",
-			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-		},
-		{
-			name:             "Test error in create flow - git log",
-			currentBranch:    "branch1",
-			pushBranch:       "branch1",
-			prListNumber:     "",
-			prListURL:        "https://github.com/elhub/demo/pull/3",
-			repoBranchName:   "main",
-			gitLogErr:        errors.New("error fetching git log"),
-			existingBranches: "main\ndifferentBranch\n",
-			expectedErr:      errors.New("error fetching git log"),
-			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-		},
-		{
-			name:             "Test error in create flow - create PR",
-			currentBranch:    "branch1",
-			pushBranch:       "branch1",
-			prListNumber:     "",
-			prListURL:        "https://github.com/elhub/demo/pull/3",
-			gitLog:           "commit 1",
-			repoBranchName:   "main",
-			prCreateErr:      errors.New("error creating PR"),
-			expectedErr:      errors.New("Failed to create pull request: error creating PR"),
-			existingBranches: "main\ndifferentBranch\n",
-			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-		},
-		{
 			name:             "Test local has untracked changes",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
-			prListNumber:     "",
+			prListNumber:     "1",
 			prListNErr:       nil,
 			prListURL:        "https://github.com/elhub/demo/pull/3",
 			gitLog:           "commit 1",
@@ -185,7 +103,7 @@ func TestExecute(t *testing.T) {
 			name:             "Test local has tracked changes",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
-			prListNumber:     "",
+			prListNumber:     "1",
 			prListNErr:       nil,
 			prListURL:        "https://github.com/elhub/demo/pull/3",
 			gitLog:           "commit 1",
@@ -200,7 +118,7 @@ func TestExecute(t *testing.T) {
 			name:             "Test local has multiple tracked changes",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
-			prListNumber:     "",
+			prListNumber:     "1",
 			prListNErr:       nil,
 			prListURL:        "https://github.com/elhub/demo/pull/3",
 			gitLog:           "commit 1",
@@ -254,9 +172,9 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
 
-			err := prcreate.Execute(mockExe,
+			err := pr.ExecuteUpdate(mockExe,
 				&config.Settings{},
-				&prcreate.Options{
+				&pr.UpdateOptions{
 					TestRun: true,
 				})
 

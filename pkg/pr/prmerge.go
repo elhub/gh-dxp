@@ -1,5 +1,4 @@
-// Package prmerge contains the logic for merging pull requests.
-package prmerge
+package pr
 
 import (
 	"errors"
@@ -7,12 +6,11 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
-	pr "github.com/elhub/gh-dxp/pkg/prcreate"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
-// Execute merges a pull request on the current branch.
-func Execute(exe utils.Executor, options *Options) error {
+// ExecuteMerge merges a pull request on the current branch.
+func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
@@ -21,12 +19,12 @@ func Execute(exe utils.Executor, options *Options) error {
 	branchID := strings.Trim(currentBranch, "\n")
 
 	// Get prID
-	prID, errPR := pr.CheckForExistingPR(exe, branchID)
+	prID, errPR := CheckForExistingPR(exe, branchID)
 	if errPR != nil {
 		return errPR
 	}
 
-	prTitle, errTitle := pr.GetPRTitle(exe)
+	prTitle, errTitle := GetPRTitle(exe)
 	if errTitle != nil {
 		return errTitle
 	}

@@ -1,7 +1,7 @@
-package prcreate
+package pr
 
 // Options represents the options for the pr command.
-type Options struct {
+type CreateOptions struct {
 	TestRun bool
 	NoLint  bool
 	NoUnit  bool
@@ -13,6 +13,17 @@ type Options struct {
 
 	Reviewers []string
 	Assignees []string
+}
+
+// Options represents the options for the merge command.
+type MergeOptions struct {
+	AutoConfirm bool
+}
+
+type UpdateOptions struct {
+	TestRun bool
+	NoLint  bool
+	NoUnit  bool
 }
 
 // PullRequest represents a pull request.
