@@ -101,6 +101,7 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	return cmd
 }
 
+// PRMergeCmd handles the merging of a pull request.
 func PRMergeCmd(exe utils.Executor) *cobra.Command {
 	opts := &pr.MergeOptions{}
 
@@ -142,6 +143,7 @@ func PRMergeCmd(exe utils.Executor) *cobra.Command {
 	return cmd
 }
 
+// PRUpdateCmd handles the updating of a pull request. This is a more limited version of the create command.
 func PRUpdateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	opts := &pr.UpdateOptions{}
 

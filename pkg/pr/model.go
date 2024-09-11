@@ -1,6 +1,6 @@
 package pr
 
-// Options represents the options for the pr command.
+// CreateOptions represents the options for the pr create command.
 type CreateOptions struct {
 	TestRun bool
 	NoLint  bool
@@ -15,11 +15,12 @@ type CreateOptions struct {
 	Assignees []string
 }
 
-// Options represents the options for the merge command.
+// MergeOptions represents the options for the pr merge command.
 type MergeOptions struct {
 	AutoConfirm bool
 }
 
+// UpdateOptions represents the options for the pr update command.
 type UpdateOptions struct {
 	TestRun bool
 	NoLint  bool
