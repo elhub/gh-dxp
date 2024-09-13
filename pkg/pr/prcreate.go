@@ -48,7 +48,7 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 		}
 		branchID = newBranchName
 	} else {
-		if options.Branch != "" {
+		if options.Branch != "" && options.Branch != branchID {
 			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + branchID)
 		}
 	}
