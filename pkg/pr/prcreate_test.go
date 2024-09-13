@@ -1,4 +1,4 @@
-package prcreate_test
+package pr_test
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/prcreate"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -33,7 +33,7 @@ func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
 	return *bytes.NewBufferString(args.String(0)), args.Error(1)
 }
 
-func TestExecute(t *testing.T) {
+func TestExecuteCreate(t *testing.T) {
 	tests := []struct {
 		name             string
 		currentBranch    string
@@ -269,9 +269,9 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
 
-			err := prcreate.Execute(mockExe,
+			err := pr.ExecuteCreate(mockExe,
 				&config.Settings{},
-				&prcreate.Options{
+				&pr.CreateOptions{
 					TestRun: true,
 				})
 

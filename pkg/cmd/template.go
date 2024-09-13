@@ -6,7 +6,7 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
-	pr "github.com/elhub/gh-dxp/pkg/prcreate"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/template"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
@@ -14,7 +14,7 @@ import (
 
 // TemplateCmd initializes a repository with default files.
 func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &pr.Options{}
+	opts := &pr.CreateOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "template",
