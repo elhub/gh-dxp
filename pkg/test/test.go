@@ -52,7 +52,7 @@ func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 	if npmTestInGitRoot(root) {
 		return "npm", []string{"test"}, nil
 	}
-	return "", []string{}, &NoTestCommandError{Msg: "No test command found"}
+	return "", []string{}, &NoTestCommandError{Msg: "No test command could be automatically detected. If you want to automatically run tests as part of pr creation, please have a look at the documentation."}
 }
 
 func gradleTestInGitRoot(root string) bool {

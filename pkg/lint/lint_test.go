@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -41,6 +42,7 @@ func TestRun(t *testing.T) {
 		fixFiles         bool
 		existingBranches string
 		currentChanges   string
+		directory        string
 	}{
 		{
 			name:             "lint has no errors",
@@ -79,6 +81,14 @@ func TestRun(t *testing.T) {
 			currentChanges:   " M /pkg/source.go\n M /pkg/source2.go",
 			modifiedFiles:    "/pkg/source.go\n/pkg/source2.go",
 		},
+		{
+			name:             "lint the pkg directory",
+			executionError:   nil,
+			expectErr:        false,
+			currentChanges:   " M /pkg/source.go\n M /pkg/source2.go",
+			existingBranches: "main\ndifferentBranch\n",
+			directory:        "pkg",
+		},
 	}
 
 	for _, tt := range tests {
@@ -87,9 +97,18 @@ func TestRun(t *testing.T) {
 			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake", "-e",
 				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
-			if !tt.lintAllFiles {
+			if !tt.lintAllFiles && tt.directory == "" {
+				mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
+
+				if len(tt.existingBranches) == 0 {
+					mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
+				} else {
+					mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
+				}
 				linterArgs = append(linterArgs, "--filesonly")
 				linterArgs = append(linterArgs, lint.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
+			} else if tt.directory != "" {
+				linterArgs = append(linterArgs, "-e", fmt.Sprintf("FILTER_REGEX_INCLUDE=(%s)", tt.directory))
 			}
 
 			if tt.fixFiles {
@@ -98,18 +117,7 @@ func TestRun(t *testing.T) {
 
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, tt.executionError)
 
-			if !tt.lintAllFiles {
-				mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
-
-				if len(tt.existingBranches) == 0 {
-					mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
-				} else {
-					mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
-				}
-
-			}
-
-			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles})
+			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles, Directory: tt.directory})
 
 			if tt.expectErr {
 				require.Error(t, err)
