@@ -116,7 +116,7 @@ func PRMergeCmd(exe utils.Executor) *cobra.Command {
 		`, "`"),
 		Example: heredoc.Doc(`
 			# Merge the current branch if it is a GitHub PR
-			$ gh dxp pr-merge
+			$ gh dxp pr merge
 		`),
 		Aliases: []string{"land", "merge"},
 		Args:    cobra.NoArgs,
