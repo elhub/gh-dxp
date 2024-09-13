@@ -1,0 +1,34 @@
+package pr
+
+// CreateOptions represents the options for the pr create command.
+type CreateOptions struct {
+	TestRun bool
+	NoLint  bool
+	NoUnit  bool
+
+	Branch        string
+	CommitMessage string
+
+	baseBranch string
+
+	Reviewers []string
+	Assignees []string
+}
+
+// MergeOptions represents the options for the pr merge command.
+type MergeOptions struct {
+	AutoConfirm bool
+}
+
+// UpdateOptions represents the options for the pr update command.
+type UpdateOptions struct {
+	TestRun bool
+	NoLint  bool
+	NoUnit  bool
+}
+
+// PullRequest represents a pull request.
+type PullRequest struct {
+	Title string
+	Body  string
+}

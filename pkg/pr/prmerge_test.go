@@ -1,37 +1,15 @@
-package prmerge_test
+package pr_test
 
 import (
-	"bytes"
-	"context"
 	"errors"
 	"testing"
 
-	merge "github.com/elhub/gh-dxp/pkg/prmerge"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
-type MockExecutor struct {
-	mock.Mock
-}
-
-func (m *MockExecutor) Command(name string, arg ...string) (string, error) {
-	args := m.Called(name, arg)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
-
-func TestExecute(t *testing.T) {
+func TestExecuteMerge(t *testing.T) {
 	tests := []struct {
 		name          string
 		pushBranch    string
@@ -90,7 +68,7 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"pr", "view", "--json", "title", "--jq", ".title"}).Return(tt.prTitle, tt.prTitleErr)
 			mockExe.On("GH", []string{"pr", "merge", "--squash", "--delete-branch"}).Return(tt.prMerge, tt.prMergeErr)
 
-			err := merge.Execute(mockExe, &merge.Options{
+			err := pr.ExecuteMerge(mockExe, &pr.MergeOptions{
 				AutoConfirm: true,
 			})
 

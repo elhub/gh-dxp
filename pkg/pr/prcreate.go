@@ -1,5 +1,4 @@
-// Package prcreate contains the logic for creating and updating pull requests.
-package prcreate
+package pr
 
 import (
 	"path/filepath"
@@ -15,8 +14,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Execute creates or updates a pull request, depending on its current state.
-func Execute(exe utils.Executor, settings *config.Settings, options *Options) error {
+// ExecuteCreate creates or updates a pull request, depending on its current state.
+func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *CreateOptions) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
@@ -49,7 +48,7 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 		}
 		branchID = newBranchName
 	} else {
-		if options.Branch != "" {
+		if options.Branch != "" && options.Branch != branchID {
 			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + branchID)
 		}
 	}
@@ -73,7 +72,7 @@ func Execute(exe utils.Executor, settings *config.Settings, options *Options) er
 	return create(exe, options, branchID)
 }
 
-func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *Options) error {
+func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *CreateOptions) error {
 	// Handle uncommitted changes
 	filesToCommit, err := handleUncommittedChanges(exe, options)
 	if err != nil {
@@ -106,7 +105,7 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, o
 	return nil
 }
 
-func create(exe utils.Executor, options *Options, branchID string) error {
+func create(exe utils.Executor, options *CreateOptions, branchID string) error {
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchID)
@@ -133,7 +132,7 @@ func create(exe utils.Executor, options *Options, branchID string) error {
 	return nil
 }
 
-func generatePRArgs(options *Options) []string {
+func generatePRArgs(options *CreateOptions) []string {
 	args := []string{}
 
 	if len(options.Assignees) > 0 {
@@ -166,36 +165,9 @@ func update(exe utils.Executor, branchID string, prID string) error {
 	return nil
 }
 
-// CheckForExistingPR checks if a PR already exists for the current branch.
-func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
-	stdOut, err := exe.GH("pr", "list", "-H", branchID, "--json", "number", "--jq", ".[].number")
-
-	if err != nil {
-		log.Debug("Error: " + err.Error())
-		return "", errors.New("Failed to find existing PR")
-	}
-
-	number := strings.Trim(stdOut.String(), "\n")
-
-	return number, nil
-}
-
-// GetPRTitle gets the title of the current PR.
-func GetPRTitle(exe utils.Executor) (string, error) {
-	stdOut, err := exe.GH("pr", "view", "--json", "title", "--jq", ".title")
-
-	if err != nil {
-		return "", errors.New("Error getting PR title")
-	}
-
-	title := strings.Trim(stdOut.String(), "\n")
-
-	return title, nil
-}
-
 func createPR(
 	exe utils.Executor,
-	options *Options,
+	options *CreateOptions,
 	branchID string,
 	mainID string,
 ) (PullRequest, error) {
@@ -225,7 +197,7 @@ func createPR(
 	return pr, nil
 }
 
-func createBody(options *Options, commits string) (string, error) {
+func createBody(options *CreateOptions, commits string) (string, error) {
 	body := ""
 
 	// Add a summary of the commits to the PR body
@@ -294,7 +266,7 @@ func createBody(options *Options, commits string) (string, error) {
 	return body, nil
 }
 
-func issuesChanges(options *Options) (string, error) {
+func issuesChanges(options *CreateOptions) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
@@ -320,7 +292,7 @@ func issuesChanges(options *Options) (string, error) {
 	return body, nil
 }
 
-func testingChanges(options *Options) (string, error) {
+func testingChanges(options *CreateOptions) (string, error) {
 	// Testing
 	// TODO: Consider skipping this, if dealing with code where unit and integration
 	// tests are not applicable. Replace with deploy test question?
@@ -348,7 +320,7 @@ func testingChanges(options *Options) (string, error) {
 	return body, nil
 }
 
-func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
+func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]string, error) {
 	// Handle presence of untracked changes - ignore or abort
 	untrackedChanges, err := utils.GetUntrackedChanges(exe)
 	if err != nil {
@@ -384,7 +356,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	return trackedChanges, nil
 }
 
-func documentationChanges(options *Options) (string, error) {
+func documentationChanges(options *CreateOptions) (string, error) {
 	// Documentation
 	// Multi-choice: README.md, docs, storybook, no updates
 	docOptions := []string{"No updates", "README.md", "docs", "storybook"}
@@ -472,7 +444,7 @@ func logPullRequest(pr PullRequest) {
 	log.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
 }
 
-func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {
+func addAndCommitFiles(exe utils.Executor, files []string, options *CreateOptions) error {
 	var commitMessage string
 	var err error
 
@@ -527,7 +499,7 @@ func formatTrackedFileChangesQuestion(changes []string) string {
 }
 
 // If the baseBranch option is not set, set it to the base branch of the remote.
-func setBaseBranch(exe utils.Executor, options *Options) (string, error) {
+func setBaseBranch(exe utils.Executor, options *CreateOptions) (string, error) {
 	// Fetch the default branch
 	baseBranch := options.baseBranch
 	if baseBranch == "" {
@@ -543,7 +515,7 @@ func setBaseBranch(exe utils.Executor, options *Options) (string, error) {
 	return baseBranch, nil
 }
 
-func getNewBranchName(options *Options) (string, error) {
+func getNewBranchName(options *CreateOptions) (string, error) {
 	var newBranchName = "branch1"
 
 	if options.Branch != "" {

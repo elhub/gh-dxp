@@ -10,7 +10,8 @@ lint: dxp lint
 test: dxp test
 
 # Pull Requests
-prc: dxp pr-create
+prc: dxp pr create
 prl: pr list
-prm: dxp pr-merge
+prm: dxp pr merge
+pru: dxp pr update
 prv: pr view

@@ -1,4 +1,4 @@
-package prcreate_test
+package pr_test
 
 import (
 	"bytes"
@@ -7,7 +7,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/prcreate"
+	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -33,7 +33,7 @@ func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
 	return *bytes.NewBufferString(args.String(0)), args.Error(1)
 }
 
-func TestExecute(t *testing.T) {
+func TestExecuteCreate(t *testing.T) {
 	tests := []struct {
 		name             string
 		currentBranch    string
@@ -211,6 +211,20 @@ func TestExecute(t *testing.T) {
 			currentChanges:   " M tracked_change.go\n M tracked_change2.go",
 		},
 		{
+			name:             "Test local has a file rename",
+			currentBranch:    "branch1",
+			pushBranch:       "branch1",
+			prListNumber:     "",
+			prListNErr:       nil,
+			prListURL:        "https://github.com/elhub/demo/pull/3",
+			gitLog:           "commit 1",
+			repoBranchName:   "main",
+			prCreate:         "pull request created",
+			expectedErr:      nil,
+			existingBranches: "main\ndifferentBranch\n",
+			currentChanges:   " M tracked_change.go\n M tracked_change2.go\nR  oldname.go -> newname.go",
+		},
+		{
 			name:             "Test lint is failing",
 			expectedLintErr:  errors.New("exit status 1"),
 			expectedErr:      errors.New("exit status 1"),
@@ -237,6 +251,7 @@ func TestExecute(t *testing.T) {
 			mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
 			mockExe.On("Command", "git", []string{"add", "/home/repo-name/tracked_change.go"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"add", "/home/repo-name/tracked_change.go", "/home/repo-name/tracked_change2.go"}).Return("", nil)
+			mockExe.On("Command", "git", []string{"add", "/home/repo-name/tracked_change.go", "/home/repo-name/tracked_change2.go", "/home/repo-name/newname.go"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"commit", "-m", "default commit message"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"show-ref", "--verify", "--quiet", "refs/heads/" + tt.currentBranch})
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return("", tt.expectedLintErr)
@@ -254,9 +269,9 @@ func TestExecute(t *testing.T) {
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
 
-			err := prcreate.Execute(mockExe,
+			err := pr.ExecuteCreate(mockExe,
 				&config.Settings{},
-				&prcreate.Options{
+				&pr.CreateOptions{
 					TestRun: true,
 				})
 

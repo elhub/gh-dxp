@@ -4,7 +4,7 @@ A GitHub (gh) CLI extension for automating daily development work, brought to yo
 
 ### User Guide
 Using the `-h` flag with any command will display relevant documentation.
-In addition to that, a user guide for `gh dxp` can be found under docs-support.
+In addition to that, a user guide for `gh dxp` can be found [here](https://docs.elhub.cloud/support/applications/gh-dxp/index.html)
 
 ### Aliases
 
