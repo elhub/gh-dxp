@@ -13,11 +13,7 @@
     </parent>
 
     <properties>
-<<<<<<< HEAD
         <devxp-build-configuration.version>1.8.3</devxp-build-configuration.version>
-=======
-        <devxp-build-configuration.version>0.106.0</devxp-build-configuration.version>
->>>>>>> 0ba05c5 (Update TC settings)
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
