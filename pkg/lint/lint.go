@@ -17,7 +17,13 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	// Run mega-linter-runner with the cupcake flavor.
 	ctx := context.Background()
 
-	args := []string{"npx", "mega-linter-runner", "--flavor", "cupcake"}
+	args := []string{"npx", "mega-linter-runner"}
+
+	if opts.LinterImage == "" {
+		args = append(args, "--flavor", "cupcake")
+	} else {
+		args = append(args, "--image", opts.LinterImage)
+	}
 
 	// Check if mega-lint configuration is present in the repository.
 	if !utils.FileExists(".mega-linter.yml") {
