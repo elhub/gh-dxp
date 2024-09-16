@@ -87,6 +87,13 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"",
 		"Lint all files under the given directory",
 	)
+	fl.StringVarP(
+		&opts.LinterImage,
+		"image",
+		"i",
+		"",
+		"Specify which MegaLinter image to use.",
+	)
 
 	return cmd
 }
