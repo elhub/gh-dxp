@@ -6,4 +6,5 @@ type Options struct {
 	LintAll     bool
 	Directory   string
 	LinterImage string
+	Proxy       string
 }

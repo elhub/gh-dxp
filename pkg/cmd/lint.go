@@ -94,6 +94,13 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"",
 		"Specify which MegaLinter image to use.",
 	)
+	fl.StringVarP(
+		&opts.Proxy,
+		"proxy",
+		"p",
+		"",
+		"Specify an https proxy server to be used in the MegaLinter container",
+	)
 
 	return cmd
 }

@@ -50,6 +50,9 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	if opts.Fix {
 		args = append(args, "--fix")
 	}
+	if opts.Proxy != "" {
+		args = append(args, "-e", fmt.Sprintf("https_proxy=%s", opts.Proxy))
+	}
 	err := exe.CommandContext(ctx, args[0], args[1:]...)
 	if err != nil {
 		log.Info("The Lint Process returned an error: " + err.Error() + "\n")
@@ -59,7 +62,6 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 }
 
 func getChangedFiles(exe utils.Executor) ([]string, error) {
-
 	branchString, err := exe.Command("git", "branch")
 	if err != nil {
 		return []string{}, err
@@ -70,7 +72,6 @@ func getChangedFiles(exe utils.Executor) ([]string, error) {
 	var changedFiles []string
 
 	if len(branchList) > 0 {
-
 		changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
 		if err != nil {
