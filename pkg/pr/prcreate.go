@@ -222,13 +222,13 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 		}
 
 		if editBody {
-			editedBody, errB := askForMultiline("Description:\n\n")
+			editedBody, errB := askForMultiline("Description:\n")
 			if errB != nil {
 				return "", errB
 			}
-			body = "## 📝 Description\n\n" + editedBody
+			body = "## 📝 Description\n\n" + editedBody + "\n"
 		} else {
-			body = "## 📝 Description\n\n" + commitSummary
+			body = "## 📝 Description\n\n" + commitSummary + "\n"
 		}
 	}
 
