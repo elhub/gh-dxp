@@ -263,8 +263,10 @@ func TestExecuteCreate(t *testing.T) {
 				Return(tt.prListNumber, tt.prListNErr)
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "url", "--jq", ".[].url"}).
 				Return(tt.prListURL, tt.prListUErr)
-			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "Testing:\n- [ ] Unit Tests\n" +
-				"- [ ] Integration Tests\n\n\nDocumentation:\n- No updates\n", "--base", "main"}).
+			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "## 📋 Checklist\n\n" +
+				"* ✅ Lint checks passed on local machine.\n" +
+				"* ✅ Unit tests passed on local machine.\n",
+				"--base", "main"}).
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
