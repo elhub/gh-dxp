@@ -202,17 +202,17 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 
 	// Add a summary of the commits to the PR body
 	commitLines := strings.Split(commits, "\n")
+	commitSummary := ""
 	if len(commitLines) > 1 {
-		body = "Summary:\n"
 		for _, line := range commitLines[1:] {
-			body += "- " + line + "\n"
+			commitSummary += "* " + line + "\n"
 		}
 	}
 
-	bodySurvey := "No summary. Do you want to add one?"
+	bodySurvey := "No description. Do you want to add one?"
 	if body != "" {
-		log.Info("Summary of commits:\n" + body)
-		bodySurvey = "Do you want to change the summary?"
+		log.Info("## Description\n\n" + commitSummary)
+		bodySurvey = "Do you want to change the description?"
 	}
 
 	if !options.TestRun {
@@ -222,11 +222,13 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 		}
 
 		if editBody {
-			editedBody, errB := askForMultiline("Summary:\n")
+			editedBody, errB := askForMultiline("Description:\n")
 			if errB != nil {
 				return "", errB
 			}
-			body = "Summary:\n" + editedBody
+			body = "## 📝 Description\n\n" + editedBody + "\n"
+		} else {
+			body = "## 📝 Description\n\n" + commitSummary
 		}
 	}
 
@@ -240,28 +242,42 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 
 	body = addDocSection(body, issueSection)
 
-	// TODO: Auto-Linting. If not auto-linted, ask why?
-	// TODO: Auto-Testing. If not auto-tested, ask why?
-	if options.NoUnit {
-		body = addDocSection(body, "🚩🚩🚩 **This PR has not been unit tested!**")
-	}
+	// CheckList
+	body = addDocSection(body, "## 📋 Checklist\n")
+
 	if options.NoLint {
-		body = addDocSection(body, "🚩🚩🚩 **This PR has not been linted!**")
+		body = addDocSection(body, "* ⛔ **This PR has not been linted!** ⚠️")
+		// TODO: Auto-Testing. If not auto-tested, ask why?
+	} else {
+		body = addDocSection(body, "* ✅ Lint checks passed on local machine.")
+	}
+	if options.NoUnit {
+		body = addDocSection(body, "* ⛔ **This PR has not been unit tested!** ⚠️")
+		// TODO: Auto-Linting. If not auto-linted, ask why?
+	} else {
+		body = addDocSection(body, "* ✅ Unit tests passed on local machine.")
 	}
 
+	// New tests checkmark
 	testSection, err := testingChanges(options)
 	if err != nil {
 		return "", err
 	}
-
 	body = addDocSection(body, testSection)
 
+	/* Skip for now - replace with auto-detection
 	docsSection, err := documentationChanges(options)
 	if err != nil {
 		return "", err
 	}
+	body += docsSection
+	*/
 
-	body = addDocSection(body, docsSection)
+	// POSIX - always end with \n
+	// Append a newline to the end of the body if it does not have one
+	if !strings.HasSuffix(body, "\n") {
+		body += "\n"
+	}
 
 	return body, nil
 }
@@ -285,7 +301,7 @@ func issuesChanges(options *CreateOptions) (string, error) {
 			for i, id := range issueIDs {
 				issueIDs[i] = strings.TrimSpace(id)
 			}
-			body += "Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
+			body += "## 🔗 Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
 		}
 	}
 
@@ -293,31 +309,19 @@ func issuesChanges(options *CreateOptions) (string, error) {
 }
 
 func testingChanges(options *CreateOptions) (string, error) {
-	// Testing
-	// TODO: Consider skipping this, if dealing with code where unit and integration
-	// tests are not applicable. Replace with deploy test question?
-	body := ""
 	if !options.TestRun {
-		unitTestConfirm, err := askToConfirm("Did you add new unit tests?")
+		newTestConfirm, err := askToConfirm("Did you add new tests?")
 		if err != nil {
 			return "", err
 		}
 
-		integrationTestConfirm, err := askToConfirm("Did you add new integration tests?")
-		if err != nil {
-			return "", err
+		if newTestConfirm {
+			return "* ✅ This PR adds news tests.", nil
 		}
 
-		body += "Testing:\n"
-		body += "- [" + getCheckboxMark(unitTestConfirm) + "] Unit Tests\n"
-		body += "- [" + getCheckboxMark(integrationTestConfirm) + "] Integration Tests\n"
-	} else {
-		body += "Testing:\n"
-		body += "- [ ] Unit Tests\n"
-		body += "- [ ] Integration Tests\n"
 	}
 
-	return body, nil
+	return "", nil
 }
 
 func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]string, error) {
@@ -358,7 +362,6 @@ func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]str
 
 func documentationChanges(options *CreateOptions) (string, error) {
 	// Documentation
-	// Multi-choice: README.md, docs, storybook, no updates
 	docOptions := []string{"No updates", "README.md", "docs", "storybook"}
 	selectedDocs := []string{}
 	if !options.TestRun {
@@ -382,6 +385,10 @@ func documentationChanges(options *CreateOptions) (string, error) {
 }
 
 func addDocSection(body string, section string) string {
+	if (section == "") || (section == "\n") {
+		return body
+	}
+
 	if body != "" {
 		body += "\n"
 	}
