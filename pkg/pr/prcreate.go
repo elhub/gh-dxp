@@ -228,7 +228,7 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 			}
 			body = "## 📝 Description\n\n" + editedBody + "\n"
 		} else {
-			body = "## 📝 Description\n\n" + commitSummary + "\n"
+			body = "## 📝 Description\n\n" + commitSummary
 		}
 	}
 
