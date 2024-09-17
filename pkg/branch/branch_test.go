@@ -1,34 +1,13 @@
 package branch_test
 
 import (
-	"bytes"
-	"context"
 	"os/exec"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/branch"
-	"github.com/stretchr/testify/mock"
+	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/stretchr/testify/require"
 )
-
-type MockExecutor struct {
-	mock.Mock
-}
-
-func (m *MockExecutor) Command(name string, args ...string) (string, error) {
-	argsCalled := m.Called(name, args)
-	return argsCalled.String(0), argsCalled.Error(1)
-}
-
-func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
 
 type FakeExitError struct {
 	code int
@@ -45,7 +24,7 @@ func (f FakeExitError) ExitCode() int {
 // This tests both branch.CheckoutBranch and branch.BranchExists.
 func TestCheckoutBranch(t *testing.T) {
 	t.Run("should checkout to existing branch", func(t *testing.T) {
-		mockExec := new(MockExecutor)
+		mockExec := new(testutils.MockExecutor)
 
 		// Set up expectation
 		mockExec.On("Command", "git", []string{"checkout", "existing-branch"}).Return("", nil)
@@ -61,7 +40,7 @@ func TestCheckoutBranch(t *testing.T) {
 	})
 
 	t.Run("should checkout to new branch if it does not exist", func(t *testing.T) {
-		mockExec := new(MockExecutor)
+		mockExec := new(testutils.MockExecutor)
 
 		// Start a process that will exit with code 1
 		// Mocking a os.ProcessState is not possible, so we need to mock the ExitError
@@ -82,7 +61,7 @@ func TestCheckoutBranch(t *testing.T) {
 	})
 
 	t.Run("should throw error if checkout fails to existing branch", func(t *testing.T) {
-		mockExec := new(MockExecutor)
+		mockExec := new(testutils.MockExecutor)
 
 		// Start a process that will exit with code 1
 		// Mocking a os.ProcessState is not possible, so we need to mock the ExitError
@@ -104,7 +83,7 @@ func TestCheckoutBranch(t *testing.T) {
 	})
 
 	t.Run("should throw error if checkout fails to new branch", func(t *testing.T) {
-		mockExec := new(MockExecutor)
+		mockExec := new(testutils.MockExecutor)
 
 		// Start a process that will exit with code 1
 		// Mocking a os.ProcessState is not possible, so we need to mock the ExitError
@@ -126,7 +105,7 @@ func TestCheckoutBranch(t *testing.T) {
 	})
 
 	t.Run("should throw error if branch exists check fails", func(t *testing.T) {
-		mockExec := new(MockExecutor)
+		mockExec := new(testutils.MockExecutor)
 
 		// Set up expectation
 		mockExec.On("Command", "git", []string{"show-ref", "--verify", "--quiet",

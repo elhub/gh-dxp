@@ -1,34 +1,13 @@
 package status_test
 
 import (
-	"bytes"
-	"context"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/status"
+	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-type MockExecutor struct {
-	mock.Mock
-}
-
-func (m *MockExecutor) Command(name string, arg ...string) (string, error) {
-	args := m.Called(name, arg)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
 
 func TestStatusAll(t *testing.T) {
 	tests := []struct {
@@ -75,7 +54,7 @@ func TestStatusAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockExec := new(MockExecutor)
+			mockExec := new(testutils.MockExecutor)
 			mockExec.On("Command", "git", []string{"remote", "get-url", "origin"}).
 				Return("git@github.com:elhub/demo.git", nil)
 			mockExec.On("GH", []string{"pr", "status"}).Return(tt.expected, nil)

@@ -181,7 +181,7 @@ func createPR(
 	// Get the title
 	pr.Title = getDefaultTitle(commits)
 	if !options.TestRun {
-		pr.Title, err = askForString("Title", pr.Title)
+		pr.Title, err = utils.AskForString("Title", pr.Title)
 		if err != nil {
 			return pr, err
 		}
@@ -216,13 +216,13 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 	}
 
 	if !options.TestRun {
-		editBody, err := askToConfirm(bodySurvey)
+		editBody, err := utils.AskToConfirm(bodySurvey)
 		if err != nil {
 			return "", err
 		}
 
 		if editBody {
-			editedBody, errB := askForMultiline("Description:\n")
+			editedBody, errB := utils.AskForMultiline("Description:\n")
 			if errB != nil {
 				return "", errB
 			}
@@ -287,7 +287,7 @@ func issuesChanges(options *CreateOptions) (string, error) {
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
 	if !options.TestRun {
-		issueIDString, errI := askForString("Issue IDs (seperate with commas):", "")
+		issueIDString, errI := utils.AskForString("Issue IDs (seperate with commas):", "")
 		if errI != nil {
 			return "", errI
 		}
@@ -310,7 +310,7 @@ func issuesChanges(options *CreateOptions) (string, error) {
 
 func testingChanges(options *CreateOptions) (string, error) {
 	if !options.TestRun {
-		newTestConfirm, err := askToConfirm("Did you add new tests?")
+		newTestConfirm, err := utils.AskToConfirm("Did you add new tests?")
 		if err != nil {
 			return "", err
 		}
@@ -332,7 +332,7 @@ func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]str
 	}
 
 	if len(untrackedChanges) > 0 && !options.TestRun {
-		res, err := askToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
+		res, err := utils.AskToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
 		if err != nil {
 			return []string{}, err
 		}
@@ -348,7 +348,7 @@ func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]str
 	}
 
 	if len(trackedChanges) > 0 && !options.TestRun && options.CommitMessage == "" {
-		res, err := askToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
+		res, err := utils.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
 		if err != nil {
 			return []string{}, err
 		}
@@ -397,41 +397,6 @@ func addDocSection(body string, section string) string {
 	return body
 }
 
-func askToConfirm(question string) (bool, error) {
-	confirm := false
-	err := survey.AskOne(&survey.Confirm{
-		Message: question,
-	}, &confirm, survey.WithValidator(survey.Required))
-	if err != nil {
-		return false, err
-	}
-	return confirm, nil
-}
-
-func askForString(question string, defaultAnswer string) (string, error) {
-	var title string
-	prompt := &survey.Input{
-		Message: question,
-		Default: defaultAnswer,
-	}
-	err := survey.AskOne(prompt, &title)
-	if err != nil {
-		return "", err
-	}
-	return title, nil
-}
-
-func askForMultiline(question string) (string, error) {
-	lines := ""
-	err := survey.AskOne(&survey.Multiline{
-		Message: question,
-	}, &lines, survey.WithValidator(survey.Required))
-	if err != nil {
-		return lines, err
-	}
-	return lines, nil
-}
-
 func getDefaultTitle(commits string) string {
 	lines := strings.Split(commits, "\n")
 	if len(lines) > 0 {
@@ -460,7 +425,7 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *CreateOption
 	} else {
 
 		if !options.TestRun {
-			commitMessage, err = askForString("Please enter a commit message: ", "")
+			commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
 			if err != nil {
 				return err
 			} else if len(commitMessage) == 0 {
@@ -530,7 +495,7 @@ func getNewBranchName(options *CreateOptions) (string, error) {
 	}
 
 	if !options.TestRun {
-		inputBranchName, err := askForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
+		inputBranchName, err := utils.AskForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
 		if err != nil {
 			return "", err
 		}

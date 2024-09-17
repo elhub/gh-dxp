@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/pr"
+	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -61,7 +62,7 @@ func TestExecuteMerge(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockExe := new(MockExecutor)
+			mockExe := new(testutils.MockExecutor)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.pushBranch, "--json", "number", "--jq", ".[].number"}).
 				Return(tt.prNumber, tt.prNumberErr)

@@ -4,8 +4,9 @@ import (
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/pr"
+	"github.com/elhub/gh-dxp/pkg/testutils"
+	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -144,9 +145,9 @@ func TestExecuteUpdate(t *testing.T) {
 				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
 			linterArgs = append(linterArgs, "--filesonly")
-			linterArgs = append(linterArgs, lint.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
+			linterArgs = append(linterArgs, utils.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
 
-			mockExe := new(MockExecutor)
+			mockExe := new(testutils.MockExecutor)
 			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("/home/repo-name", nil)
 			mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)

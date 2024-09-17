@@ -4,7 +4,6 @@ package lint
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -32,7 +31,7 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 		args = append(args, "-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml")
 	}
 	if !opts.LintAll && opts.Directory == "" {
-		changedFiles, err := getChangedFiles(exe)
+		changedFiles, err := utils.GetChangedFiles(exe)
 		if err != nil {
 			return err
 		}
@@ -59,37 +58,4 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 		return err
 	}
 	return nil
-}
-
-func getChangedFiles(exe utils.Executor) ([]string, error) {
-	branchString, err := exe.Command("git", "branch")
-	if err != nil {
-		return []string{}, err
-	}
-
-	branchList := ConvertTerminalOutputIntoList(branchString)
-
-	var changedFiles []string
-
-	if len(branchList) > 0 {
-		changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
-		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
-		if err != nil {
-			return []string{}, err
-		}
-	} else {
-		changedFiles, err = utils.GetTrackedChanges(exe)
-		if err != nil {
-			return []string{}, err
-		}
-	}
-	return changedFiles, nil
-}
-
-// ConvertTerminalOutputIntoList converts terminal output on multiple lines to a list of strings
-func ConvertTerminalOutputIntoList(changedFilesString string) []string {
-	if len(changedFilesString) == 0 {
-		return []string{}
-	}
-	return strings.Split(strings.TrimSpace(changedFilesString), "\n")
 }
