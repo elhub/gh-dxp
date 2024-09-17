@@ -62,7 +62,6 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 }
 
 func getChangedFiles(exe utils.Executor) ([]string, error) {
-
 	branchString, err := exe.Command("git", "branch")
 	if err != nil {
 		return []string{}, err
@@ -73,7 +72,6 @@ func getChangedFiles(exe utils.Executor) ([]string, error) {
 	var changedFiles []string
 
 	if len(branchList) > 0 {
-
 		changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
 		if err != nil {
