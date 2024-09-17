@@ -43,6 +43,7 @@ func TestRun(t *testing.T) {
 		existingBranches string
 		currentChanges   string
 		directory        string
+		proxy            string
 	}{
 		{
 			name:             "lint has no errors",
@@ -89,6 +90,15 @@ func TestRun(t *testing.T) {
 			existingBranches: "main\ndifferentBranch\n",
 			directory:        "pkg",
 		},
+		{
+			name:             "use proxy",
+			executionError:   nil,
+			expectErr:        false,
+			currentChanges:   " M /pkg/source.go\n M /pkg/source2.go",
+			existingBranches: "main\ndifferentBranch\n",
+			directory:        "pkg",
+			proxy:            "https://myproxy.no:8080",
+		},
 	}
 
 	for _, tt := range tests {
@@ -111,13 +121,17 @@ func TestRun(t *testing.T) {
 				linterArgs = append(linterArgs, "-e", fmt.Sprintf("FILTER_REGEX_INCLUDE=(%s)", tt.directory))
 			}
 
+			if tt.proxy != "" {
+				linterArgs = append(linterArgs, "-e", fmt.Sprintf("https_proxy=%s", tt.proxy))
+			}
+
 			if tt.fixFiles {
 				linterArgs = append(linterArgs, "--fix")
 			}
 
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, tt.executionError)
 
-			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles, Directory: tt.directory})
+			err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: tt.lintAllFiles, Fix: tt.fixFiles, Directory: tt.directory, Proxy: tt.proxy})
 
 			if tt.expectErr {
 				require.Error(t, err)

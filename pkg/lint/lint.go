@@ -50,6 +50,9 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	if opts.Fix {
 		args = append(args, "--fix")
 	}
+	if opts.Proxy != "" {
+		args = append(args, "-e", fmt.Sprintf("https_proxy=%s", opts.Proxy))
+	}
 	err := exe.CommandContext(ctx, args[0], args[1:]...)
 	if err != nil {
 		log.Info("The Lint Process returned an error: " + err.Error() + "\n")
