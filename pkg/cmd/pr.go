@@ -97,6 +97,12 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		false,
 		"Do not run linting",
 	)
+	fl.BoolVar(
+		&opts.Draft,
+		"draft",
+		false,
+		"Mark pull request as draft",
+	)
 
 	return cmd
 }
