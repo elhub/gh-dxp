@@ -47,10 +47,12 @@ func TestGetGitRootDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockExe := new(testutils.MockExecutor)
-			for _, mock := range tt.mocks {
-				mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
-			}
+			//
+			mockExe := testutils.NewMockExecutor(tt.mocks)
+			//new(testutils.MockExecutor)
+			//for _, mock := range tt.mocks {
+			//		mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
+			//	}
 
 			got, err := utils.GetGitRootDirectory(mockExe)
 			if tt.wantErr {

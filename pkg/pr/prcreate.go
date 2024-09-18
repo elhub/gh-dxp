@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -187,7 +186,7 @@ func createPR(
 		}
 	}
 
-	pr.Body, err = createBody(options, commits)
+	pr.Body, err = createBody(exe, options, commits)
 	if err != nil {
 		return pr, err
 	}
@@ -197,7 +196,7 @@ func createPR(
 	return pr, nil
 }
 
-func createBody(options *CreateOptions, commits string) (string, error) {
+func createBody(exe utils.Executor, options *CreateOptions, commits string) (string, error) {
 	body := ""
 
 	// Add a summary of the commits to the PR body
@@ -265,13 +264,11 @@ func createBody(options *CreateOptions, commits string) (string, error) {
 	}
 	body = addDocSection(body, testSection)
 
-	/* Skip for now - replace with auto-detection
-	docsSection, err := documentationChanges(options)
+	docsSection, err := documentationChanges(exe)
 	if err != nil {
 		return "", err
 	}
-	body += docsSection
-	*/
+	body = addDocSection(body, docsSection)
 
 	// POSIX - always end with \n
 	// Append a newline to the end of the body if it does not have one
@@ -360,25 +357,26 @@ func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]str
 	return trackedChanges, nil
 }
 
-func documentationChanges(options *CreateOptions) (string, error) {
-	// Documentation
-	docOptions := []string{"No updates", "README.md", "docs", "storybook"}
-	selectedDocs := []string{}
-	if !options.TestRun {
-		err := survey.AskOne(&survey.MultiSelect{
-			Message: "What documentation was updated?",
-			Options: docOptions,
-		}, &selectedDocs, survey.WithValidator(survey.Required))
-		if err != nil {
-			return "", err
-		}
-	} else {
-		selectedDocs = append(selectedDocs, "No updates")
+func documentationChanges(exe utils.Executor) (string, error) {
+	changedFiles, err := utils.GetChangedFiles(exe)
+	if err != nil {
+		return "", err
 	}
 
-	body := "\nDocumentation:\n"
-	for _, doc := range selectedDocs {
-		body += "- " + doc + "\n"
+	readmewasUpdated := utils.CheckFilesUpdated(changedFiles, []string{"README.md"})
+	docsWereUpdated := utils.CheckFilesUpdated(changedFiles, []string{"docs"})
+
+	selectedDocs := []string{}
+	if readmewasUpdated {
+		selectedDocs = append(selectedDocs, "README")
+	}
+	if docsWereUpdated {
+		selectedDocs = append(selectedDocs, "System Documentation")
+	}
+
+	body := ""
+	if len(selectedDocs) > 0 {
+		body += "* ✅ Documentation Updates: " + strings.Join(selectedDocs, ", ")
 	}
 
 	return body, nil

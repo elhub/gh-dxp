@@ -38,6 +38,22 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 	return changedFiles, nil
 }
 
+// CheckFilesUpdated checks if any of the specified patterns match the changed files.
+func CheckFilesUpdated(changedFiles []string, patterns []string) bool {
+	for _, file := range changedFiles {
+		for _, pattern := range patterns {
+			matched, err := regexp.MatchString(pattern, file)
+			if err != nil {
+				continue
+			}
+			if matched {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // GetUntrackedChanges returns a list of file names for unchanged files in the current repo
 func GetUntrackedChanges(exe Executor) ([]string, error) {
 	re := regexp.MustCompile(`^\?\?`)

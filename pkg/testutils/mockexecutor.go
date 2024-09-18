@@ -43,3 +43,12 @@ type MockContent struct {
 	Out    string
 	Err    error
 }
+
+// NewMockExecutor creates a new MockExecutor with the given mocks.
+func NewMockExecutor(mocks []MockContent) *MockExecutor {
+	mockExe := new(MockExecutor)
+	for _, mock := range mocks {
+		mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
+	}
+	return mockExe
+}
