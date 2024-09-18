@@ -19,7 +19,7 @@ func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *Updat
 	}
 	pr.branchID = strings.Trim(currentBranch, "\n")
 
-	opts := &CreateOptions{
+	prOpts := &Options{
 		TestRun: options.TestRun,
 		NoLint:  options.NoLint,
 		NoUnit:  options.NoUnit,
@@ -31,7 +31,7 @@ func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *Updat
 		return errCheck
 	}
 
-	pr, err := performPreCommitOperations(exe, settings, pr, opts)
+	pr, err := performPreCommitOperations(exe, settings, pr, prOpts)
 	if err != nil {
 		return err
 	}

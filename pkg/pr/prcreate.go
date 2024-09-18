@@ -1,14 +1,11 @@
 package pr
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/test"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
@@ -59,7 +56,13 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 		return errCheck
 	}
 
-	pr, err = performPreCommitOperations(exe, settings, pr, options)
+	prOpts := &Options{
+		TestRun: options.TestRun,
+		NoLint:  options.NoLint,
+		NoUnit:  options.NoUnit,
+	}
+
+	pr, err = performPreCommitOperations(exe, settings, pr, prOpts)
 	if err != nil {
 		return err
 	}
@@ -70,40 +73,6 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 	}
 	// If it doesn't exist, create a new PR
 	return create(exe, options, pr)
-}
-
-func performPreCommitOperations(exe utils.Executor, settings *config.Settings, pr PullRequest, options *CreateOptions) (PullRequest, error) {
-	// Handle uncommitted changes
-	filesToCommit, err := handleUncommittedChanges(exe, options)
-	if err != nil {
-		return pr, err
-	}
-
-	// Run lint
-	if !options.NoLint {
-		err = lint.Run(exe, settings, &lint.Options{})
-		if err != nil {
-			return pr, err
-		}
-		pr.isLinted = true
-	}
-
-	// Run tests
-	if !options.NoUnit {
-		pr.isTested, err = test.RunTest(exe)
-		if err != nil {
-			return pr, err
-		}
-	}
-
-	if len(filesToCommit) > 0 {
-		err = addAndCommitFiles(exe, filesToCommit, options)
-		if err != nil {
-			return pr, err
-		}
-	}
-
-	return pr, nil
 }
 
 func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
@@ -327,42 +296,6 @@ func testingChanges(options *CreateOptions) (string, error) {
 	return "", nil
 }
 
-func handleUncommittedChanges(exe utils.Executor, options *CreateOptions) ([]string, error) {
-	// Handle presence of untracked changes - ignore or abort
-	untrackedChanges, err := utils.GetUntrackedChanges(exe)
-	if err != nil {
-		return []string{}, err
-	}
-
-	if len(untrackedChanges) > 0 && !options.TestRun {
-		res, err := utils.AskToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
-		if err != nil {
-			return []string{}, err
-		}
-		if !res {
-			return []string{}, errors.New("User aborted workflow")
-		}
-	}
-
-	// Handle presence of tracked changes - commit or abort
-	trackedChanges, err := utils.GetTrackedChanges(exe)
-	if err != nil {
-		return []string{}, err
-	}
-
-	if len(trackedChanges) > 0 && !options.TestRun && options.CommitMessage == "" {
-		res, err := utils.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
-		if err != nil {
-			return []string{}, err
-		}
-
-		if !res {
-			return []string{}, errors.New("User aborted workflow")
-		}
-	}
-	return trackedChanges, nil
-}
-
 func documentationChanges(exe utils.Executor) (string, error) {
 	changedFiles, err := utils.GetChangedFiles(exe)
 	if err != nil {
@@ -418,52 +351,6 @@ func getCheckboxMark(confirm bool) string {
 
 func logPullRequest(pr PullRequest) {
 	log.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
-}
-
-func addAndCommitFiles(exe utils.Executor, files []string, options *CreateOptions) error {
-	var commitMessage string
-	var err error
-
-	if options.CommitMessage != "" {
-		commitMessage = options.CommitMessage
-	} else {
-
-		if !options.TestRun {
-			commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
-			if err != nil {
-				return err
-			} else if len(commitMessage) == 0 {
-				return errors.New("Empty commit message not allowed")
-			}
-		} else {
-			commitMessage = "default commit message"
-		}
-	}
-	// Get git root directory and add to files to get fully qualified paths
-	root, err := utils.GetGitRootDirectory(exe)
-	if err != nil {
-		return err
-	}
-
-	var fullPaths []string
-	for _, filePath := range files {
-		fullPaths = append(fullPaths, filepath.Join(root, filePath))
-	}
-
-	addCommandArgs := append([]string{"add"}, fullPaths...)
-
-	_, err = exe.Command("git", addCommandArgs...)
-	if err != nil {
-		return err
-	}
-
-	// Commit files
-	_, err = exe.Command("git", "commit", "-m", commitMessage)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func formatUntrackedFileChangesQuestion(changes []string) string {
