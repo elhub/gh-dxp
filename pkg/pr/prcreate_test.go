@@ -245,7 +245,7 @@ func TestExecuteCreate(t *testing.T) {
 				Return(tt.prListURL, tt.prListUErr)
 			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "## 📋 Checklist\n\n" +
 				"* ✅ Lint checks passed on local machine.\n" +
-				"* ⛔ **No tests could be run for this PR.**\n",
+				"* ⚠️ **No tests could be run for this PR.**\n",
 				"--base", "main"}).
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).

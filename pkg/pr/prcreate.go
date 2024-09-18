@@ -251,16 +251,16 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, comm
 	if pr.isLinted {
 		body = addDocSection(body, "* ✅ Lint checks passed on local machine.")
 	} else if options.NoLint {
-		body = addDocSection(body, "* ⛔ **This PR has not been linted! The --nolint option was used.** ⚠️")
+		body = addDocSection(body, "* ⛔ **This PR has not been linted! The --nolint option was used.**")
 	} else {
 		body = addDocSection(body, "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️")
 	}
 	if pr.isTested {
 		body = addDocSection(body, "* ✅ Unit tests passed on local machine.")
 	} else if options.NoUnit {
-		body = addDocSection(body, "* ⛔ **This PR has not been unit tested! The --notest option was used.** ⚠️")
+		body = addDocSection(body, "* ⛔ **This PR has not been unit tested! The --notest option was used.**")
 	} else {
-		body = addDocSection(body, "* ⛔ **No tests could be run for this PR.**")
+		body = addDocSection(body, "* ⚠️ **No tests could be run for this PR.**")
 	}
 
 	// New tests checkmark
