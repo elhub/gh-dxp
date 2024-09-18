@@ -363,8 +363,8 @@ func documentationChanges(exe utils.Executor) (string, error) {
 		return "", err
 	}
 
-	readmewasUpdated := utils.CheckFilesUpdated(changedFiles, []string{"README.md"})
-	docsWereUpdated := utils.CheckFilesUpdated(changedFiles, []string{"docs"})
+	readmewasUpdated := utils.CheckFilesUpdated(changedFiles, []string{"README.md$"})
+	docsWereUpdated := utils.CheckFilesUpdated(changedFiles, []string{"/docs/"})
 
 	selectedDocs := []string{}
 	if readmewasUpdated {
