@@ -5,6 +5,7 @@ type CreateOptions struct {
 	TestRun bool
 	NoLint  bool
 	NoUnit  bool
+	Draft   bool
 
 	Branch        string
 	CommitMessage string

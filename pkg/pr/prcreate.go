@@ -141,6 +141,9 @@ func generatePRArgs(options *CreateOptions) []string {
 	if len(options.Reviewers) > 0 {
 		args = append(args, "--reviewer", strings.Join(options.Reviewers, ","))
 	}
+	if options.Draft {
+		args = append(args, "--draft")
+	}
 
 	return args
 }
