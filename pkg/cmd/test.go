@@ -20,8 +20,8 @@ func TestCmd(exe utils.Executor) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			res := test.RunTest(exe)
-			return res
+			_, err = test.RunTest(exe)
+			return err
 		},
 	}
 	return cmd

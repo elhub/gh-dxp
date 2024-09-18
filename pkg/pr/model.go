@@ -30,6 +30,9 @@ type UpdateOptions struct {
 
 // PullRequest represents a pull request.
 type PullRequest struct {
-	Title string
-	Body  string
+	branchID string
+	Title    string
+	Body     string
+	isLinted bool
+	isTested bool
 }

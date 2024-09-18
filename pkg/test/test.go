@@ -13,24 +13,24 @@ import (
 var FileExists = utils.FileExists //nolint: gochecknoglobals // Exported to allow mocking during tests.
 
 // RunTest runs a workflow to automatically determine relevant tests in the current repo and run them.
-func RunTest(exe utils.Executor) error {
+func RunTest(exe utils.Executor) (bool, error) {
 	cmd, args, err := resolveTestCommand(exe)
 	if err != nil {
 		var ntcErr *NoTestCommandError
 		if errors.As(err, &ntcErr) {
 			log.Warn(err.Error())
-			return nil
+			return false, nil
 		}
-		return err
+		return false, err
 	}
 
 	ctx := context.Background()
 	err = exe.CommandContext(ctx, cmd, args...)
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	return nil
+	return true, nil
 }
 
 func resolveTestCommand(exe utils.Executor) (string, []string, error) {
@@ -56,7 +56,7 @@ func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 }
 
 func gradleTestInGitRoot(root string) bool {
-	return FileExists(filepath.Join(root, ".gradlew"))
+	return FileExists(filepath.Join(root, "gradlew"))
 }
 
 func makeTestInGitRoot(root string) bool {

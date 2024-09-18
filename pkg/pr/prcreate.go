@@ -15,12 +15,13 @@ import (
 
 // ExecuteCreate creates or updates a pull request, depending on its current state.
 func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *CreateOptions) error {
+	pr := PullRequest{}
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
 		return errBranch
 	}
-	branchID := strings.Trim(currentBranch, "\n")
+	pr.branchID = strings.Trim(currentBranch, "\n")
 
 	baseBranch, err := setBaseBranch(exe, options)
 	if err != nil {
@@ -28,7 +29,7 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 	}
 
 	// If we're currently in the base branch, we need to make a new temporary branch to contain the diff
-	if branchID == baseBranch {
+	if pr.branchID == baseBranch {
 		newBranchName, err := getNewBranchName(options)
 		if err != nil {
 			return err
@@ -45,81 +46,82 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 		if err != nil {
 			return err
 		}
-		branchID = newBranchName
+		pr.branchID = newBranchName
 	} else {
-		if options.Branch != "" && options.Branch != branchID {
-			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + branchID)
+		if options.Branch != "" && options.Branch != pr.branchID {
+			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + pr.branchID)
 		}
 	}
 
 	// Check if PR exists on branch
-	prID, errCheck := CheckForExistingPR(exe, branchID)
+	prID, errCheck := CheckForExistingPR(exe, pr.branchID)
 	if errCheck != nil {
 		return errCheck
 	}
 
-	err = performPreCommitOperations(exe, settings, options)
+	pr, err = performPreCommitOperations(exe, settings, pr, options)
 	if err != nil {
 		return err
 	}
 
 	if prID != "" {
 		// If the PR exists, update it by pushing to the remote
-		return update(exe, branchID, prID)
+		return update(exe, pr.branchID, prID)
 	}
 	// If it doesn't exist, create a new PR
-	return create(exe, options, branchID)
+	return create(exe, options, pr)
 }
 
-func performPreCommitOperations(exe utils.Executor, settings *config.Settings, options *CreateOptions) error {
+func performPreCommitOperations(exe utils.Executor, settings *config.Settings, pr PullRequest, options *CreateOptions) (PullRequest, error) {
 	// Handle uncommitted changes
 	filesToCommit, err := handleUncommittedChanges(exe, options)
 	if err != nil {
-		return err
-	}
-
-	// Run tests
-	if !options.NoUnit {
-		err = test.RunTest(exe)
-		if err != nil {
-			return err
-		}
+		return pr, err
 	}
 
 	// Run lint
 	if !options.NoLint {
 		err = lint.Run(exe, settings, &lint.Options{})
 		if err != nil {
-			return err
+			return pr, err
+		}
+		pr.isLinted = true
+	}
+
+	// Run tests
+	if !options.NoUnit {
+		pr.isTested, err = test.RunTest(exe)
+		if err != nil {
+			return pr, err
 		}
 	}
 
 	if len(filesToCommit) > 0 {
 		err = addAndCommitFiles(exe, filesToCommit, options)
 		if err != nil {
-			return err
+			return pr, err
 		}
 	}
 
-	return nil
+	return pr, nil
 }
 
-func create(exe utils.Executor, options *CreateOptions, branchID string) error {
+func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
-	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", branchID)
+	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", pr.branchID)
 	s.Stop()
 	if err != nil {
 		return err
 	}
 	log.Info("Current Branch:" + currentBranch + "\n")
-	pr, err := createPR(exe, options, branchID, options.baseBranch)
+	newPR, err := createPR(exe, options, pr, options.baseBranch)
 	if err != nil {
 		return err
 	}
 
-	s = utils.StartSpinner("Processing pull request...", "Pull request "+pr.Title+" created.")
-	args := []string{"pr", "create", "--title", pr.Title, "--body", pr.Body, "--base", options.baseBranch}
+	s = utils.StartSpinner("Processing pull request...", "Pull request "+newPR.Title+" created.")
+	args := []string{"pr", "create", "--title", newPR.Title, "--body", newPR.Body, "--base", options.baseBranch}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
 	s.Stop()
@@ -170,12 +172,11 @@ func update(exe utils.Executor, branchID string, prID string) error {
 func createPR(
 	exe utils.Executor,
 	options *CreateOptions,
-	branchID string,
+	pr PullRequest,
 	mainID string,
 ) (PullRequest, error) {
-	pr := PullRequest{}
 	// Get the commit messages between the current branch and the main branch and put them in the PR body.
-	commits, err := branch.GetCommitMessages(exe, mainID, branchID)
+	commits, err := branch.GetCommitMessages(exe, mainID, pr.branchID)
 	if err != nil {
 		return pr, err
 	}
@@ -189,7 +190,7 @@ func createPR(
 		}
 	}
 
-	pr.Body, err = createBody(exe, options, commits)
+	pr.Body, err = createBody(exe, pr, options, commits)
 	if err != nil {
 		return pr, err
 	}
@@ -199,7 +200,7 @@ func createPR(
 	return pr, nil
 }
 
-func createBody(exe utils.Executor, options *CreateOptions, commits string) (string, error) {
+func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, commits string) (string, error) {
 	body := ""
 
 	// Add a summary of the commits to the PR body
@@ -247,17 +248,19 @@ func createBody(exe utils.Executor, options *CreateOptions, commits string) (str
 	// CheckList
 	body = addDocSection(body, "## 📋 Checklist\n")
 
-	if options.NoLint {
-		body = addDocSection(body, "* ⛔ **This PR has not been linted!** ⚠️")
-		// TODO: Auto-Testing. If not auto-tested, ask why?
-	} else {
+	if pr.isLinted {
 		body = addDocSection(body, "* ✅ Lint checks passed on local machine.")
-	}
-	if options.NoUnit {
-		body = addDocSection(body, "* ⛔ **This PR has not been unit tested!** ⚠️")
-		// TODO: Auto-Linting. If not auto-linted, ask why?
+	} else if options.NoLint {
+		body = addDocSection(body, "* ⛔ **This PR has not been linted! The --nolint option was used.**")
 	} else {
+		body = addDocSection(body, "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️")
+	}
+	if pr.isTested {
 		body = addDocSection(body, "* ✅ Unit tests passed on local machine.")
+	} else if options.NoUnit {
+		body = addDocSection(body, "* ⛔ **This PR has not been unit tested! The --notest option was used.**")
+	} else {
+		body = addDocSection(body, "* ⚠️ **No tests could be run for this PR.**")
 	}
 
 	// New tests checkmark

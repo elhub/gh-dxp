@@ -10,12 +10,14 @@ import (
 
 // ExecuteUpdate updates a pull request, depending on its current state.
 func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *UpdateOptions) error {
+	pr := PullRequest{}
+
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {
 		return errBranch
 	}
-	branchID := strings.Trim(currentBranch, "\n")
+	pr.branchID = strings.Trim(currentBranch, "\n")
 
 	opts := &CreateOptions{
 		TestRun: options.TestRun,
@@ -24,20 +26,20 @@ func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *Updat
 	}
 
 	// Check if PR exists on branch
-	prID, errCheck := CheckForExistingPR(exe, branchID)
+	prID, errCheck := CheckForExistingPR(exe, pr.branchID)
 	if errCheck != nil {
 		return errCheck
 	}
 
-	err := performPreCommitOperations(exe, settings, opts)
+	pr, err := performPreCommitOperations(exe, settings, pr, opts)
 	if err != nil {
 		return err
 	}
 
 	if prID != "" {
 		// If the PR exists, update it by pushing to the remote
-		return update(exe, branchID, prID)
+		return update(exe, pr.branchID, prID)
 	}
 	// If it doesn't exist, return an error
-	return errors.New("No PR found for branch " + branchID)
+	return errors.New("No PR found for branch " + pr.branchID)
 }
