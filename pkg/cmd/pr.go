@@ -23,13 +23,35 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	cmd.AddCommand(PRMergeCmd(exe))
 	cmd.AddCommand(PRUpdateCmd(exe, settings))
 
+	var opts = &pr.Options{}
+
+	fl := cmd.PersistentFlags()
+	fl.BoolVar(
+		&opts.NoUnit,
+		"nounit",
+		false,
+		"Do not run tests",
+	)
+	fl.BoolVar(
+		&opts.NoLint,
+		"nolint",
+		false,
+		"Do not run linting",
+	)
+	fl.StringVarP(
+		&opts.CommitMessage,
+		"commitmessage",
+		"m",
+		"",
+		"Commit message, if there are uncommitted changes.",
+	)
 	return cmd
 }
 
 // PRCreateCmd handles the creation of a pull request.
 func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &pr.CreateOptions{}
 
+	opts := &pr.CreateOptions{}
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a PR (Pull Request)",
@@ -46,8 +68,15 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			$ gh dxp pr create
 		`),
 		Args: cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := utils.SetWorkDirToGitHubRoot(exe)
+		RunE: func(prCmd *cobra.Command, _ []string) error {
+			prOpts, err := getPrOptionsFromCmd(prCmd)
+			if err != nil {
+				return err
+			}
+
+			addPrOptionsToCreateOptions(prOpts, opts)
+
+			err = utils.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
@@ -72,30 +101,11 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"Assign people by their id. Use \"@me\" to self-assign.",
 	)
 	fl.StringVarP(
-		&opts.CommitMessage,
-		"commitmessage",
-		"m",
-		"",
-		"Commit message, if there are uncommitted changes.",
-	)
-	fl.StringVarP(
 		&opts.Branch,
 		"branch",
 		"b",
 		"",
 		"Temporary branch to switch to if currently on the default branch",
-	)
-	fl.BoolVar(
-		&opts.NoUnit,
-		"nounit",
-		false,
-		"Do not run tests",
-	)
-	fl.BoolVar(
-		&opts.NoLint,
-		"nolint",
-		false,
-		"Do not run linting",
 	)
 	fl.BoolVar(
 		&opts.Draft,
@@ -165,8 +175,14 @@ func PRUpdateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			$ gh dxp pr update
 		`),
 		Args: cobra.NoArgs,
-		RunE: func(_ *cobra.Command, _ []string) error {
-			err := utils.SetWorkDirToGitHubRoot(exe)
+		RunE: func(prCmd *cobra.Command, _ []string) error {
+			prOpts, err := getPrOptionsFromCmd(prCmd)
+			if err != nil {
+				return err
+			}
+
+			addPrOptionsToUpdateOptions(prOpts, opts)
+			err = utils.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
@@ -175,4 +191,39 @@ func PRUpdateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	}
 
 	return cmd
+}
+
+// Patches prOptions into a createOptions object
+func addPrOptionsToCreateOptions(prOptions pr.Options, createOptions *pr.CreateOptions) {
+	createOptions.NoLint = prOptions.NoLint
+	createOptions.NoUnit = prOptions.NoUnit
+	createOptions.CommitMessage = prOptions.CommitMessage
+}
+
+// Patches prOptions into an updateOptions object
+func addPrOptionsToUpdateOptions(prOptions pr.Options, updateOptions *pr.UpdateOptions) {
+	updateOptions.NoLint = prOptions.NoLint
+	updateOptions.NoUnit = prOptions.NoUnit
+	updateOptions.CommitMessage = prOptions.CommitMessage
+}
+
+func getPrOptionsFromCmd(cmd *cobra.Command) (pr.Options, error) {
+	var prOptions pr.Options
+
+	noLint, err := cmd.Flags().GetBool("nolint")
+	if err != nil {
+		return pr.Options{}, err
+	}
+	noUnit, err := cmd.Flags().GetBool("nounit")
+	if err != nil {
+		return pr.Options{}, err
+	}
+	commitMessage, err := cmd.Flags().GetString("commitmessage")
+	if err != nil {
+		return pr.Options{}, err
+	}
+	prOptions.NoLint = noLint
+	prOptions.NoUnit = noUnit
+	prOptions.CommitMessage = commitMessage
+	return prOptions, nil
 }

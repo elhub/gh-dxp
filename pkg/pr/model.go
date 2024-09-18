@@ -1,5 +1,14 @@
 package pr
 
+// Options represents the options for the pr command.
+type Options struct {
+	TestRun bool
+	NoLint  bool
+	NoUnit  bool
+
+	CommitMessage string
+}
+
 // CreateOptions represents the options for the pr create command.
 type CreateOptions struct {
 	TestRun bool
@@ -26,6 +35,8 @@ type UpdateOptions struct {
 	TestRun bool
 	NoLint  bool
 	NoUnit  bool
+
+	CommitMessage string
 }
 
 // PullRequest represents a pull request.
