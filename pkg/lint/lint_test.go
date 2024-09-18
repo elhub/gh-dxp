@@ -1,36 +1,17 @@
 package lint_test
 
 import (
-	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
+	"github.com/elhub/gh-dxp/pkg/testutils"
+	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-type mockExecutor struct {
-	mock.Mock
-}
-
-func (m *mockExecutor) Command(name string, arg ...string) (string, error) {
-	args := m.Called(name, arg)
-	return args.String(0), args.Error(1)
-}
-
-func (m *mockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *mockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
 
 func TestRun(t *testing.T) {
 	tests := []struct {
@@ -103,7 +84,7 @@ func TestRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockExe := new(mockExecutor)
+			mockExe := new(testutils.MockExecutor)
 			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake", "-e",
 				"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
@@ -116,7 +97,7 @@ func TestRun(t *testing.T) {
 					mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
 				}
 				linterArgs = append(linterArgs, "--filesonly")
-				linterArgs = append(linterArgs, lint.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
+				linterArgs = append(linterArgs, utils.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
 			} else if tt.directory != "" {
 				linterArgs = append(linterArgs, "-e", fmt.Sprintf("FILTER_REGEX_INCLUDE=(%s)", tt.directory))
 			}

@@ -1,34 +1,14 @@
 package test_test
 
 import (
-	"bytes"
-	"context"
 	"errors"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/test"
+	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
-
-type MockExecutor struct {
-	mock.Mock
-}
-
-func (m *MockExecutor) Command(name string, arg ...string) (string, error) {
-	args := m.Called(name, arg)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
 
 func TestExecute(t *testing.T) {
 	tests := []struct {
@@ -80,7 +60,7 @@ func TestExecute(t *testing.T) {
 				return path == tt.testFile
 			}
 
-			mockExe := new(MockExecutor)
+			mockExe := new(testutils.MockExecutor)
 
 			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return(tt.gitRoot, tt.gitRootError)
 			mockExe.On("CommandContext", mock.Anything, "gradlew", []string{"test"}).Return(nil, tt.expectedErr)

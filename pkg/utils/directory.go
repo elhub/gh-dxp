@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"os"
-	"regexp"
 	"strings"
 )
 
@@ -20,24 +18,20 @@ func GetGitRootDirectory(exe Executor) (string, error) {
 	return formattedRoot, nil
 }
 
-// SetWorkDirToGitHubRoot checks whether the current working directory is in a GitHub repo. If false, an error is raised. If true, the working directory is set to the root of that repo.
+// SetWorkDirToGitHubRoot checks whether the current working directory is in a GitHub repo.
+// If false, an error is raised. If true, the working directory is set to the root of that repo.
 func SetWorkDirToGitHubRoot(exe Executor) error {
 	_, err := isInGitHubRepo(exe)
 	if err != nil {
 		return err
 	}
-	err = setWorkingDirectoryToGitRoot(exe)
-	return err
-}
 
-// setWorkingDirectoryToGitRoot sets the working directory to be the git root directory.
-func setWorkingDirectoryToGitRoot(exe Executor) error {
 	root, err := GetGitRootDirectory(exe)
 	if err != nil {
 		return err
 	}
 
-	err = os.Chdir(root)
+	err = exe.Chdir(root)
 	return err
 }
 
@@ -61,6 +55,8 @@ func ListFilesInDirectory(exe Executor, directory string) ([]string, error) {
 		return nil, err
 	}
 
+	files = strings.TrimSpace(files)
+
 	return strings.Split(files, "\n"), nil
 }
 
@@ -80,50 +76,4 @@ func isInGitHubRepo(exe Executor) (bool, error) {
 
 func urlIsGitHubRepo(url string) bool {
 	return (strings.HasPrefix(url, "https://github.com") || strings.HasPrefix(url, "git@github.com"))
-}
-
-// GetUntrackedChanges returns a list of file names for unchanged files in the current repo
-func GetUntrackedChanges(exe Executor) ([]string, error) {
-	re := regexp.MustCompile(`^\?\?`)
-
-	return getChanges(exe, re)
-}
-
-// GetTrackedChanges returns a list of file names for changed files in the current repo
-func GetTrackedChanges(exe Executor) ([]string, error) {
-	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) // This regex is intended to catch all tracked changes except for unmerged conflicts
-	return getChanges(exe, re)
-}
-
-// Checks the current repo state for any changes matching a given regex 're'
-func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
-	changeString, err := exe.Command("git", "status", "--porcelain")
-	if err != nil {
-		return []string{}, err
-	}
-
-	changes := strings.Split(changeString, "\n")
-	matchedChanges := filter(changes, re.MatchString)
-
-	// Remove the regex matched part of the string, leaving only the file name
-	for i, s := range matchedChanges {
-		matchedChanges[i] = re.ReplaceAllString(s, "")
-	}
-
-	// Split string on '->' and capture the last element, in order to catch changes of type 'oldfilename.txt -> newfilename.txt'
-	for i, s := range matchedChanges {
-		macgyver := strings.Split(s, "->")
-		matchedChanges[i] = strings.TrimSpace(macgyver[len(macgyver)-1])
-	}
-	return matchedChanges, nil
-}
-
-func filter(list []string, test func(string) bool) []string {
-	ret := []string{}
-	for _, s := range list {
-		if test(s) {
-			ret = append(ret, s)
-		}
-	}
-	return ret
 }
