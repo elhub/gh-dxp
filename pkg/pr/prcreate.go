@@ -57,9 +57,10 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 	}
 
 	prOpts := &Options{
-		TestRun: options.TestRun,
-		NoLint:  options.NoLint,
-		NoUnit:  options.NoUnit,
+		TestRun:       options.TestRun,
+		NoLint:        options.NoLint,
+		NoUnit:        options.NoUnit,
+		CommitMessage: options.CommitMessage,
 	}
 
 	pr, err = performPreCommitOperations(exe, settings, pr, prOpts)
@@ -375,6 +376,7 @@ func setBaseBranch(exe utils.Executor, options *CreateOptions) (string, error) {
 		baseBranch = strings.Trim(stdOut.String(), "\n")
 		options.baseBranch = baseBranch
 	}
+	log.Info("info")
 	return baseBranch, nil
 }
 

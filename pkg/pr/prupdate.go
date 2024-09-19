@@ -20,9 +20,10 @@ func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *Updat
 	pr.branchID = strings.Trim(currentBranch, "\n")
 
 	prOpts := &Options{
-		TestRun: options.TestRun,
-		NoLint:  options.NoLint,
-		NoUnit:  options.NoUnit,
+		TestRun:       options.TestRun,
+		NoLint:        options.NoLint,
+		NoUnit:        options.NoUnit,
+		CommitMessage: options.CommitMessage,
 	}
 
 	// Check if PR exists on branch
