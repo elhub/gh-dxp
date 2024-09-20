@@ -230,7 +230,7 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, comm
 				return "", errB
 			}
 			body = "## 📝 Description\n\n" + editedBody + "\n"
-		} else {
+		} else if commitSummary != "" {
 			body = "## 📝 Description\n\n" + commitSummary
 		}
 	}
