@@ -1,35 +1,90 @@
 # Contributing
 
-So you want to code? Awesome. The following is the contributing guide for Elhub development inner-source code. Please read these guidelines if you haven't
-done so before. By following these guidelines, you will save the owning team both time and effort, and they will be better able to help you in addressing
-your issues, assess changes, and helping you finalize any contributions to the project.
+So you want to contribute ? Awesome. ❤️
 
-You can contribute in many ways to the project:
+All types of contributions are encouraged and valued.  See below for different ways to help and details about how
+this project handles them. Please make sure to read the relevant section before making your contribution. It will
+make it a lot easier for us maintainers and smooth out the experience for everyone involved. We look forward to
+your contributions. 🎉
 
-* Submit bug reports or feature requests
-* Improve the documentation, either the README here or the documentation on confluence (see README for link)
-* Hack on the project itself by fixing bugs you've found or adding new features
+> If you like the project, but just don't have time to contribute, that's fine. There are other easy ways to support
+> the project and show your appreciation, which we would also be very happy about:
+> * Star the project
+> * Refer this project in your project's readme
+> * Mention the project on social media, meetups, etc.
 
-If you have more general questions about this project, use the Team Dev Teams channel.
 
-## How to Report a bug or suggest a feature/enchancement
+## Code of Conduct
 
-If you are an Elhub employee, follow the [guidelines on Confluence](https://confluence.elhub.cloud/display/DEV/How+to+Submit+a+Bug+or+Feature+Request).
+We adhere to the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+By participating, you are expected to uphold this code.
 
-If you are accessing this repository on Github, submit an issue using the project's issue board on Github.
 
-## How to Fix a bug or Add a feature/enhancement
+## Issue Tracker
 
-If you are an Elhub employee, follow the [guidelines on Confluence](https://confluence.elhub.cloud/pages/viewpage.action?pageId=641763474).
+Elhub employees should generally use our internal Jira instance (follow the link in the [README](../README.md));
+everyone else is welcome to [open an issue on GitHub](/issues/).
 
-If you are looking at this repository on Github, feel free to submit a PR. Is this new to you? You can learn how to do it from this *free* set of tutorials:
-[How to Contribute to an Open Source Project on GitHub](https://egghead.io/series/how-to-contribute-to-an-open-source-project-on-github).
+When writing issues:
 
-All code that is submitted into the project is code-reviewed by the responsible team (listed in CODEOWNERS) before being pushed into the repository.
+* Ensure you are running on the latest version.
+* Always check whether there is a previous, similar issue. If there is, consider commenting on that issue rather
+  than opening an entirely new issue.
+* Provide as much context as you can about what you're running into. Describe what you're observing and what you
+  expected, steps to reproduce the issue, technical details, etc.
 
-Expectations:
+> Do not, **ever**, report security related issues, vulnerabilities or bugs including sensitive information to the
+> public issue tracker or elsewhere in public. For sensitive bugs, <email:security@elhub.no>.
 
-* Create an issue for any major change or enhancement before writing any code. Creating an issue allows the change to be discussed openly by the team.
-* Ensure that code submitted follow our code guidelines (running the linters will ensure this).
-* Keep commits as small as possible, preferably one change per commit.
-* Be considerate and respectful to others.
+
+## I Have a Question
+
+> If you want to ask a question, we assume that you have read the available documentation (start with ../README.md).
+
+Post your question as a new issue or comment on an existing suitable issue.
+
+We will try to respond as soon as possible.
+
+
+## I Want To Contribute
+
+> ### Legal Notice
+> When contributing to this project, you must agree that you have authored 100% of the content, that you have the
+> necessary rights to the content and that the content you contribute may be provided under the project license.
+
+### Reporting Bugs
+
+Before submitting a bug report, please investigate as much as you can beforehand, focusing especially on isolating
+the problem and understanding how to recreate it. Then submit the bug in the [issue tracker](#issue-tracker).
+
+### Suggesting Enhancements
+
+Before submitting an enhancement, consider whether the idea fits within the scope and aims of the project.
+[Asking a question](#i-have-a-question) can be a good starting point. Then submit the enchancement as a suggestion
+through the [issue tracker](#issue-tracker).
+
+### Your First Code Contribution
+
+Ideally, use our GitHub CLI extension ([gh-dxp](https://github.com/elhub/gh-dxp)) to enforce linting/style rules
+and format your pull request. Otherwise, use our
+[pull request template](https://github.com/elhub/devxp-project-template/blob/main/resources/.github/pull_request_template.md)
+as a starting point.
+
+The title should use present tense ("Add feature" not "Added feature") and use the imperative mood.
+
+All our code is linted with [MegaLinter](https://megalinter.io). To run linting manually, use:
+
+```bash
+npx mega-linter-runner --install
+npx mega-linter-runner --flavor cupcake -e MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml
+```
+
+To run the local tests, check the [README](../README.md).
+
+Providing linted _and_ tested code significantly increases the chance that a pull request will be accepted.
+
+### Improving The Documentation
+
+Markdown is our format of preference for all documentation. Submitting new or corrections to documentation follow the
+same procedure as for code. You do not need to run unit tests on documentation, but you should run the linter (which
+includes [markdownlint](https://github.com/DavidAnson/markdownlint)).
