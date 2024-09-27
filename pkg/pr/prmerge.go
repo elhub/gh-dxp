@@ -28,6 +28,8 @@ func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 	if errTitle != nil {
 		return errTitle
 	}
+	log.Info("Hello there")
+	log.Info("General Kenobi")
 
 	log.Info("Merging pull request #" + prID + "(" + prTitle + ")")
 	// TODO: Add list of commits
