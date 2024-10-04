@@ -43,10 +43,3 @@ If you want to install this extension **from source**, such as for development, 
     ```
 
 </details>
-
-## RoadMap
-
-Following are some of the things we are thinking/working on.
-
-* Wish-List:
-  * Proper Jira integration. Do some basic Jira checks (is ticket assigned, put into progress, etc). 
