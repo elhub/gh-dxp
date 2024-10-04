@@ -8,23 +8,23 @@ import (
 // GetLatestReleaseVersion fetches the tag of the latest release.
 func GetLatestReleaseVersion(exe Executor) (string, error) {
 
-	ret, err := exe.GH("api", "-H", "Accept: application/vnd.github+json", "-H", "X-GitHub-Api-Version: 2022-11-28", "/repos/elhub/gh-dxp/releases/latest")
+	response, err := exe.GH("api", "-H", "Accept: application/vnd.github+json", "-H", "X-GitHub-Api-Version: 2022-11-28", "/repos/elhub/gh-dxp/releases/latest")
 	if err != nil {
 		return "", err
 	}
 
-	var decoded gitHubRelease
+	var deserializedResponse gitHubRelease
 
-	err = json.NewDecoder(&ret).Decode(&decoded)
+	err = json.NewDecoder(&response).Decode(&deserializedResponse)
 	if err != nil {
 		return "", err
 	}
 
-	if decoded.TagName == "" {
+	if deserializedResponse.TagName == "" {
 		return "", errors.New("response object contained no tag_name field")
 	}
 
-	return decoded.TagName, nil
+	return deserializedResponse.TagName, nil
 }
 
 // IsLatestVersion checks whether the provided version is the same as the latest release in GitHub.
