@@ -12,16 +12,19 @@ import (
 
 // Execute runs the main command of the CLI tool.
 func Execute(settings *config.Settings, version string) error {
-	mainCmd := GenerateCmd(settings, version)
+	mainCmd, err := GenerateCmd(settings, version)
+	if err != nil {
+		return err
+	}
 	ctx := context.Background()
 
-	err := mainCmd.ExecuteContext(ctx)
+	err = mainCmd.ExecuteContext(ctx)
 
 	return err
 }
 
 // GenerateCmd sets up the command structure for the CLI tool using Cobra.
-func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
+func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, error) {
 	var (
 		debug bool
 	)
@@ -46,6 +49,13 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 	retCmd.PersistentFlags().BoolVar(&debug, "debug", false, "verbose logging")
 
 	exe := utils.LinuxExecutor()
+	isLatestVersion, err := utils.IsLatestVersionOrSnapshot(exe, version)
+	if err != nil {
+		return nil, err
+	}
+	if !isLatestVersion {
+		log.Warn("You may be using an outdated version of gh dxp. Consider running 'gh dxp upgrade' to upgrade to the latest version.")
+	}
 
 	retCmd.AddCommand(
 		AliasCmd(exe),
@@ -56,7 +66,8 @@ func GenerateCmd(settings *config.Settings, version string) *cobra.Command {
 		TestCmd(exe),
 		TemplateCmd(exe, settings),
 		StatusCmd(exe),
+		UpgradeCmd(exe),
 	)
 
-	return retCmd
+	return retCmd, nil
 }
