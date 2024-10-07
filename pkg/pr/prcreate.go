@@ -376,7 +376,6 @@ func setBaseBranch(exe utils.Executor, options *CreateOptions) (string, error) {
 		baseBranch = strings.Trim(stdOut.String(), "\n")
 		options.baseBranch = baseBranch
 	}
-	log.Info("info")
 	return baseBranch, nil
 }
 
