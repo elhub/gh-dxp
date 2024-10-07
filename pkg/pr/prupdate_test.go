@@ -136,6 +136,14 @@ func TestExecuteUpdate(t *testing.T) {
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
 			currentBranch:    "branch1",
+			prListNumber:     "1",
+		},
+		{
+			name:             "Test lint is failing",
+			expectedErr:      errors.New("No PR found for branch branch1"),
+			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
+			existingBranches: "main\ndifferentBranch\n",
+			currentBranch:    "branch1",
 		},
 	}
 

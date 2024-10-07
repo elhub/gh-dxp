@@ -19,27 +19,27 @@ func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *Updat
 	}
 	pr.branchID = strings.Trim(currentBranch, "\n")
 
-	opts := &CreateOptions{
-		TestRun: options.TestRun,
-		NoLint:  options.NoLint,
-		NoUnit:  options.NoUnit,
-	}
-
 	// Check if PR exists on branch
 	prID, errCheck := CheckForExistingPR(exe, pr.branchID)
 	if errCheck != nil {
 		return errCheck
 	}
+	if prID == "" {
+		// If PR does not exist, return an error
+		return errors.New("No PR found for branch " + pr.branchID)
+	}
 
-	pr, err := performPreCommitOperations(exe, settings, pr, opts)
+	prOpts := &Options{
+		TestRun:       options.TestRun,
+		NoLint:        options.NoLint,
+		NoUnit:        options.NoUnit,
+		CommitMessage: options.CommitMessage,
+	}
+
+	pr, err := performPreCommitOperations(exe, settings, pr, prOpts)
 	if err != nil {
 		return err
 	}
 
-	if prID != "" {
-		// If the PR exists, update it by pushing to the remote
-		return update(exe, pr.branchID, prID)
-	}
-	// If it doesn't exist, return an error
-	return errors.New("No PR found for branch " + pr.branchID)
+	return update(exe, pr.branchID, prID)
 }
