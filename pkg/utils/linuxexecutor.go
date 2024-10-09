@@ -30,8 +30,11 @@ func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error)
 	log.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
 	cmd := e.ExecCommand(name, args...)
 	bytes, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Error(string(bytes))
+
+	outputString := string(bytes)
+
+	if err != nil && outputString != "" {
+		log.Error(outputString)
 	}
 	return string(bytes), err
 }
