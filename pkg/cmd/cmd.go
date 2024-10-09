@@ -54,7 +54,7 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 		return nil, err
 	}
 	if !isLatestVersion {
-		log.Warn("You may be using an outdated version of gh dxp. Consider running 'gh dxp upgrade' to upgrade to the latest version.")
+		log.Warn("You may be using an outdated version of gh dxp. To upgrade to the latest version, you can run the following command: \n\n gh extension upgrade elhub/gh-dxp --force\n")
 	}
 
 	retCmd.AddCommand(
