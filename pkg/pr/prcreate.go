@@ -259,23 +259,26 @@ func issuesChanges(options *CreateOptions) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
-	if !options.TestRun {
-		issueIDString, errI := utils.AskForString("Issue IDs (seperate with commas):", "")
+	var issueIDString string
+	if !options.TestRun && options.Issues == "" {
+		userIssueString, errI := utils.AskForString("Issue IDs (seperate with commas):", "")
 		if errI != nil {
 			return "", errI
 		}
-
-		if issueIDString != "" {
-			if body != "" {
-				body += "\n"
-			}
-
-			issueIDs := strings.Split(issueIDString, ",")
-			for i, id := range issueIDs {
-				issueIDs[i] = strings.TrimSpace(id)
-			}
-			body += "## 🔗 Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
+		issueIDString = userIssueString
+	} else {
+		issueIDString = options.Issues
+	}
+	if issueIDString != "" {
+		if body != "" {
+			body += "\n"
 		}
+
+		issueIDs := strings.Split(issueIDString, ",")
+		for i, id := range issueIDs {
+			issueIDs[i] = strings.TrimSpace(id)
+		}
+		body += "## 🔗 Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
 	}
 
 	return body, nil

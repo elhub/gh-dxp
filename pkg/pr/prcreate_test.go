@@ -35,6 +35,8 @@ func TestExecuteCreate(t *testing.T) {
 		expectedLintErr  error
 		modifiedFiles    string
 		existingBranches string
+		issues           string
+		issueBodySection string
 	}{
 		{
 			name:             "Test successful PR creation",
@@ -212,6 +214,13 @@ func TestExecuteCreate(t *testing.T) {
 			existingBranches: "main\ndifferentBranch\n",
 			currentBranch:    "branch1",
 		},
+		{
+			name:             "Issues added in opts",
+			issues:           "TDX-123,EDIEL-456",
+			currentBranch:    "branch1",
+			repoBranchName:   "main",
+			issueBodySection: "## 🔗 Issue ID(s): TDX-123, EDIEL-456\n\n",
+		},
 	}
 
 	for _, tt := range tests {
@@ -243,7 +252,8 @@ func TestExecuteCreate(t *testing.T) {
 				Return(tt.prListNumber, tt.prListNErr)
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.currentBranch, "--json", "url", "--jq", ".[].url"}).
 				Return(tt.prListURL, tt.prListUErr)
-			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", "## 📋 Checklist\n\n" +
+			mockExe.On("GH", []string{"pr", "create", "--title", tt.gitLog, "--body", tt.issueBodySection +
+				"## 📋 Checklist\n\n" +
 				"* ✅ Lint checks passed on local machine.\n" +
 				"* ⚠️ **No tests could be run for this PR.**\n",
 				"--base", "main"}).
@@ -255,6 +265,7 @@ func TestExecuteCreate(t *testing.T) {
 				&config.Settings{},
 				&pr.CreateOptions{
 					TestRun: true,
+					Issues:  tt.issues,
 				})
 
 			if tt.expectedErr != nil {
