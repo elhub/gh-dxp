@@ -107,6 +107,13 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"",
 		"Temporary branch to switch to if currently on the default branch",
 	)
+	fl.StringVarP(
+		&opts.Issues,
+		"issues",
+		"i",
+		"",
+		"Comma separated list of issues",
+	)
 	fl.BoolVar(
 		&opts.Draft,
 		"draft",

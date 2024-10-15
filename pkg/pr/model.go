@@ -18,6 +18,7 @@ type CreateOptions struct {
 
 	Branch        string
 	CommitMessage string
+	Issues        string
 
 	baseBranch string
 
