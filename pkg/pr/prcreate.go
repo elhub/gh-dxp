@@ -292,7 +292,7 @@ func testingChanges(options *CreateOptions) (string, error) {
 		}
 
 		if newTestConfirm {
-			return "* ✅ This PR adds news tests.", nil
+			return "* ✅ This PR adds new tests.", nil
 		}
 
 	}
