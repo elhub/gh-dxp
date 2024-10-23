@@ -58,7 +58,12 @@ func Execute(workingDir string, settings *config.Settings) error {
 		},
 		{
 			fileName:  ".github/CONTRIBUTING-template.md",
-			path:      filepath.Join(ghDir, "CONTRIBUTING"),
+			path:      filepath.Join(ghDir, "CONTRIBUTING.md"),
+			overwrite: true,
+		},
+		{
+			fileName:  ".github/SECURITY-template.md",
+			path:      filepath.Join(ghDir, "SECURITY.md"),
 			overwrite: true,
 		},
 	}
