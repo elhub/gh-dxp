@@ -27,7 +27,7 @@ On the `alias.yml` file that follows this project. This installs a number of use
 <details>
    <summary><strong>Install from source</strong></summary>
 
-If you want to install this extension **from source**, such as for development, follow these steps:
+If you want to install this extension **from source**, such as for development, follow these two steps:
 
 1. Clone the repo
 
