@@ -29,7 +29,6 @@ func TestExecute(t *testing.T) {
 		filepath.Join(tempDir, "README.md"),
 		filepath.Join(tempDir, ".github/CODEOWNERS"),
 		filepath.Join(tempDir, ".github/CONTRIBUTING.md"),
-		filepath.Join(tempDir, ".github/SECURITY.md"),
 	}
 
 	// Execute the function
