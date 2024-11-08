@@ -24,8 +24,8 @@ func StartSpinner(msg string, finalMsg string) *spinner.Spinner {
 }
 
 /*
-RemoveSpinnerFinalMsg removes the finalmsg from a spinner. This is intended to be used if an error occurs to prevent conflicting terminal output
+RemoveFinalMsg removes the finalmsg from a spinner. This is intended to be used if an error occurs to prevent conflicting terminal output
 */
-func RemoveSpinnerFinalMsg(s *spinner.Spinner) {
+func RemoveFinalMsg(s *spinner.Spinner) {
 	s.FinalMSG = ""
 }

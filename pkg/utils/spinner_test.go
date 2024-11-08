@@ -24,7 +24,7 @@ func TestStartSpinner(t *testing.T) {
 	t.Run("Spinner final message is correctly removed", func(t *testing.T) {
 
 		s := utils.StartSpinner(suffix, finalMsg)
-		utils.RemoveSpinnerFinalMsg(s)
+		utils.RemoveFinalMsg(s)
 
 		assert.Empty(t, s.FinalMSG)
 	})
