@@ -29,15 +29,25 @@ func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 
 // GetPRTitle gets the title of the current PR.
 func GetPRTitle(exe utils.Executor) (string, error) {
-	stdOut, err := exe.GH("pr", "view", "--json", "title", "--jq", ".title")
+	return getPRField(exe, "title")
+}
+
+// GetPRBody gets the body of the current PR.
+func GetPRBody(exe utils.Executor) (string, error) {
+	return getPRField(exe, "body")
+}
+
+// getPRField gets a single field of information about a PR using the gh pr command
+func getPRField(exe utils.Executor, field string) (string, error) {
+	stdOut, err := exe.GH("pr", "view", "--json", field, "--jq", "."+field)
 
 	if err != nil {
-		return "", errors.New("Error getting PR title")
+		return "", err
 	}
 
-	title := strings.Trim(stdOut.String(), "\n")
+	value := strings.Trim(stdOut.String(), "\n")
 
-	return title, nil
+	return value, nil
 }
 
 func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
