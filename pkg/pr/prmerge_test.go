@@ -19,6 +19,8 @@ func TestExecuteMerge(t *testing.T) {
 		prNumberErr   error
 		prTitle       string
 		prTitleErr    error
+		prBody        string
+		prBodyErr     error
 		prMerge       string
 		prMergeErr    error
 		expectedErr   error
@@ -28,6 +30,7 @@ func TestExecuteMerge(t *testing.T) {
 			pushBranch:  "branch1",
 			prNumber:    "3",
 			prTitle:     "PR title",
+			prBody:      "PR body",
 			prMerge:     "pull request merged",
 			expectedErr: nil,
 		},
@@ -67,7 +70,8 @@ func TestExecuteMerge(t *testing.T) {
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.pushBranch, "--json", "number", "--jq", ".[].number"}).
 				Return(tt.prNumber, tt.prNumberErr)
 			mockExe.On("GH", []string{"pr", "view", "--json", "title", "--jq", ".title"}).Return(tt.prTitle, tt.prTitleErr)
-			mockExe.On("GH", []string{"pr", "merge", "--squash", "--delete-branch"}).Return(tt.prMerge, tt.prMergeErr)
+			mockExe.On("GH", []string{"pr", "view", "--json", "body", "--jq", ".body"}).Return(tt.prBody, tt.prBodyErr)
+			mockExe.On("GH", []string{"pr", "merge", "--squash", "--delete-branch", "--subject", tt.prTitle, "--body", tt.prBody}).Return(tt.prMerge, tt.prMergeErr)
 
 			err := pr.ExecuteMerge(mockExe, &pr.MergeOptions{
 				AutoConfirm: true,

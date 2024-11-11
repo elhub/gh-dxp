@@ -29,6 +29,11 @@ func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 		return errTitle
 	}
 
+	prBody, errBody := GetPRBody(exe)
+	if errBody != nil {
+		return errBody
+	}
+
 	log.Info("Merging pull request #" + prID + "(" + prTitle + ")")
 	// TODO: Add list of commits
 	doMerge := false
@@ -47,7 +52,7 @@ func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 		return nil
 	}
 
-	stdOut, err := exe.GH("pr", "merge", "--squash", "--delete-branch")
+	stdOut, err := exe.GH("pr", "merge", "--squash", "--delete-branch", "--subject", prTitle, "--body", prBody)
 	log.Info(stdOut.String())
 
 	if err != nil {
