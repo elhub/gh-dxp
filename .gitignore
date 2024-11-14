@@ -2,17 +2,21 @@
 # This is required to avoid megalinter spamming each repository with lint configurations
 .ansible-lint
 .checkmake.ini
+.ecrc
 .flake8
+.gitleaks.toml
 .golangci.yml
 .htmlhintrc
 .jsonlintrc
 .markdownlint.json
 .prettierrc.json
 .pylintrc
+.secretlintrc.json
 .stylelintrc.json
 .yamllint.yml
 pyproject.toml
 revive.toml
+trivy.yaml
 
 ### Ansible ###
 **/galaxy/*
