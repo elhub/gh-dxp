@@ -11,14 +11,28 @@ max_line_length = 160
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-[*.{java,kt,kts,scala,rs,xml,kt.spec,kts.spec}]
+[{.gitmodules}]
+indent_style = tab
+indent_size = 4
+
+[*.{java,scala,rs,xml}]
 indent_size = 4
 
 [*.{kt,kts}]
+indent_size = 4
 ktlint_code_style = ktlint_official
 ktlint_standard_max-line-length = 160
 ktlint_standard = enabled
 
+[{Makefile,**.mk}]
+# Use tabs for indentation (Makefiles require tabs)
+indent_style = tab
+indent_size = 4
+
 [{*.py, *.pyi}]
 indent_size = 4
 max_line_length = 160
+
+[{go.mod,go.sum,*.go}]
+indent_style = tab
+indent_size = 4
