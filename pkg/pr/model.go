@@ -26,6 +26,11 @@ type CreateOptions struct {
 	Assignees []string
 }
 
+type ListOptions struct {
+	Mine        bool
+	NeedsReview bool
+}
+
 // MergeOptions represents the options for the pr merge command.
 type MergeOptions struct {
 	AutoConfirm bool
