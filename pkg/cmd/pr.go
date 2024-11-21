@@ -160,11 +160,11 @@ func PRListCmd(exe utils.Executor) *cobra.Command {
 		"Show my open pull requests only.",
 	)
 	fl.BoolVarP(
-		&opts.NeedsReview,
-		"needs-review",
+		&opts.ReviewRequested,
+		"review-requested",
 		"r",
 		true,
-		"Show all pull requests that need review by me.",
+		"Show all pull requests that request reviews from me.",
 	)
 
 	return cmd
