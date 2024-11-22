@@ -90,6 +90,7 @@ func RetrievePullRequests(searchTerm string) error {
 		return errors.Wrap(err, "failed to unmarshal search results for my pull requests")
 	}
 
+	// Fetching the details of each PR is slow, so we do this in parallel
 	for _, sr := range searchResults {
 		wg.Add(1)
 		go fetchPullRequestDetails(sr, prChan, errChan, &wg)
