@@ -2,7 +2,6 @@
 package pr
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/caarlos0/log"
@@ -86,7 +85,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	return trackedChanges, nil
 }
 
-func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {
+func addAndCommitFiles(exe utils.Executor, options *Options) error {
 	var commitMessage string
 	var err error
 
@@ -105,20 +104,8 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 			commitMessage = "default commit message"
 		}
 	}
-	// Get git root directory and add to files to get fully qualified paths
-	root, err := utils.GetGitRootDirectory(exe)
-	if err != nil {
-		return err
-	}
 
-	var fullPaths []string
-	for _, filePath := range files {
-		fullPaths = append(fullPaths, filepath.Join(root, filePath))
-	}
-
-	addCommandArgs := append([]string{"add"}, fullPaths...)
-
-	_, err = exe.Command("git", addCommandArgs...)
+	_, err = exe.Command("git", "add", "-u")
 	if err != nil {
 		return err
 	}
@@ -157,7 +144,7 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, p
 	}
 
 	if len(filesToCommit) > 0 {
-		err = addAndCommitFiles(exe, filesToCommit, options)
+		err = addAndCommitFiles(exe, options)
 		if err != nil {
 			return pr, err
 		}
