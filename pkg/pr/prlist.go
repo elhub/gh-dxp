@@ -8,7 +8,6 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/cli/go-gh/v2"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
@@ -28,14 +27,14 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	errChan = make(chan error)
 
 	if options.Mine {
-		err := RetrievePullRequests("--author=@me")
+		err := RetrievePullRequests("--author=@me", exe)
 		if err != nil {
 			return err
 		}
 	}
 
 	if options.ReviewRequested {
-		RetrievePullRequests("--review-requested=@me")
+		RetrievePullRequests("--review-requested=@me", exe)
 	}
 
 	go func() {
@@ -77,9 +76,9 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	return nil
 }
 
-func RetrievePullRequests(searchTerm string) error {
+func RetrievePullRequests(searchTerm string, exe utils.Executor) error {
 
-	res, _, err := gh.Exec("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
+	res, err := exe.GH("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
 	if err != nil {
 		return errors.Wrap(err, "failed to search prs for my pull requests")
 	}
@@ -93,16 +92,17 @@ func RetrievePullRequests(searchTerm string) error {
 	// Fetching the details of each PR is slow, so we do this in parallel
 	for _, sr := range searchResults {
 		wg.Add(1)
-		go fetchPullRequestDetails(sr, prChan, errChan, &wg)
+		go fetchPullRequestDetails(exe, sr, prChan, errChan, &wg)
 	}
 
 	return nil
 }
 
-func fetchPullRequestDetails(sr SearchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
+func fetchPullRequestDetails(exe utils.Executor, sr SearchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 	url := "https://github.com/" + sr.Repository.NameWithOwner + "/pull/" + strconv.Itoa(sr.Number)
-	pullRequestDetails, _, err := gh.Exec("pr", "view", url, "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision")
+	pullRequestDetails, err := exe.GH("pr", "view", url, "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision")
+
 	if err != nil {
 		errChan <- errors.Wrap(err, "failed to get pr details")
 		return
