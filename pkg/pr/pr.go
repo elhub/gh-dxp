@@ -2,7 +2,6 @@
 package pr
 
 import (
-	"path/filepath"
 	"strings"
 
 	"github.com/caarlos0/log"
@@ -22,22 +21,32 @@ func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 		return "", errors.New("Failed to find existing PR")
 	}
 
-	number := strings.Trim(stdOut.String(), "\n")
+	number := strings.Trim(stdOut, "\n")
 
 	return number, nil
 }
 
 // GetPRTitle gets the title of the current PR.
 func GetPRTitle(exe utils.Executor) (string, error) {
-	stdOut, err := exe.GH("pr", "view", "--json", "title", "--jq", ".title")
+	return getPRField(exe, "title")
+}
+
+// GetPRBody gets the body of the current PR.
+func GetPRBody(exe utils.Executor) (string, error) {
+	return getPRField(exe, "body")
+}
+
+// getPRField gets a single field of information about a PR using the gh pr command
+func getPRField(exe utils.Executor, field string) (string, error) {
+	stdOut, err := exe.GH("pr", "view", "--json", field, "--jq", "."+field)
 
 	if err != nil {
-		return "", errors.New("Error getting PR title")
+		return "", err
 	}
 
-	title := strings.Trim(stdOut.String(), "\n")
+	value := strings.Trim(stdOut, "\n")
 
-	return title, nil
+	return value, nil
 }
 
 func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
@@ -76,7 +85,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	return trackedChanges, nil
 }
 
-func addAndCommitFiles(exe utils.Executor, files []string, options *Options) error {
+func addAndCommitFiles(exe utils.Executor, options *Options) error {
 	var commitMessage string
 	var err error
 
@@ -95,20 +104,8 @@ func addAndCommitFiles(exe utils.Executor, files []string, options *Options) err
 			commitMessage = "default commit message"
 		}
 	}
-	// Get git root directory and add to files to get fully qualified paths
-	root, err := utils.GetGitRootDirectory(exe)
-	if err != nil {
-		return err
-	}
 
-	var fullPaths []string
-	for _, filePath := range files {
-		fullPaths = append(fullPaths, filepath.Join(root, filePath))
-	}
-
-	addCommandArgs := append([]string{"add"}, fullPaths...)
-
-	_, err = exe.Command("git", addCommandArgs...)
+	_, err = exe.Command("git", "add", "-u")
 	if err != nil {
 		return err
 	}
@@ -147,7 +144,7 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, p
 	}
 
 	if len(filesToCommit) > 0 {
-		err = addAndCommitFiles(exe, filesToCommit, options)
+		err = addAndCommitFiles(exe, options)
 		if err != nil {
 			return pr, err
 		}

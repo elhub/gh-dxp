@@ -80,10 +80,11 @@ func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", pr.branchID)
-	s.Stop()
 	if err != nil {
+		utils.RemoveFinalMsg(s)
 		return err
 	}
+	s.Stop()
 	log.Info("Current Branch:" + currentBranch + "\n")
 	newPR, err := createPR(exe, options, pr, options.baseBranch)
 	if err != nil {
@@ -94,11 +95,12 @@ func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 	args := []string{"pr", "create", "--title", newPR.Title, "--body", newPR.Body, "--base", options.baseBranch}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
-	s.Stop()
 	if err != nil {
+		utils.RemoveFinalMsg(s)
 		return errors.Wrap(err, "Failed to create pull request")
 	}
-	log.Info(strings.Trim(stdOut.String(), "\n"))
+	s.Stop()
+	log.Info(strings.Trim(stdOut, "\n"))
 
 	return nil
 }
@@ -123,10 +125,11 @@ func update(exe utils.Executor, branchID string, prID string) error {
 	// Push the current branch to the already existing git remote
 	s := utils.StartSpinner("Updating Pull Request #"+prID+"...", "Pull Request #"+prID+" has been updated.")
 	_, err := exe.Command("git", "push")
-	s.Stop()
 	if err != nil {
+		utils.RemoveFinalMsg(s)
 		return err
 	}
+	s.Stop()
 
 	// Fetching this for info
 	stdOut, err := exe.GH("pr", "list", "-H", branchID, "--json", "url", "--jq", ".[].url")
@@ -134,7 +137,7 @@ func update(exe utils.Executor, branchID string, prID string) error {
 		return err
 	}
 
-	log.Info(strings.Trim(stdOut.String(), "\n") + "\n")
+	log.Info(strings.Trim(stdOut, "\n") + "\n")
 
 	return nil
 }
@@ -372,11 +375,12 @@ func setBaseBranch(exe utils.Executor, options *CreateOptions) (string, error) {
 	if baseBranch == "" {
 		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
 		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
-		s.Stop()
 		if errV != nil {
+			utils.RemoveFinalMsg(s)
 			return "", errors.Wrap(errV, "Failed to fetch default branch")
 		}
-		baseBranch = strings.Trim(stdOut.String(), "\n")
+		s.Stop()
+		baseBranch = strings.Trim(stdOut, "\n")
 		options.baseBranch = baseBranch
 	}
 	return baseBranch, nil

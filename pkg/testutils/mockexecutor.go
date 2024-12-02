@@ -1,7 +1,6 @@
 package testutils
 
 import (
-	"bytes"
 	"context"
 
 	"github.com/stretchr/testify/mock"
@@ -25,9 +24,9 @@ func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...s
 }
 
 // GH pretends to run a GitHub CLI command and returns its output.
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
+func (m *MockExecutor) GH(arg ...string) (string, error) {
 	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
+	return args.String(0), args.Error(1)
 }
 
 // Chdir pretends to change the current working directory.

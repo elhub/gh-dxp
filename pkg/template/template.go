@@ -56,6 +56,11 @@ func Execute(workingDir string, settings *config.Settings) error {
 			path:      filepath.Join(ghDir, "CODEOWNERS"),
 			overwrite: false,
 		},
+		{
+			fileName:  ".github/CONTRIBUTING-template.md",
+			path:      filepath.Join(ghDir, "CONTRIBUTING.md"),
+			overwrite: true,
+		},
 	}
 
 	// Only write file if overwrite = true or file does not exist

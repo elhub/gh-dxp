@@ -15,7 +15,7 @@ func GetLatestReleaseVersion(exe Executor) (string, error) {
 
 	var deserializedResponse gitHubRelease
 
-	err = json.NewDecoder(&response).Decode(&deserializedResponse)
+	err = json.Unmarshal([]byte(response), &deserializedResponse)
 	if err != nil {
 		return "", err
 	}

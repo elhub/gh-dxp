@@ -2,7 +2,6 @@
 package utils
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -51,15 +50,15 @@ func (e *LinuxExecutorImpl) CommandContext(ctx context.Context, name string, arg
 }
 
 // GH runs a GitHub CLI command and returns its output.
-func (e *LinuxExecutorImpl) GH(args ...string) (bytes.Buffer, error) {
+func (e *LinuxExecutorImpl) GH(args ...string) (string, error) {
 	log.Debug(fmt.Sprintf("Running gh '%s'", strings.Join(args, " ")))
 	stdOut, stdErr, err := gh.Exec(args...)
 	if err != nil {
 		log.Error(stdErr.String())
 		log.Debug(fmt.Sprintf("Error running GH command: %s", err.Error()))
-		return stdErr, err
+		return stdErr.String(), err
 	}
-	return stdOut, err
+	return stdOut.String(), err
 }
 
 // Chdir changes the current working directory.
