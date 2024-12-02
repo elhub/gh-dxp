@@ -100,7 +100,7 @@ func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 		return errors.Wrap(err, "Failed to create pull request")
 	}
 	s.Stop()
-	log.Info(strings.Trim(stdOut.String(), "\n"))
+	log.Info(strings.Trim(stdOut, "\n"))
 
 	return nil
 }
@@ -137,7 +137,7 @@ func update(exe utils.Executor, branchID string, prID string) error {
 		return err
 	}
 
-	log.Info(strings.Trim(stdOut.String(), "\n") + "\n")
+	log.Info(strings.Trim(stdOut, "\n") + "\n")
 
 	return nil
 }
@@ -380,7 +380,7 @@ func setBaseBranch(exe utils.Executor, options *CreateOptions) (string, error) {
 			return "", errors.Wrap(errV, "Failed to fetch default branch")
 		}
 		s.Stop()
-		baseBranch = strings.Trim(stdOut.String(), "\n")
+		baseBranch = strings.Trim(stdOut, "\n")
 		options.baseBranch = baseBranch
 	}
 	return baseBranch, nil

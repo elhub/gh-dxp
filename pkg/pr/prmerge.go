@@ -53,7 +53,7 @@ func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 	}
 
 	stdOut, err := exe.GH("pr", "merge", "--squash", "--delete-branch", "--subject", prTitle, "--body", prBody)
-	log.Info(stdOut.String())
+	log.Info(stdOut)
 
 	if err != nil {
 		log.Debug("Error: " + err.Error())

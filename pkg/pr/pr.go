@@ -21,7 +21,7 @@ func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 		return "", errors.New("Failed to find existing PR")
 	}
 
-	number := strings.Trim(stdOut.String(), "\n")
+	number := strings.Trim(stdOut, "\n")
 
 	return number, nil
 }
@@ -44,7 +44,7 @@ func getPRField(exe utils.Executor, field string) (string, error) {
 		return "", err
 	}
 
-	value := strings.Trim(stdOut.String(), "\n")
+	value := strings.Trim(stdOut, "\n")
 
 	return value, nil
 }
