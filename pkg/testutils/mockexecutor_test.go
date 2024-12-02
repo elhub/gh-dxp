@@ -49,7 +49,7 @@ func TestNewMockExecutor(t *testing.T) {
 	// Test GH method
 	ghOutput, err := mockExe.GH("repo", "view")
 	assert.NoError(t, err)
-	assert.Equal(t, "mocked output", ghOutput.String())
+	assert.Equal(t, "mocked output", ghOutput)
 
 	// Test Chdir method
 	err = mockExe.Chdir("/mock/path")

@@ -50,7 +50,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		statusReport.WriteString(fmt.Sprintf("PR Status:\n%s\n", prStatus.String()))
+		statusReport.WriteString(fmt.Sprintf("PR Status:\n%s\n", prStatus))
 	}
 
 	if opts.All || opts.Branches {
@@ -66,7 +66,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		statusReport.WriteString(fmt.Sprintf("Assigned PRs/Review Requests:\n%s\n", assignedPRs.String()))
+		statusReport.WriteString(fmt.Sprintf("Assigned PRs/Review Requests:\n%s\n", assignedPRs))
 	}
 
 	log.Info(statusReport.String())
