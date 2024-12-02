@@ -82,7 +82,7 @@ func RetrievePullRequests(searchTerm string, exe utils.Executor) error {
 	}
 
 	var searchResults []SearchResult
-	err = json.Unmarshal(res.Bytes(), &searchResults)
+	err = json.Unmarshal([]byte(res), &searchResults)
 	if err != nil {
 		return errors.Wrap(err, "failed to unmarshal search results for my pull requests")
 	}
@@ -107,7 +107,7 @@ func fetchPullRequestDetails(exe utils.Executor, sr SearchResult, prChan chan<- 
 	}
 
 	var pullRequest PullRequestInfo
-	err = json.Unmarshal(pullRequestDetails.Bytes(), &pullRequest)
+	err = json.Unmarshal([]byte(pullRequestDetails), &pullRequest)
 	if err != nil {
 		errChan <- errors.Wrap(err, "failed to unmarshal pull request details")
 		return
