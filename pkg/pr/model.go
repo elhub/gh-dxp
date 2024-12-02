@@ -31,6 +31,7 @@ type CreateOptions struct {
 }
 
 type ListOptions struct {
+	TestRun         bool
 	Mine            bool
 	ReviewRequested bool
 }
