@@ -15,7 +15,6 @@ var baseStyle = lipgloss.NewStyle().
 func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 
 	rows := []table.Row{}
-	//rows :=//make([]table.Row, 0, len(mine)+len(review)+1)
 	var maxRepoNameLen = 12
 	var maxTitleLen = 40
 	var maxChangesLen = 8
@@ -82,5 +81,5 @@ func (ui pullRequestUI) Update(_ tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (ui pullRequestUI) View() string {
-	return baseStyle.Render(ui.table.View()) + "\n  " //+ ui.table.HelpView() + "\n"
+	return baseStyle.Render(ui.table.View()) + "\n  "
 }
