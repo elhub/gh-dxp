@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/caarlos0/log"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
@@ -21,7 +20,7 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	pullRequests = []pullRequestInfo{}
 	prChan = make(chan pullRequestInfo)
 	errChan = make(chan error)
-	log.Error("Pre-wolo")
+
 	if options.Mine {
 		err := retrievePullRequests("--author=@me", exe)
 		if err != nil {
