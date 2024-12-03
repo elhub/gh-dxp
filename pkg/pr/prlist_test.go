@@ -44,7 +44,7 @@ func TestExecuteList(t *testing.T) {
 		{
 			name:                 "Author search fails",
 			authorSearchResponse: "[]",
-			expectedErr:          errors.New("Something went wrong during author search!"),
+			expectedErr:          errors.New("something went wrong during author search"),
 		},
 	}
 
@@ -52,7 +52,6 @@ func TestExecuteList(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(testutils.MockExecutor)
 
-			//mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("GH", []string{"search", "prs", "--author=@me", "--state=open", "--json", "number,repository"}).Return(tt.authorSearchResponse, tt.expectedErr)
 			mockExe.On("GH", []string{"search", "prs", "--review-requested=@me", "--state=open", "--json", "number,repository"}).Return(tt.reviewerSearchResponse, tt.expectedErr)
 
@@ -64,7 +63,6 @@ func TestExecuteList(t *testing.T) {
 
 			if tt.expectedErr != nil {
 				require.Error(t, err)
-				//assert.Equal(t, tt.expectedErr.Error(), err.Error())
 				assert.True(t, errors.As(err, &tt.expectedErr))
 			} else {
 				require.NoError(t, err)

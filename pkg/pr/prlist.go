@@ -11,25 +11,26 @@ import (
 	"github.com/pkg/errors"
 )
 
-var pullRequests []PullRequestInfo
+var pullRequests []pullRequestInfo
 var wg sync.WaitGroup
-var prChan chan PullRequestInfo
+var prChan chan pullRequestInfo
 var errChan chan error
 
+// ExecuteList renders the user's assigned pull requests
 func ExecuteList(exe utils.Executor, options *ListOptions) error {
-	pullRequests = []PullRequestInfo{}
-	prChan = make(chan PullRequestInfo)
+	pullRequests = []pullRequestInfo{}
+	prChan = make(chan pullRequestInfo)
 	errChan = make(chan error)
 	log.Error("Pre-wolo")
 	if options.Mine {
-		err := RetrievePullRequests("--author=@me", exe)
+		err := retrievePullRequests("--author=@me", exe)
 		if err != nil {
 			return err
 		}
 	}
 
 	if options.ReviewRequested {
-		RetrievePullRequests("--review-requested=@me", exe)
+		retrievePullRequests("--review-requested=@me", exe)
 	}
 
 	go func() {
@@ -57,7 +58,6 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 
 	// Check content of pullRequests
 	// Pretty Print myPullRequests as a Table
-
 	if !options.TestRun {
 		p := tea.NewProgram(initialModel(pullRequests))
 		if _, err := p.Run(); err != nil {
@@ -65,23 +65,17 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 		}
 	}
 
-	/*
-		// Process pullRequests as needed
-		for _, pr := range pullRequests {
-			log.Info(pr.Title)
-		}*/
-
 	return nil
 }
 
-func RetrievePullRequests(searchTerm string, exe utils.Executor) error {
+func retrievePullRequests(searchTerm string, exe utils.Executor) error {
 
 	res, err := exe.GH("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
 	if err != nil {
 		return errors.Wrap(err, "failed to search prs for my pull requests")
 	}
 
-	var searchResults []SearchResult
+	var searchResults []searchResult
 	err = json.Unmarshal([]byte(res), &searchResults)
 	if err != nil {
 		return errors.Wrap(err, "failed to unmarshal search results for my pull requests")
@@ -96,7 +90,7 @@ func RetrievePullRequests(searchTerm string, exe utils.Executor) error {
 	return nil
 }
 
-func fetchPullRequestDetails(exe utils.Executor, sr SearchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
+func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- pullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 	url := "https://github.com/" + sr.Repository.NameWithOwner + "/pull/" + strconv.Itoa(sr.Number)
 	pullRequestDetails, err := exe.GH("pr", "view", url, "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision")
@@ -106,7 +100,7 @@ func fetchPullRequestDetails(exe utils.Executor, sr SearchResult, prChan chan<- 
 		return
 	}
 
-	var pullRequest PullRequestInfo
+	var pullRequest pullRequestInfo
 	err = json.Unmarshal([]byte(pullRequestDetails), &pullRequest)
 	if err != nil {
 		errChan <- errors.Wrap(err, "failed to unmarshal pull request details")

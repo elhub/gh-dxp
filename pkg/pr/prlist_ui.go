@@ -12,7 +12,7 @@ var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
-func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
+func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 
 	rows := []table.Row{}
 	//rows :=//make([]table.Row, 0, len(mine)+len(review)+1)
@@ -68,19 +68,19 @@ func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
 		Bold(false)
 
 	t.SetStyles(s)
-	return PullRequestUI{
+	return pullRequestUI{
 		table: t,
 	}
 }
 
-func (ui PullRequestUI) Init() tea.Cmd {
+func (ui pullRequestUI) Init() tea.Cmd {
 	return nil
 }
 
-func (ui PullRequestUI) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (ui pullRequestUI) Update(_ tea.Msg) (tea.Model, tea.Cmd) {
 	return ui, tea.Quit
 }
 
-func (ui PullRequestUI) View() string {
+func (ui pullRequestUI) View() string {
 	return baseStyle.Render(ui.table.View()) + "\n  " //+ ui.table.HelpView() + "\n"
 }
