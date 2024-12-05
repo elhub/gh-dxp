@@ -11,7 +11,7 @@ test: dxp test
 
 # Pull Requests
 prc: dxp pr create
-prl: pr list
+prl: dxp pr list
 prm: dxp pr merge
 pru: dxp pr update
 prv: pr view

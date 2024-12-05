@@ -20,6 +20,7 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	}
 
 	cmd.AddCommand(PRCreateCmd(exe, settings))
+	cmd.AddCommand(PRListCmd(exe))
 	cmd.AddCommand(PRMergeCmd(exe))
 	cmd.AddCommand(PRUpdateCmd(exe, settings))
 
@@ -119,6 +120,51 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		"draft",
 		false,
 		"Mark pull request as draft",
+	)
+
+	return cmd
+}
+
+// PRListCmd handles the listing of pull requests.
+func PRListCmd(exe utils.Executor) *cobra.Command {
+	opts := &pr.ListOptions{}
+
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List your PRs (Pull Requests) in GitHub",
+		Long: heredoc.Doc(`
+			List your PRs (pull requests) in GitHub. This is a general command that can help you get an overview
+			of all your PRs that your user has.
+		`),
+		Example: heredoc.Doc(`
+			# List all PRs
+			$ gh dxp pr list
+		`),
+		Args: cobra.NoArgs,
+		RunE: func(_ *cobra.Command, _ []string) error {
+			err := utils.SetWorkDirToGitHubRoot(exe)
+			if err != nil {
+				return err
+			}
+
+			return pr.ExecuteList(exe, opts)
+		},
+	}
+
+	fl := cmd.Flags()
+	fl.BoolVarP(
+		&opts.Mine,
+		"mine",
+		"q",
+		true,
+		"Show my open pull requests only.",
+	)
+	fl.BoolVarP(
+		&opts.ReviewRequested,
+		"review-requested",
+		"r",
+		true,
+		"Show all pull requests that request reviews from me.",
 	)
 
 	return cmd
