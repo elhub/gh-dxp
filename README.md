@@ -1,6 +1,6 @@
 # gh-dxp
 
-A GitHub (gh) CLI extension for automating daily development work, brought to you by Elhub's DevXP team. It implements an opinionated workflow based around small and frequent commits, squash merge, and mandatory linting and unit testing. To view more detailed documentation, please refer to the gh-dxp page in docs-support, and more.
+A GitHub (gh) CLI extension for automating daily development work, brought to you by Elhub's DevXP team. It implements an opinionated workflow based around small and frequent commits, squash merge, and mandatory linting and unit testing. For detailed documentation, please refer to the gh-dxp page in docs-support.
 
 ### User Guide
 Using the `-h` flag with any command will display relevant documentation.
