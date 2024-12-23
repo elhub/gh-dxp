@@ -49,13 +49,6 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 	retCmd.PersistentFlags().BoolVar(&debug, "debug", false, "verbose logging")
 
 	exe := utils.LinuxExecutor()
-	isLatestVersion, err := utils.IsLatestVersionOrSnapshot(exe, version)
-	if err != nil {
-		return nil, err
-	}
-	if !isLatestVersion {
-		log.Warn("You may be using an outdated version of gh dxp. To upgrade to the latest version, you can run the following command: \n\n gh extension upgrade elhub/gh-dxp --force\n")
-	}
 
 	retCmd.AddCommand(
 		AliasCmd(exe),
@@ -66,7 +59,6 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 		TestCmd(exe),
 		TemplateCmd(exe, settings),
 		StatusCmd(exe),
-		UpgradeCmd(exe),
 	)
 
 	return retCmd, nil
