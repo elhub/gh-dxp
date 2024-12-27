@@ -2,6 +2,7 @@ package pr
 
 import (
 	"encoding/json"
+	"sort"
 	"strconv"
 	"sync"
 
@@ -54,6 +55,7 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 			}
 		}
 	}
+	sortPullRequests(pullRequests)
 
 	// Check content of pullRequests
 	// Pretty Print myPullRequests as a Table
@@ -107,4 +109,13 @@ func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- 
 	}
 
 	prChan <- pullRequest
+}
+
+func sortPullRequests(pullRequests []pullRequestInfo) {
+	sort.Slice(pullRequests, func(i, j int) bool {
+		if pullRequests[i].HeadRepository.ID == pullRequests[j].HeadRepository.ID {
+			return pullRequests[i].Number < pullRequests[j].Number
+		}
+		return pullRequests[i].HeadRepository.Name < pullRequests[j].HeadRepository.Name
+	})
 }
