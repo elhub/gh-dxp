@@ -30,7 +30,6 @@ func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 		})
 	}
 
-	// Beyond a certain length, some columns will be truncated
 	t := table.New(
 		table.WithColumns([]table.Column{
 			{Title: "Repository", Width: repoNameLen},
