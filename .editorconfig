@@ -20,9 +20,24 @@ indent_size = 4
 
 [*.{kt,kts}]
 indent_size = 4
-ktlint_code_style = ktlint_official
+ktlint_code_style = intellij_idea
 ktlint_standard_max-line-length = 160
 ktlint_standard = enabled
+
+ktlint_chain_method_rule_force_multiline_when_chain_operator_count_greater_or_equal_than=unset
+ktlint_class_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than=unset
+ktlint_function_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than=unset
+ktlint_standard_string-template-indent = disabled
+ktlint_standard_trailing-comma-on-call-site = disabled
+ktlint_standard_trailing-comma-on-declaration-site = disabled
+
+# These two rules are too strict on whether parameters can be on multiple lines even though they could potentially fit on one line.
+# Can't find a more specific rule to disable.
+ktlint_standard_function-signature = disabled
+ktlint_standard_class-signature = disabled
+
+# This ends up correcting to something that intellij auto-formats back
+ktlint_standard_condition-wrapping = disabled
 
 [{Makefile,**.mk}]
 # Use tabs for indentation (Makefiles require tabs)
