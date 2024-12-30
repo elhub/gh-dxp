@@ -15,9 +15,9 @@ var baseStyle = lipgloss.NewStyle().
 func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 
 	rows := []table.Row{}
-	var maxRepoNameLen = 12
-	var maxTitleLen = 40
-	var maxChangesLen = 8
+	var repoNameLen = 12
+	var titleLen = 40
+	var changesLen = 8
 	for _, pr := range pullRequests {
 		changes := "+" + strconv.Itoa(pr.Additions) + " -" + strconv.Itoa(pr.Deletions)
 		rows = append(rows, table.Row{
@@ -28,25 +28,16 @@ func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 			pr.ReviewDecision,
 			changes,
 		})
-		if len(pr.HeadRepository.Name) > maxRepoNameLen {
-			maxRepoNameLen = len(pr.HeadRepository.Name)
-		}
-		if len(pr.Title) > maxTitleLen {
-			maxTitleLen = len(pr.Title)
-		}
-		if len(changes) > maxChangesLen {
-			maxChangesLen = len(changes)
-		}
 	}
 
 	t := table.New(
 		table.WithColumns([]table.Column{
-			{Title: "Repository", Width: maxRepoNameLen},
+			{Title: "Repository", Width: repoNameLen},
 			{Title: "ID", Width: 4},
-			{Title: "Title", Width: maxTitleLen},
-			{Title: "Author", Width: 30},
+			{Title: "Title", Width: titleLen},
+			{Title: "Author", Width: 20},
 			{Title: "Status", Width: 16},
-			{Title: "Changes", Width: maxChangesLen},
+			{Title: "Changes", Width: changesLen},
 		}),
 		table.WithRows(rows),
 		table.WithFocused(true),
