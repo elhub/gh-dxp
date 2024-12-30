@@ -50,7 +50,7 @@ func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 		}),
 		table.WithRows(rows),
 		table.WithFocused(true),
-		table.WithHeight(len(pullRequests)),
+		table.WithHeight(len(pullRequests)+1),
 	)
 
 	s := table.DefaultStyles()
