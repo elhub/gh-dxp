@@ -13,24 +13,20 @@ import (
 )
 
 // Execute downloads the project template files and writes them to the working directory.
-func Execute(workingDir string, settings *config.Settings) error {
+func Execute(workingDir string, settings *config.Settings, options *Options) error {
 	// Get the project template URI
 	uri := settings.ProjectTemplateURI
 
 	// Create the .github directory if it does not exist
-	ghDir := filepath.Join(workingDir, ".github")
-	if _, errStat := os.Stat(ghDir); os.IsNotExist(errStat) {
-		if err := os.Mkdir(ghDir, 0755); err != nil {
-			return fmt.Errorf("could not create .github directory: %w", err)
-		}
+	ghDir, err := createDirectory(workingDir, ".github")
+	if err != nil {
+		return err
 	}
 
 	// Create the .teamcity directory if it does not exist
-	tcDir := filepath.Join(workingDir, ".teamcity")
-	if _, errStat := os.Stat(tcDir); os.IsNotExist(errStat) {
-		if err := os.Mkdir(tcDir, 0755); err != nil {
-			return fmt.Errorf("could not create .teamcity directory: %w", err)
-		}
+	tcDir, err := createDirectory(workingDir, ".teamcity")
+	if err != nil {
+		return err
 	}
 
 	// Download files
@@ -81,6 +77,59 @@ func Execute(workingDir string, settings *config.Settings) error {
 		},
 	}
 
+	if options.IsGradleProject {
+
+		// Create gradle directories if we are setting up a gradle project
+		gradleDir, err := createDirectory(workingDir, "gradle")
+		if err != nil {
+			return err
+		}
+
+		gradleWrapperDir, err := createDirectory(gradleDir, "wrapper")
+		if err != nil {
+			return err
+		}
+
+		gradleFiles := []struct {
+			fileName  string
+			path      string
+			overwrite bool
+		}{
+			{
+				fileName:  "gradleFiles/gradle/wrapper/gradle-wrapper.jar",
+				path:      filepath.Join(gradleWrapperDir, "gradle-wrapper.jar"),
+				overwrite: false,
+			},
+			{
+				fileName:  "gradleFiles/gradle/wrapper/gradle-wrapper.properties",
+				path:      filepath.Join(gradleWrapperDir, "gradle-wrapper.properties"),
+				overwrite: false,
+			},
+			{
+				fileName:  "gradleFiles/build.gradle.kts",
+				path:      filepath.Join(workingDir, "build.gradle.kts"),
+				overwrite: false,
+			},
+			{
+				fileName:  "gradleFiles/gradle.properties",
+				path:      filepath.Join(workingDir, "gradle.properties"),
+				overwrite: false,
+			},
+			{
+				fileName:  "gradleFiles/gradlew",
+				path:      filepath.Join(workingDir, "gradlew"),
+				overwrite: false,
+			},
+			{
+				fileName:  "gradleFiles/settings.gradle.kts",
+				path:      filepath.Join(workingDir, "settings.gradle.kts"),
+				overwrite: false,
+			},
+		}
+
+		files = append(files, gradleFiles...)
+	}
+
 	// Only write file if overwrite = true or file does not exist
 	for _, file := range files {
 		// Check if the file exists
@@ -123,4 +172,17 @@ func writeFile(uri string, filepath string) error {
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
 	return err
+}
+
+func createDirectory(path string, name string) (string, error) {
+	dir := filepath.Join(path, name)
+
+	// Check if the directory already exists
+	if _, errStat := os.Stat(dir); os.IsNotExist(errStat) {
+		// Attempt to create the directory
+		if err := os.Mkdir(dir, 0755); err != nil {
+			return "", fmt.Errorf("could not create directory %s: %w", dir, err)
+		}
+	}
+	return dir, nil
 }

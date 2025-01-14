@@ -6,7 +6,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/template"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
@@ -14,7 +13,7 @@ import (
 
 // TemplateCmd initializes a repository with default files.
 func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &pr.CreateOptions{}
+	opts := &template.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "template",
@@ -26,25 +25,24 @@ func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
 		Example: heredoc.Doc(`
 			$ gh dxp template
 		`),
-		Args: cobra.NoArgs,
+		Args: cobra.MaximumNArgs(1),
 		RunE: func(_ *cobra.Command, _ []string) error {
 			cwd, err := os.Getwd()
 			if err != nil {
 				return fmt.Errorf("could not get current working directory: %w", err)
 			}
 
-			return template.Execute(cwd, settings)
+			return template.Execute(cwd, settings, opts)
 		},
 	}
 
-	// TODO: Support flags from gh pr
 	fl := cmd.Flags()
 	fl.BoolVarP(
-		&opts.TestRun,
-		"confirm",
-		"y",
+		&opts.IsGradleProject,
+		"gradle",
+		"m",
 		false,
-		"Don't ask for user input.",
+		"Include gradle specific files",
 	)
 	return cmd
 }
