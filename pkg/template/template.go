@@ -25,6 +25,14 @@ func Execute(workingDir string, settings *config.Settings) error {
 		}
 	}
 
+	// Create the .teamcity directory if it does not exist
+	tcDir := filepath.Join(workingDir, ".teamcity")
+	if _, errStat := os.Stat(tcDir); os.IsNotExist(errStat) {
+		if err := os.Mkdir(tcDir, 0755); err != nil {
+			return fmt.Errorf("could not create .teamcity directory: %w", err)
+		}
+	}
+
 	// Download files
 	files := []struct {
 		fileName  string
@@ -60,6 +68,16 @@ func Execute(workingDir string, settings *config.Settings) error {
 			fileName:  ".github/CONTRIBUTING-template.md",
 			path:      filepath.Join(ghDir, "CONTRIBUTING.md"),
 			overwrite: true,
+		},
+		{
+			fileName:  ".teamcity/pom-template.xml",
+			path:      filepath.Join(tcDir, "pom.xml"),
+			overwrite: false,
+		},
+		{
+			fileName:  ".teamcity/settings-template.kts",
+			path:      filepath.Join(tcDir, "settings.kts"),
+			overwrite: false,
 		},
 	}
 
