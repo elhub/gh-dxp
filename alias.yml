@@ -15,3 +15,6 @@ prl: dxp pr list
 prm: dxp pr merge
 pru: dxp pr update
 prv: pr view
+
+# Repos
+cla: dxp repo clone-all

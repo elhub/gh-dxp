@@ -1,8 +1,23 @@
 package utils
 
 import (
+	"errors"
+	"io/fs"
+	"os"
 	"strings"
 )
+
+// DirectoryExists checks whether a directory exists.
+func DirectoryExists(path string) (bool, error) {
+	_, err := os.Stat(path)
+	if err == nil {
+		return true, nil
+	}
+	if errors.Is(err, fs.ErrNotExist) {
+		return false, nil
+	}
+	return false, err
+}
 
 // GetGitRootDirectory returns the root directory of the current git repo.
 func GetGitRootDirectory(exe Executor) (string, error) {
