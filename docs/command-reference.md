@@ -15,7 +15,7 @@ This document contains documentation for the various commands implemented in `gh
 In order to simplify usage, we have defined a default `alias.yml` that defines the most commonly used workflow
 commands. The `alias` command downloads and imports this default file.
 
-Example:
+**Example:**
 
 ```bash
 gh dxp alias import
@@ -84,7 +84,7 @@ The `pr` command handles all things related to pull requests.
 The `pr create` command allows you to create and update diffs/pull requests. By default, it will run both `lint` and
 `test` as steps.
 
-### Example usage
+**Example:**
 
 ```bash
 # Start flow to create pr
@@ -110,7 +110,7 @@ The `repo` command extends .
 
 The `repo clone-all` command allows you to clone some or all repositories within an organization.
 
-### Example usage
+**Example:**
 
 ```bash
 # Clone all repositories from all organization you have access to.
