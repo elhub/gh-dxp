@@ -100,3 +100,25 @@ gh dxp pr create -b branchName -m "Add amazing new feature"
 ### pr merge
 
 The `pr merge` command handles the merging of diffs/pull requests.
+
+
+## repo
+
+The `repo` command extends .
+
+### repo clone-all
+
+The `repo clone-all` command allows you to clone some or all repositories within an organization.
+
+### Example usage
+
+```bash
+# Clone all repositories from all organization you have access to.
+gh dxp repo clone-all
+
+# Clone all repositories that contain "docs"
+gh dxp repo clone-all docs
+
+# List the repositories that would be cloned using this command
+gh dxp repo clone-all docs --dryrun
+```
