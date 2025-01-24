@@ -17,4 +17,4 @@ pru: dxp pr update
 prv: pr view
 
 # Repos
-cla: dxp repo clone-all
+rcl: dxp repo clone-all
