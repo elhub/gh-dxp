@@ -17,6 +17,8 @@
 pyproject.toml
 revive.toml
 trivy.yaml
+checkstyle-config.xml
+java-pmd-ruleset.xml
 
 ### Ansible ###
 **/galaxy/*
@@ -88,6 +90,35 @@ buildNumber.properties
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+### Python ###
+.venv
+__pycache__/
+*.py[cod]
+*$py.class
+# Distribution / packaging
+.Python
+build/
+dist/
+wheels/
+share/python-wheels/
+*.egg-info/
+*.egg
+MANIFEST
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
 ### React ###
 .DS_*
 dist/
@@ -119,3 +150,9 @@ terraform/*.tfvars
 ### Visual Studio Code ###
 .vscode/
 *.code-workspace
+
+### Helm ###
+# Chart dependencies
+**/charts/*.tgz
+# Avoid commiting chart lockfile (can cause issues with ArgoCD)
+Chart.lock

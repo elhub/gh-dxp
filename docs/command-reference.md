@@ -7,7 +7,8 @@ tags: [github, reference]
 This document contains documentation for the various commands implemented in `gh-dxp`.
 
 !!! tip
-    You can run any command with the `--help` flag to get more information on how it works.
+    You can run any command with the `--help` flag to get more information on how it works. There are lots of
+    useful options that are not documented on these pages.
 
 
 ## alias
@@ -15,7 +16,7 @@ This document contains documentation for the various commands implemented in `gh
 In order to simplify usage, we have defined a default `alias.yml` that defines the most commonly used workflow
 commands. The `alias` command downloads and imports this default file.
 
-Example:
+**Example:**
 
 ```bash
 gh dxp alias import
@@ -84,7 +85,7 @@ The `pr` command handles all things related to pull requests.
 The `pr create` command allows you to create and update diffs/pull requests. By default, it will run both `lint` and
 `test` as steps.
 
-### Example usage
+**Example:**
 
 ```bash
 # Start flow to create pr
@@ -100,3 +101,25 @@ gh dxp pr create -b branchName -m "Add amazing new feature"
 ### pr merge
 
 The `pr merge` command handles the merging of diffs/pull requests.
+
+
+## repo
+
+The `repo` command extends .
+
+### repo clone-all
+
+The `repo clone-all` command allows you to clone some or all repositories within an organization.
+
+**Example:**
+
+```bash
+# Clone all repositories from all organization you have access to.
+gh dxp repo clone-all
+
+# Clone all repositories that contain "docs"
+gh dxp repo clone-all docs
+
+# List the repositories that would be cloned using this command
+gh dxp repo clone-all docs --dryrun
+```
