@@ -7,7 +7,8 @@ tags: [github, reference]
 This document contains documentation for the various commands implemented in `gh-dxp`.
 
 !!! tip
-    You can run any command with the `--help` flag to get more information on how it works.
+    You can run any command with the `--help` flag to get more information on how it works. There are lots of
+    useful options that are not documented on these pages.
 
 
 ## alias
