@@ -3,6 +3,7 @@ package repo
 import (
 	"encoding/json"
 	"strings"
+	"time"
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/utils"
@@ -33,6 +34,7 @@ func ExecuteClone(exe utils.Executor, pattern string, opts *Options) error {
 			if opts.DryRun {
 				log.Infof("Dry run: Clone repository %s", repo.FullName)
 			} else {
+				time.Sleep(1 * time.Second)
 				log.Infof("Cloning repository: %s", repo.FullName)
 				_, err := exe.GH("repo", "clone", repo.FullName)
 				if err != nil {
