@@ -24,6 +24,8 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 		args = append(args, "--image", opts.LinterImage)
 	}
 
+	args = append(args, "-e", "LINTER_RULES_PATH=tmp/") // Prevents mega-linter from spamming lint configuration files into the repository
+
 	// Check if mega-lint configuration is present in the repository.
 	if !utils.FileExists(".mega-linter.yml") {
 		log.Info("Using the default Elhub mega-linter configuration.\n")
