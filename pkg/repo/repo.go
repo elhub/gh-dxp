@@ -2,6 +2,8 @@ package repo
 
 import (
 	"encoding/json"
+	"fmt"
+	"math"
 	"strings"
 	"time"
 
@@ -17,7 +19,7 @@ type repositoryInfo struct {
 }
 
 // ExecuteClone carries out a clone all on the given pattern
-func ExecuteClone(exe utils.Executor, pattern string, opts *Options) error {
+func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Duration), opts *Options) error {
 	repositoryInfo, err := retrieveRepositories(pattern, exe)
 	if err != nil {
 		return err
@@ -34,11 +36,11 @@ func ExecuteClone(exe utils.Executor, pattern string, opts *Options) error {
 			if opts.DryRun {
 				log.Infof("Dry run: Clone repository %s", repo.FullName)
 			} else {
-				time.Sleep(1 * time.Second)
 				log.Infof("Cloning repository: %s", repo.FullName)
-				_, err := exe.GH("repo", "clone", repo.FullName)
+
+				err := cloneRepoWithRetries(repo.FullName, sleepFunction, exe)
 				if err != nil {
-					log.Debug(err.Error())
+					log.Warn(err.Error())
 				}
 			}
 		} else {
@@ -99,4 +101,27 @@ func retrieveRepositories(pattern string, exe utils.Executor) ([]repositoryInfo,
 	log.Infof("Found %d repositories matching the pattern %s", len(searchResults), pattern)
 
 	return searchResults, nil
+}
+
+func cloneRepoWithRetries(reponame string, sleep func(time.Duration), exe utils.Executor) error {
+
+	maxAttempts := 5
+
+	for i := 0; i <= maxAttempts; i++ {
+		_, err := exe.GH("repo", "clone", reponame)
+		if err != nil {
+			if i != maxAttempts {
+				sleepDuration := powInt(2, i)
+				log.Debugf("Will retry clone in %d seconds", sleepDuration)
+				sleep(time.Second * time.Duration(sleepDuration))
+			}
+			continue
+		}
+		return nil
+	}
+	return fmt.Errorf("unable to clone repo %s after %d attempts", reponame, maxAttempts)
+}
+
+func powInt(x, y int) int {
+	return int(math.Pow(float64(x), float64(y)))
 }
