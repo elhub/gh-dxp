@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/MakeNowJust/heredoc"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/repo"
@@ -51,7 +53,8 @@ func RepoCloneCmd(exe utils.Executor) *cobra.Command {
 			if len(args) > 0 {
 				pattern = args[0]
 			}
-			return repo.ExecuteClone(exe, pattern, opts)
+			sleepFunction := time.Sleep
+			return repo.ExecuteClone(exe, pattern, sleepFunction, opts)
 		},
 	}
 
