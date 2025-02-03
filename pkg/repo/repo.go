@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/caarlos0/log"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
@@ -34,17 +34,17 @@ func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Du
 
 		if !exists {
 			if opts.DryRun {
-				log.Infof("Dry run: Clone repository %s", repo.FullName)
+				logger.Infof("Dry run: Clone repository %s", repo.FullName)
 			} else {
-				log.Infof("Cloning repository: %s", repo.FullName)
+				logger.Infof("Cloning repository: %s", repo.FullName)
 
 				err := cloneRepoWithRetries(repo.FullName, sleepFunction, exe)
 				if err != nil {
-					log.Warn(err.Error())
+					logger.Warn(err.Error())
 				}
 			}
 		} else {
-			log.Infof("Skipped cloning of repository %s as directory already exists", repo.FullName)
+			logger.Infof("Skipped cloning of repository %s as directory already exists", repo.FullName)
 		}
 	}
 
@@ -81,7 +81,7 @@ func retrieveRepositories(pattern string, exe utils.Executor) ([]repositoryInfo,
 	}
 	// Convert to comma separated string
 	orgsStr := strings.Join(orgs, ",")
-	log.Infof("Searching for repositories in the following organizations: %s", orgsStr)
+	logger.Infof("Searching for repositories in the following organizations: %s", orgsStr)
 
 	var res string
 	if len(pattern) == 0 {
@@ -98,7 +98,7 @@ func retrieveRepositories(pattern string, exe utils.Executor) ([]repositoryInfo,
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal search results for repositories")
 	}
-	log.Infof("Found %d repositories matching the pattern %s", len(searchResults), pattern)
+	logger.Infof("Found %d repositories matching the pattern %s", len(searchResults), pattern)
 
 	return searchResults, nil
 }
@@ -112,7 +112,7 @@ func cloneRepoWithRetries(reponame string, sleep func(time.Duration), exe utils.
 		if err != nil {
 			if i != maxAttempts {
 				sleepDuration := powInt(2, i)
-				log.Debugf("Will retry clone in %d seconds", sleepDuration)
+				logger.Debugf("Will retry clone in %d seconds", sleepDuration)
 				sleep(time.Second * time.Duration(sleepDuration))
 			}
 			continue

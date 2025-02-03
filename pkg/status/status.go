@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/caarlos0/log"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
@@ -69,7 +69,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		statusReport.WriteString(fmt.Sprintf("Assigned PRs/Review Requests:\n%s\n", assignedPRs))
 	}
 
-	log.Info(statusReport.String())
+	logger.Info(statusReport.String())
 	return nil
 }
 

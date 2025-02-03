@@ -6,6 +6,7 @@ import (
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
@@ -36,12 +37,12 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 		SilenceErrors: true,
 		Version:       version,
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
-			log.DecreasePadding()
-			log.SetLevel(log.InfoLevel)
+			logger.DecreasePadding()
+			logger.SetLevel(log.InfoLevel)
 
 			if debug {
-				log.Info("Debug logs enabled")
-				log.SetLevel(log.DebugLevel)
+				logger.Info("Debug logs enabled")
+				logger.SetLevel(log.DebugLevel)
 			}
 		},
 	}
