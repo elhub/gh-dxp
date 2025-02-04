@@ -4,9 +4,9 @@ package pr
 import (
 	"strings"
 
-	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/test"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
@@ -17,7 +17,7 @@ func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 	stdOut, err := exe.GH("pr", "list", "-H", branchID, "--json", "number", "--jq", ".[].number")
 
 	if err != nil {
-		log.Debug("Error: " + err.Error())
+		logger.Debug("Error: " + err.Error())
 		return "", errors.New("Failed to find existing PR")
 	}
 

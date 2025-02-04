@@ -3,9 +3,9 @@ package pr
 import (
 	"strings"
 
-	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
@@ -46,7 +46,7 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 		pr.branchID = newBranchName
 	} else {
 		if options.Branch != "" && options.Branch != pr.branchID {
-			log.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + pr.branchID)
+			logger.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + pr.branchID)
 		}
 	}
 
@@ -85,7 +85,7 @@ func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 		return err
 	}
 	s.Stop()
-	log.Info("Current Branch:" + currentBranch + "\n")
+	logger.Info("Current Branch:" + currentBranch + "\n")
 	newPR, err := createPR(exe, options, pr, options.baseBranch)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 		return errors.Wrap(err, "Failed to create pull request")
 	}
 	s.Stop()
-	log.Info(strings.Trim(stdOut, "\n"))
+	logger.Info(strings.Trim(stdOut, "\n"))
 
 	return nil
 }
@@ -137,7 +137,7 @@ func update(exe utils.Executor, branchID string, prID string) error {
 		return err
 	}
 
-	log.Info(strings.Trim(stdOut, "\n") + "\n")
+	logger.Info(strings.Trim(stdOut, "\n") + "\n")
 
 	return nil
 }
@@ -187,7 +187,7 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, comm
 
 	bodySurvey := "No description. Do you want to add one?"
 	if body != "" {
-		log.Info("## Description\n\n" + commitSummary)
+		logger.Info("## Description\n\n" + commitSummary)
 		bodySurvey = "Do you want to change the description?"
 	}
 
@@ -357,7 +357,7 @@ func getCheckboxMark(confirm bool) string {
 }
 
 func logPullRequest(pr PullRequest) {
-	log.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
+	logger.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
 }
 
 func formatUntrackedFileChangesQuestion(changes []string) string {

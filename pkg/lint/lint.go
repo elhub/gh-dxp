@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
@@ -26,7 +26,7 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 
 	// Check if mega-lint configuration is present in the repository.
 	if !utils.FileExists(".mega-linter.yml") {
-		log.Info("Using the default Elhub mega-linter configuration.\n")
+		logger.Info("Using the default Elhub mega-linter configuration.\n")
 		// Append the default configuration file to the args.
 		args = append(args, "-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml")
 	}
@@ -37,7 +37,7 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 		}
 
 		if len(changedFiles) == 0 {
-			log.Info("Did not find any changed files to lint")
+			logger.Info("Did not find any changed files to lint")
 			return nil
 		}
 
@@ -54,7 +54,7 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	}
 	err := exe.CommandContext(ctx, args[0], args[1:]...)
 	if err != nil {
-		log.Info("The Lint Process returned an error: " + err.Error() + "\n")
+		logger.Info("The Lint Process returned an error: " + err.Error() + "\n")
 		return err
 	}
 	return nil

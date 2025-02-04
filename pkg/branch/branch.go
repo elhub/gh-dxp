@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/caarlos0/log"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
@@ -19,19 +19,19 @@ func CheckoutBranch(exe utils.Executor, branchID string) error {
 	}
 
 	if branchExists {
-		log.Debugf("Branch '%s' already exists, checking out to it", branchID)
+		logger.Debugf("Branch '%s' already exists, checking out to it", branchID)
 		out, err1 := exe.Command("git", "checkout", branchID)
 		if err1 != nil {
 			return errors.Wrap(err1, "Failed to checkout branch")
 		}
-		log.Info(strings.Trim(out, "\n"))
+		logger.Info(strings.Trim(out, "\n"))
 	} else {
-		log.Debugf("Creating branch '%s' and checking out to it", branchID)
+		logger.Debugf("Creating branch '%s' and checking out to it", branchID)
 		out, err2 := exe.Command("git", "checkout", "-b", branchID)
 		if err2 != nil {
 			return errors.Wrap(err2, "Failed to create branch")
 		}
-		log.Debug(strings.Trim(out, "\n"))
+		logger.Debug(strings.Trim(out, "\n"))
 	}
 
 	return nil

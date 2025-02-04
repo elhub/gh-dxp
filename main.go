@@ -4,9 +4,9 @@ package main
 import (
 	"os"
 
-	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/cmd"
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/logger"
 )
 
 var (
@@ -25,7 +25,7 @@ func main() {
 	}
 
 	if cmdErr := cmd.Execute(settings, version); cmdErr != nil {
-		log.WithError(cmdErr).Error("Command failed")
+		logger.WithError(cmdErr).Error("Command failed")
 		os.Exit(1)
 	}
 }

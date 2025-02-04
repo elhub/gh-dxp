@@ -5,7 +5,7 @@ import (
 	"errors"
 	"path/filepath"
 
-	"github.com/caarlos0/log"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
@@ -18,7 +18,7 @@ func RunTest(exe utils.Executor) (bool, error) {
 	if err != nil {
 		var ntcErr *NoTestCommandError
 		if errors.As(err, &ntcErr) {
-			log.Warn(err.Error())
+			logger.Warn(err.Error())
 			return false, nil
 		}
 		return false, err

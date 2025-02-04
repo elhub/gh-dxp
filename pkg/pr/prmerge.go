@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/caarlos0/log"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
@@ -34,7 +34,7 @@ func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 		return errBody
 	}
 
-	log.Info("Merging pull request #" + prID + "(" + prTitle + ")")
+	logger.Info("Merging pull request #" + prID + "(" + prTitle + ")")
 	// TODO: Add list of commits
 	doMerge := false
 	if options.AutoConfirm {
@@ -53,15 +53,15 @@ func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
 	}
 
 	stdOut, err := exe.GH("pr", "merge", "--squash", "--delete-branch", "--subject", prTitle, "--body", prBody)
-	log.Info(stdOut)
+	logger.Info(stdOut)
 
 	if err != nil {
-		log.Debug("Error: " + err.Error())
+		logger.Debug("Error: " + err.Error())
 		return errors.New("Failed to merge pull request #" + prID)
 	}
 
-	log.Info("Deleted local " + branchID + " and switched to branch main")
-	log.Info("Deleted remote branch " + branchID)
+	logger.Info("Deleted local " + branchID + " and switched to branch main")
+	logger.Info("Deleted remote branch " + branchID)
 
 	return nil
 }

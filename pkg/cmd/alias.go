@@ -5,7 +5,7 @@ import (
 	"os/exec"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/caarlos0/log"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -42,7 +42,7 @@ func AliasImportCmd(exe utils.Executor) *cobra.Command {
 			$ gh dxp alias import
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
-			log.Info("Piping default aliases from github/elhub/gh-dxp to standard input")
+			logger.Info("Piping default aliases from github/elhub/gh-dxp to standard input")
 			ctx := context.Background()
 			err := exe.CommandContext(ctx, "sh", "-c",
 				"curl -s https://raw.githubusercontent.com/elhub/gh-dxp/main/alias.yml | gh alias import - --clobber")
