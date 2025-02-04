@@ -150,7 +150,7 @@ func TestExecuteUpdate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake",
-				"-e", "LINTER_RULES_PATH=tmp/",
+				"-e", "LINTER_RULES_PATH=/tmp",
 				"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
 			linterArgs = append(linterArgs, "--filesonly")
