@@ -15,7 +15,7 @@ import (
 func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	// Run mega-linter-runner with the cupcake flavor.
 	ctx := context.Background()
-
+	// This is a comment
 	args := []string{"npx", "mega-linter-runner"}
 
 	if opts.LinterImage == "" {
