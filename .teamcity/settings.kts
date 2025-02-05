@@ -1,5 +1,6 @@
 import no.elhub.devxp.build.configuration.pipeline.ElhubProject.Companion.elhubProject
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
+import no.elhub.devxp.build.configuration.pipeline.jobs.lint
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
 
 elhubProject(DEVXP, "gh-dxp") {
@@ -10,6 +11,7 @@ elhubProject(DEVXP, "gh-dxp") {
     }
 
     pipeline(withReleaseVersion = false) {
+        lint()
         sequential {
             makeVerify {
                 disableSonarScan = true
