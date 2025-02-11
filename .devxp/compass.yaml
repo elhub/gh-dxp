@@ -1,0 +1,28 @@
+---
+name: gh-dxp
+id: 'ari:cloud:compass:dd0efeb0-2368-4bf7-b77b-9402345ecfe5:component/4290245e-438e-4548-ba7a-a603f0c73614/a4f624ba-d022-48db-9a5a-5a9ae5a2bb56'
+description: 'GitHub CLI extension implementing an opinionated workflow for branches, commits, and pull requests.'
+configVersion: 1
+typeId: APPLICATION
+ownerId: 'ari:cloud:identity::team/e6119202-0d8b-4174-bf04-7f1421525c1e'
+fields:
+  tier: 4
+  lifecycle: Active
+links:
+  - name: null
+    type: REPOSITORY
+    url: 'https://github.com/elhub/gh-dxp'
+  - name: ''
+    type: PROJECT
+    url: 'https://elhub.atlassian.net/browse/TDX'
+  - name: Developer Docs
+    type: DOCUMENT
+    url: 'https://docs.elhub.cloud/enabling-systems/devxp/gh-dxp/index.html'
+relationships: {}
+labels:
+  - gh-extension
+  - git
+  - 'language:go'
+  - productivity
+  - 'source:github'
+customFields: null
