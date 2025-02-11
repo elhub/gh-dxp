@@ -17,8 +17,9 @@ func TestRun_LintNoErrors(t *testing.T) {
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go",
 	}
 
@@ -35,8 +36,9 @@ func TestRun_LintHasErrors(t *testing.T) {
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go",
 	}
 
@@ -51,8 +53,9 @@ func TestRun_LintAllFiles(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 	}
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
@@ -68,8 +71,9 @@ func TestRun_LintWithFix(t *testing.T) {
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go", "--fix",
 	}
 
@@ -86,8 +90,9 @@ func TestRun_LintWithNoExistingBranches(t *testing.T) {
 	mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(" M /pkg/source.go\n M /pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go",
 	}
 
@@ -102,8 +107,9 @@ func TestRun_LintSpecificDirectory(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"-e", "FILTER_REGEX_INCLUDE=(pkg)",
 	}
 
@@ -118,8 +124,9 @@ func TestRun_UseProxy(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake", "-e",
-		"MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+		"mega-linter-runner", "--flavor", "cupcake",
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"-e", "FILTER_REGEX_INCLUDE=(pkg)", "-e", "https_proxy=https://myproxy.no:8080",
 	}
 
