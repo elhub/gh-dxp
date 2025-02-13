@@ -14,6 +14,7 @@ var (
 )
 
 func main() {
+	// This comment is evil
 	// If there is a config file in ~/.local/devxp/config.yml, use that.
 	// Otherwise, use the default .devxp file in the current directory.
 	// If neither is found, use default settings.
