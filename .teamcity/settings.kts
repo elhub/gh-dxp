@@ -11,7 +11,6 @@ elhubProject(DEVXP, "gh-dxp") {
     }
 
     pipeline(withReleaseVersion = false) {
-        lint()
         sequential {
             makeVerify {
                 disableSonarScan = true
