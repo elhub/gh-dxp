@@ -35,7 +35,7 @@ require (
 )
 
 require (
-	github.com/MakeNowJust/heredoc v1.0.0
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/caarlos0/log v0.4.4
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
