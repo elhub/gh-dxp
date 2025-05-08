@@ -27,6 +27,12 @@ func TestGetChangedFiles(t *testing.T) {
 				},
 				{
 					Method: "Command",
+					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Out:    "origin/main\n",
+					Err:    nil,
+				},
+				{
+					Method: "Command",
 					Args:   []interface{}{"git", []string{"diff", "--name-only", "main", "--relative"}},
 					Out:    "README.md\n",
 					Err:    nil,
@@ -55,6 +61,12 @@ func TestGetChangedFiles(t *testing.T) {
 					Method: "Command",
 					Args:   []interface{}{"git", []string{"branch"}},
 					Out:    "main\n",
+					Err:    nil,
+				},
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Out:    "origin/main\n",
 					Err:    nil,
 				},
 				{
