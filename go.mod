@@ -5,12 +5,12 @@ go 1.21.9
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/briandowns/spinner v1.23.0
-	github.com/charmbracelet/bubbles v0.20.0
-	github.com/charmbracelet/bubbletea v1.2.3
-	github.com/charmbracelet/lipgloss v1.0.0
-	github.com/cli/go-gh/v2 v2.11.1
-	github.com/hmarr/codeowners v1.1.2
-	github.com/stretchr/testify v1.9.0
+	github.com/charmbracelet/bubbles v0.21.0
+	github.com/charmbracelet/bubbletea v1.3.5
+	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/cli/go-gh/v2 v2.12.0
+	github.com/hmarr/codeowners v1.2.1
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
@@ -45,7 +45,7 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rivo/uniseg v0.4.7 // indirect
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.9.1
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
