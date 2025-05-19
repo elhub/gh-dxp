@@ -1,53 +1,93 @@
 # EditorConfig helps developers define and maintain consistent coding styles between different editors and IDEs
 # editorconfig.org
+
+# This file is the top-most EditorConfig file
 root = true
 
+# All Files
 [*]
 charset = utf-8
 end_of_line = lf
 indent_style = space
-indent_size = 2
-max_line_length = 160
-trim_trailing_whitespace = true
 insert_final_newline = true
+trim_trailing_whitespace = true
 
+# Git
 [{.gitmodules}]
 indent_style = tab
-indent_size = 4
 
-[*.{java,scala,rs,xml}]
-indent_size = 4
+# Go
+[{go.mod,go.sum,*.go}]
+indent_style = tab
+max_line_length = 160
 
+# Java, Scala, Rust
+[*.{java,scala,rs}]
+max_line_length = 160
+
+# JSON
+[*.json]
+indent_size = 2
+
+# Kotlin
 [*.{kt,kts}]
-indent_size = 4
 ktlint_code_style = intellij_idea
 ktlint_standard_max-line-length = 160
 ktlint_standard = enabled
-
+# Disable Ktlint rules
 ktlint_chain_method_rule_force_multiline_when_chain_operator_count_greater_or_equal_than=unset
 ktlint_class_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than=unset
 ktlint_function_signature_rule_force_multiline_when_parameter_count_greater_or_equal_than=unset
 ktlint_standard_string-template-indent = disabled
 ktlint_standard_trailing-comma-on-call-site = disabled
 ktlint_standard_trailing-comma-on-declaration-site = disabled
-
 # These two rules are too strict on whether parameters can be on multiple lines even though they could potentially fit on one line.
 # Can't find a more specific rule to disable.
 ktlint_standard_function-signature = disabled
 ktlint_standard_class-signature = disabled
-
 # This ends up correcting to something that intellij auto-formats back
 ktlint_standard_condition-wrapping = disabled
+max_line_length = 160
 
+# Makefile
 [{Makefile,**.mk}]
 # Use tabs for indentation (Makefiles require tabs)
 indent_style = tab
-indent_size = 4
-
-[{*.py, *.pyi}]
-indent_size = 4
 max_line_length = 160
 
-[{go.mod,go.sum,*.go}]
-indent_style = tab
-indent_size = 4
+# Markdown
+[*.md]
+max_line_length = 160
+
+# PlantUML
+[*.{puml,plantuml}]
+indent_size = 2
+max_line_length = 160
+
+# Python
+[{*.py, *.pyi}]
+max_line_length = 160
+
+# Shell
+[*.sh]
+indent_size = 2
+max_line_length = 160
+
+# SQL
+[*.{sql}]
+indent_size = 2
+
+# TOML
+[*.toml]
+indent_size = 2
+max_line_length = 160
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
+max_line_length = 160
+
+# XML
+[*.{xml}]
+indent_size = 2
+max_line_length = 160
