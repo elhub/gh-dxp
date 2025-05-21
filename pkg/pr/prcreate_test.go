@@ -259,6 +259,7 @@ func TestExecuteCreate(t *testing.T) {
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
+			mockExe.On("Command", "git", []string{"fetch, origin, main"}).Return("", nil)
 
 			err := pr.ExecuteCreate(mockExe,
 				&config.Settings{},

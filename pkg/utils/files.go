@@ -21,6 +21,14 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 
 	branchList := ConvertTerminalOutputIntoList(branchString)
 
+	// If main does not exist, we need to check it out in order to perform the comparison (relevant for new TC agents)
+	if !contains(branchList, "main") {
+		_, err := exe.Command("git", "fetch", "origin", "main")
+		if err != nil {
+			return []string{}, err
+		}
+	}
+
 	var changedFiles []string
 
 	if len(branchList) > 0 {
@@ -98,4 +106,13 @@ func filter(list []string, test func(string) bool) []string {
 		}
 	}
 	return ret
+}
+
+func contains(slice []string, item string) bool {
+	for _, s := range slice {
+		if s == item {
+			return true
+		}
+	}
+	return false
 }
