@@ -37,3 +37,4 @@
 *.woff2     binary
 *.xlsx      binary
 *.zip       binary
+*.jks       binary

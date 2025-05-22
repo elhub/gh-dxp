@@ -3,6 +3,7 @@
 .ansible-lint
 .checkmake.ini
 .ecrc
+.editorconfig-checker.json
 .flake8
 .gitleaks.toml
 .golangci.yml
@@ -45,6 +46,8 @@ modules.xml
 *.iml
 *.ipr
 out/
+# Project-specific kotlin files
+.kotlin/
 # JIRA plugin
 atlassian-ide-plugin.xml
 # SonarQube Plugin
@@ -53,8 +56,8 @@ atlassian-ide-plugin.xml
 
 ### Gradle ###
 .gradle
-build/
-**/build/
+**/build/**/*
+!**/src/**/build/**/*
 gradle-app.setting
 .gradletasknamecache
 
@@ -75,9 +78,8 @@ buildNumber.properties
 # Compiled class file
 *.class
 # Log files
-*.log
 *.log*
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -97,7 +99,6 @@ __pycache__/
 *$py.class
 # Distribution / packaging
 .Python
-build/
 dist/
 wheels/
 share/python-wheels/
@@ -156,3 +157,7 @@ terraform/*.tfvars
 **/charts/*.tgz
 # Avoid commiting chart lockfile (can cause issues with ArgoCD)
 Chart.lock
+
+### Secrets ###
+*.secrets.properties
+*.secrets.conf
