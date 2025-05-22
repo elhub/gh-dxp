@@ -242,6 +242,7 @@ func TestExecuteCreate(t *testing.T) {
 			mockExe.On("Command", "git", []string{"add", "-u"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"commit", "-m", "default commit message"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"show-ref", "--verify", "--quiet", "refs/heads/" + tt.currentBranch})
+			mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return("", tt.expectedLintErr)
 			mockExe.On("Command", "git", []string{"push", "--set-upstream", "origin", tt.currentBranch}).
 				Return(tt.pushBranch, tt.pushBranchErr)
