@@ -1,3 +1,4 @@
+// Package utils provides common utilities for the gh-dxp extension.
 package utils
 
 import (
@@ -32,7 +33,13 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 	var changedFiles []string
 
 	if len(branchList) > 0 {
-		changedFilesString, err := exe.Command("git", "diff", "--name-only", "main", "--relative")
+		// Fetch the default branch (should be the main branch or a temporary working branch that’s intended to be merged back into main)
+		headRef, err := exe.Command("git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD")
+		if err != nil {
+			return nil, err
+		}
+		defaultBranch := strings.TrimSpace(strings.TrimPrefix(headRef, "origin/"))
+		changedFilesString, err := exe.Command("git", "diff", "--name-only", defaultBranch, "--relative")
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
 		if err != nil {
 			return []string{}, err

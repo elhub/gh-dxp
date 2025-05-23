@@ -67,6 +67,7 @@ func TestExecuteMerge(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(testutils.MockExecutor)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.pushBranch, tt.pushBranchErr)
+			mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 			mockExe.On("GH", []string{"pr", "list", "-H", tt.pushBranch, "--json", "number", "--jq", ".[].number"}).
 				Return(tt.prNumber, tt.prNumberErr)
 			mockExe.On("GH", []string{"pr", "view", "--json", "title", "--jq", ".title"}).Return(tt.prTitle, tt.prTitleErr)

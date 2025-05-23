@@ -14,6 +14,7 @@ import (
 func TestRun_LintNoErrors(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
+	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
@@ -33,6 +34,7 @@ func TestRun_LintNoErrors(t *testing.T) {
 func TestRun_LintHasErrors(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
+	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
@@ -68,6 +70,7 @@ func TestRun_LintAllFiles(t *testing.T) {
 func TestRun_LintWithFix(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
+	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
