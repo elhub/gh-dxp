@@ -160,6 +160,7 @@ func TestExecuteUpdate(t *testing.T) {
 			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("/home/repo-name", nil)
 			mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(tt.currentChanges, nil)
 			mockExe.On("Command", "git", []string{"branch", "--show-current"}).Return(tt.currentBranch, tt.currentBranchErr)
+			mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 			mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return(tt.modifiedFiles, nil)
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
