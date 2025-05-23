@@ -91,6 +91,7 @@ func TestRun_LintWithNoExistingBranches(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(" M /pkg/source.go\n M /pkg/source2.go", nil)
+	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
