@@ -22,22 +22,22 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 
 	branchList := ConvertTerminalOutputIntoList(branchString)
 
-	// If main does not exist, we need to check it out in order to perform the comparison (relevant for new TC agents)
-	if !contains(branchList, "main") {
-		_, err := exe.Command("git", "fetch", "origin", "main")
-		if err != nil {
-			return []string{}, err
-		}
-	}
-
 	var changedFiles []string
 
 	if len(branchList) > 0 {
+
+		// Locally update origin/HEAD symbolic reference to point at the default branch
+		_, err := exe.Command("git", "remote", "set-head", "origin", "--auto")
+		if err != nil {
+			return nil, err
+		}
+
 		// Fetch the default branch (should be the main branch or a temporary working branch that’s intended to be merged back into main)
 		headRef, err := exe.Command("git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD")
 		if err != nil {
 			return nil, err
 		}
+
 		defaultBranch := strings.TrimSpace(strings.TrimPrefix(headRef, "origin/"))
 		changedFilesString, err := exe.Command("git", "diff", "--name-only", defaultBranch, "--relative")
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
@@ -113,13 +113,4 @@ func filter(list []string, test func(string) bool) []string {
 		}
 	}
 	return ret
-}
-
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }

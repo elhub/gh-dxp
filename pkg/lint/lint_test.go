@@ -14,6 +14,7 @@ import (
 func TestRun_LintNoErrors(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
+	mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
@@ -34,6 +35,7 @@ func TestRun_LintNoErrors(t *testing.T) {
 func TestRun_LintHasErrors(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
+	mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
@@ -70,6 +72,7 @@ func TestRun_LintAllFiles(t *testing.T) {
 func TestRun_LintWithFix(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
+	mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
@@ -91,7 +94,6 @@ func TestRun_LintWithNoExistingBranches(t *testing.T) {
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(" M /pkg/source.go\n M /pkg/source2.go", nil)
-	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
