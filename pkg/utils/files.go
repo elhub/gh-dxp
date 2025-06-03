@@ -44,8 +44,7 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 			return nil, err
 		}
 
-		defaultBranch := strings.TrimSpace(strings.TrimPrefix(headRef, "origin/"))
-		changedFilesString, err := exe.Command("git", "diff", "--name-only", defaultBranch, "--relative")
+		changedFilesString, err := exe.Command("git", "diff", "--name-only", headRef, "--relative")
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
 		if err != nil {
 			return []string{}, err
