@@ -166,6 +166,7 @@ func TestExecuteUpdate(t *testing.T) {
 			mockExe.On("Command", "git", []string{"push"}).Return(tt.pushBranch, tt.pushBranchErr)
 			mockExe.On("Command", "git", []string{"branch"}).Return(tt.existingBranches, nil)
 			mockExe.On("Command", "git", []string{"add", "-u"}).Return("", nil)
+			mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"commit", "-m", "default commit message"}).Return("", nil)
 			mockExe.On("Command", "git", []string{"show-ref", "--verify", "--quiet", "refs/heads/" + tt.currentBranch})
 			mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return("", tt.expectedLintErr)

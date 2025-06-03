@@ -26,6 +26,12 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 
 	if len(branchList) > 0 {
 
+		// Pull latest changes from main branch
+		_, pullErr := exe.Command("git", "fetch", "origin", "main")
+		if pullErr != nil {
+			return nil, err
+		}
+
 		// Locally update origin/HEAD symbolic reference to point at the default branch
 		_, err := exe.Command("git", "remote", "set-head", "origin", "--auto")
 		if err != nil {
