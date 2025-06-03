@@ -17,7 +17,7 @@ func TestRun_LintNoErrors(t *testing.T) {
 	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
-	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
+	mockExe.On("Command", "git", []string{"diff", "--name-only", "origin/main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
@@ -39,7 +39,7 @@ func TestRun_LintHasErrors(t *testing.T) {
 	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
-	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
+	mockExe.On("Command", "git", []string{"diff", "--name-only", "origin/main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
@@ -77,7 +77,7 @@ func TestRun_LintWithFix(t *testing.T) {
 	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"remote", "set-head", "origin", "--auto"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}).Return("origin/main", nil)
-	mockExe.On("Command", "git", []string{"diff", "--name-only", "main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
+	mockExe.On("Command", "git", []string{"diff", "--name-only", "origin/main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
