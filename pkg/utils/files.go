@@ -2,6 +2,7 @@
 package utils
 
 import (
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"os"
 	"regexp"
 	"strings"
@@ -27,6 +28,7 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 	if len(branchList) > 0 {
 
 		// Pull latest changes from main branch
+		logger.Info("Fetching latest changes from the main branch...")
 		_, pullErr := exe.Command("git", "fetch", "origin", "main")
 		if pullErr != nil {
 			return nil, err
@@ -44,6 +46,7 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 			return nil, err
 		}
 
+		logger.Info("Checking for changes relative to the default branch: " + headRef)
 		changedFilesString, err := exe.Command("git", "diff", "--name-only", headRef, "--relative")
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
 		if err != nil {
