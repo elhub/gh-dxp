@@ -47,6 +47,7 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 		}
 
 		logger.Info("Checking for changes relative to the default branch: " + headRef)
+		logger.Info("Running: git diff --name-only " + headRef + " --relative")
 		changedFilesString, err := exe.Command("git", "diff", "--name-only", headRef, "--relative")
 		logger.Info("Changed files: " + changedFilesString)
 		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
