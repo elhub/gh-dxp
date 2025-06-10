@@ -7,6 +7,7 @@ toolchain go1.24.4
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/MakeNowJust/heredoc v1.0.0
+	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/briandowns/spinner v1.23.2
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.5
@@ -42,7 +43,6 @@ require (
 )
 
 require (
-	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/caarlos0/log v0.4.8
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
