@@ -2,17 +2,16 @@
 tags: [github, reference]
 ---
 
-# GH-dxp Command Reference
+# gh-dxp Command Reference
 
 This document contains documentation for the various commands implemented in `gh-dxp`.
 
-!!! tip
+💡 tip:
     You can run any command with the `--help` flag to get more information on how it works. There are lots of
     useful options that are not documented on these pages.
 
 
-## alias
-
+## 🕵️ alias
 In order to simplify usage, we have defined a default `alias.yml` that defines the most commonly used workflow
 commands. The `alias` command downloads and imports this default file.
 
@@ -25,14 +24,20 @@ gh dxp alias import
 By default this "clobbers" (i.e., overwrites) any existing aliases with the same name.
 
 
-## branch
+## 🌿 branch
+Provides a shortcut for creating and switching to branches.
 
-The `branch` command provides a shortcut for creating and switching to branches.
 
+## ✅ completion
+Generates and sets up the autocompletion script for the `gh dxp` command.
+This allows you to use tab completion for the various commands and options available in `gh dxp`.
+Has options for bash, fish, zsh, and powershell.
 
-## lint
+## 🆘 help
+Provides help for the `gh dxp` command and its subcommands.
 
-The `lint` command will run MegaLinter on the project. By default, the linter will only run on files that have a diff
+## 🧹 lint
+Runs MegaLinter on the project. By default, the linter will only run on files that have a diff
 to the default branch. If you want to lint everything, you can run the linter using the `--all` flag. Some lint errors
 can be fixed by using the `--fix` flag.
 
@@ -41,7 +46,7 @@ can be fixed by using the `--fix` flag.
 Configuration of MegaLinter, such as file exclusions or custom rules, is done by adding a `.mega-linter.yml` in the
 repository root.
 
-!!! tip
+💡 tip:
     Check out [megalinter documentation](https://megalinter.io/7.8.0/configuration/) for more info on how to
     configure the linter.
 
@@ -60,23 +65,10 @@ EXTENDS:
 
 ```
 
+## 🧐 owner
+Gets the owner of a specific file or directory. This is useful for determining who to contact if you have questions about the code.
 
-## test
-
-The `test` command will attempt to autodetect tests in your current repository and run them. It does so using the following logic:
-
-1. *If* the repository root contains a `Makefile`, the test command will be `make check`
-2. *if* the repository root contains a `gradlew`, the test command will be `./gradlew test`
-3. *if* the repository root contains a `pom.xml`, the test command will be `mvn test`
-4. *if* the repository root contains a `package.json`, the test command will be `npm test`
-5. *else* (i.e. none of the above): test will simply print *"no test command found"* and return exit code 0 (success).
-
-!!! tip
-    If your setup doesn't neatly fit into any of the options outlined above, you can add a Makefile to your repo and
-    define the `make check` command however you want.
-
-
-## pr
+## ⤵️ pr
 
 The `pr` command handles all things related to pull requests.
 
@@ -103,9 +95,10 @@ gh dxp pr create -b branchName -m "Add amazing new feature"
 The `pr merge` command handles the merging of diffs/pull requests.
 
 
-## repo
+## 🗃️ repo
 
-The `repo` command extends .
+Extends the basic repo commands provided by the gh cli.
+Also has support for cloning all repositories starting with a given prefix.
 
 ### repo clone-all
 
@@ -123,3 +116,25 @@ gh dxp repo clone-all docs
 # List the repositories that would be cloned using this command
 gh dxp repo clone-all docs --dryrun
 ```
+
+## 🔎 status
+Allows you to get the status of various aspects of the repository, such as existing branches, pull requests, issues etc.
+
+## 📐 template
+Generates relevant template files (like .teamcity folder, .gitignore, .editorconfig, etc.) in the current repository.
+Also has support for generating base files for gradle projects, if using the `--gradle` flag.
+
+## 🧪 test
+
+The `test` command will attempt to autodetect tests in your current repository and run them. It does so using the following logic:
+
+1. *If* the repository root contains a `Makefile`, the test command will be `make check`
+2. *if* the repository root contains a `gradlew`, the test command will be `./gradlew test`
+3. *if* the repository root contains a `pom.xml`, the test command will be `mvn test`
+4. *if* the repository root contains a `package.json`, the test command will be `npm test`
+5. *else* (i.e. none of the above): test will simply print *"no test command found"* and return exit code 0 (success).
+
+💡 tip:
+If your setup doesn't neatly fit into any of the options outlined above, you can add a Makefile to your repo and
+define the `make check` command however you want.
+
