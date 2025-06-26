@@ -45,7 +45,7 @@ func TestGetChangedFiles(t *testing.T) {
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main\n", "--relative"}},
+					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
 					Out:    "README.md\n",
 					Err:    nil,
 				},
@@ -95,7 +95,7 @@ func TestGetChangedFiles(t *testing.T) {
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main\n", "--relative"}},
+					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
 					Out:    "",
 					Err:    errors.New("error in git diff command"),
 				},
