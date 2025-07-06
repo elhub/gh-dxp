@@ -1,6 +1,6 @@
 module github.com/elhub/gh-dxp
 
-go 1.23.0
+go 1.24.0
 
 toolchain go1.24.4
 
@@ -45,7 +45,7 @@ require (
 )
 
 require (
-	github.com/caarlos0/log v0.4.8
+	github.com/caarlos0/log v0.5.1
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
