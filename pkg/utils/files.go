@@ -87,7 +87,9 @@ func GetUntrackedChanges(exe Executor) ([]string, error) {
 
 // GetTrackedChanges returns a list of file names for changed files in the current repo
 func GetTrackedChanges(exe Executor) ([]string, error) {
-	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`) // This regex is intended to catch all tracked changes except for unmerged conflicts
+	// This regex is intended to catch all tracked changes except for unmerged conflicts
+	// We need to check for strings like ' M example` and `M  example` to catch both staged and unstaged changes.
+	re := regexp.MustCompile(`^([ADMRT]|\s)([ADMRT]|\s)\s`)
 	return getChanges(exe, re)
 }
 
