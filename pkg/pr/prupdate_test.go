@@ -44,7 +44,7 @@ func TestExecuteUpdate(t *testing.T) {
 			expectedErr:      nil,
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in getting current branch",
