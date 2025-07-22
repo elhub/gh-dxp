@@ -100,7 +100,7 @@ func TestExecuteUpdate(t *testing.T) {
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
 			expectedErr:      errors.New("No tracked changes found, skipping commit"),
-			currentChanges:   "??  untracked_change.go",
+			currentChanges:   "?? untracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
@@ -131,7 +131,7 @@ func TestExecuteUpdate(t *testing.T) {
 			prCreate:         "pull request created",
 			expectedErr:      nil,
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  tracked_change.go\nM  tracked_change2.go",
+			currentChanges:   " M tracked_change.go\n M tracked_change2.go",
 		},
 		{
 			name:             "Test lint is failing",

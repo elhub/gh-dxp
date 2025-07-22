@@ -169,7 +169,7 @@ func TestExecuteCreate(t *testing.T) {
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
 			expectedErr:      errors.New("No tracked changes found, skipping commit"),
-			currentChanges:   "??  untracked_change.go",
+			currentChanges:   "?? untracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
