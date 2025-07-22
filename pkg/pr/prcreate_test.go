@@ -51,7 +51,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      nil,
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test successful PR update",
@@ -61,7 +61,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      nil,
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in getting current branch",
@@ -69,7 +69,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("error getting current branch"),
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in checking for existing PR",
@@ -80,7 +80,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("Failed to find existing PR"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in update flow - git push",
@@ -105,7 +105,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("error getting PR URL"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in create flow - git push",
@@ -117,7 +117,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("error pushing branch"),
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in create flow - fetch default",
@@ -129,7 +129,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("Failed to fetch default branch: error fetching default branch"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in create flow - git log",
@@ -142,7 +142,7 @@ func TestExecuteCreate(t *testing.T) {
 			existingBranches: "main\ndifferentBranch\n",
 			expectedErr:      errors.New("error fetching git log"),
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in create flow - create PR",
@@ -156,7 +156,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("Failed to create pull request: error creating PR"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test local has untracked changes",
@@ -168,8 +168,8 @@ func TestExecuteCreate(t *testing.T) {
 			gitLog:           "commit 1",
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
-			expectedErr:      nil,
-			currentChanges:   "M  untracked_change.go",
+			expectedErr:      errors.New("No tracked changes found, skipping commit"),
+			currentChanges:   "??  untracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
@@ -184,7 +184,7 @@ func TestExecuteCreate(t *testing.T) {
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
 			expectedErr:      nil,
-			currentChanges:   " M tracked_change.go",
+			currentChanges:   "M  tracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
@@ -200,7 +200,7 @@ func TestExecuteCreate(t *testing.T) {
 			prCreate:         "pull request created",
 			expectedErr:      nil,
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   " M tracked_change.go\n M tracked_change2.go",
+			currentChanges:   "M  tracked_change.go\nM  tracked_change2.go",
 		},
 		{
 			name:             "Test local has a file rename",
@@ -214,7 +214,7 @@ func TestExecuteCreate(t *testing.T) {
 			prCreate:         "pull request created",
 			expectedErr:      nil,
 			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M tracked_change.go\n M tracked_change2.go\nR  oldname.go -> newname.go",
+			currentChanges:   "M  tracked_change.go\nM  tracked_change2.go\nR  oldname.go -> newname.go",
 		},
 		{
 			name:             "Test lint is failing",
@@ -223,7 +223,7 @@ func TestExecuteCreate(t *testing.T) {
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
 			currentBranch:    "branch1",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Issues added in opts",
