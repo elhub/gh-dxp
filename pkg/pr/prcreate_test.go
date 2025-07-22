@@ -92,7 +92,7 @@ func TestExecuteCreate(t *testing.T) {
 			expectedErr:      errors.New("error pushing branch"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in update flow - list URL",
