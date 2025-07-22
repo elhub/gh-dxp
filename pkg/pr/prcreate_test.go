@@ -232,7 +232,7 @@ func TestExecuteCreate(t *testing.T) {
 			repoBranchName:   "main",
 			issueBodySection: "## 🔗 Issue ID(s): TDX-123, EDIEL-456\n\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			currentChanges:   "M  pkg/cmd/lint.go\n M  pkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 	}
 
