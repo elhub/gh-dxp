@@ -72,7 +72,11 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 		return []string{}, err
 	}
 
-	if len(trackedChanges) > 0 && !options.TestRun && options.CommitMessage == "" {
+	if len(trackedChanges) == 0 {
+		return []string{}, errors.New("No tracked changes found, skipping commit")
+	}
+
+	if !options.TestRun && options.CommitMessage == "" {
 		res, err := utils.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
 		if err != nil {
 			return []string{}, err

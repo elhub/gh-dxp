@@ -44,6 +44,7 @@ func TestExecuteUpdate(t *testing.T) {
 			expectedErr:      nil,
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in getting current branch",
@@ -61,6 +62,7 @@ func TestExecuteUpdate(t *testing.T) {
 			expectedErr:      errors.New("Failed to find existing PR"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in update flow - git push",
@@ -72,6 +74,7 @@ func TestExecuteUpdate(t *testing.T) {
 			expectedErr:      errors.New("error pushing branch"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test error in update flow - list URL",
@@ -84,6 +87,7 @@ func TestExecuteUpdate(t *testing.T) {
 			expectedErr:      errors.New("error getting PR URL"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test local has untracked changes",
@@ -95,7 +99,7 @@ func TestExecuteUpdate(t *testing.T) {
 			gitLog:           "commit 1",
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
-			expectedErr:      nil,
+			expectedErr:      errors.New("No tracked changes found, skipping commit"),
 			currentChanges:   "?? untracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
@@ -111,7 +115,7 @@ func TestExecuteUpdate(t *testing.T) {
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
 			expectedErr:      nil,
-			currentChanges:   " M tracked_change.go",
+			currentChanges:   "M  tracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 		},
@@ -137,6 +141,7 @@ func TestExecuteUpdate(t *testing.T) {
 			existingBranches: "main\ndifferentBranch\n",
 			currentBranch:    "branch1",
 			prListNumber:     "1",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
 			name:             "Test lint is failing",
