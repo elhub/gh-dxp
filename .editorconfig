@@ -50,7 +50,7 @@ indent_size = 2
 max_line_length = 160
 
 # Python
-[{*.py, *.pyi}]
+[{*.py,*.pyi}]
 max_line_length = 160
 
 # Shell
@@ -59,7 +59,7 @@ indent_size = 2
 max_line_length = 160
 
 # SQL
-[*.{sql}]
+[*.sql]
 indent_size = 2
 
 # TOML
@@ -73,6 +73,6 @@ indent_size = 2
 max_line_length = 160
 
 # XML
-[*.{xml}]
+[*.xml]
 indent_size = 2
 max_line_length = 160
