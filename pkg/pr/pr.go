@@ -72,7 +72,12 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 		return []string{}, err
 	}
 
-	if len(trackedChanges) == 0 {
+	commits, err := exe.Command("git", "log", "--oneline", "origin/main..")
+	if err != nil {
+		return []string{}, err
+	}
+
+	if len(trackedChanges) == 0 && commits == "" {
 		return []string{}, errors.New("No tracked changes found, skipping commit")
 	}
 
