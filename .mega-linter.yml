@@ -5,6 +5,3 @@
 # linters documentation
 EXTENDS:
   - https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml
-
-ENABLE_LINTERS:
-  - GO_REVIVE
