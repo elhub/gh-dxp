@@ -113,6 +113,7 @@ func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
 		macgyver := strings.Split(s, "->")
 		matchedChanges[i] = strings.TrimSpace(macgyver[len(macgyver)-1])
 	}
+
 	return matchedChanges, nil
 }
 
