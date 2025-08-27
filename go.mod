@@ -6,7 +6,7 @@ toolchain go1.24.5
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
-	github.com/MakeNowJust/heredoc/v2 v2.0.1
+	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/briandowns/spinner v1.23.2
 	github.com/charmbracelet/bubbles v0.21.0
@@ -14,7 +14,7 @@ require (
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250319133953-166f707985bc
 	github.com/cli/go-gh/v2 v2.12.2
 	github.com/hmarr/codeowners v1.2.1
-	github.com/stretchr/testify v1.11.0
+	github.com/stretchr/testify v1.11.1
 )
 
 require (
