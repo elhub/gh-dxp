@@ -2,6 +2,7 @@ import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
 
+
 elhubProject(DEVXP, "gh-dxp") {
 
     params {
@@ -11,7 +12,11 @@ elhubProject(DEVXP, "gh-dxp") {
 
     pipeline {
         makeVerify {
-            disableSonarScan = true
+            sonarScanSettings = {
+                workingDir = "."
+                additionalParams = arrayListOf("--sonar.go.coverage.reportPaths=build/coverage.out")
+            }
+            enablePublishMetrics = true
         }
     }
 }
