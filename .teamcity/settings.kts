@@ -14,7 +14,7 @@ elhubProject(DEVXP, "gh-dxp") {
         makeVerify {
             sonarScanSettings = {
                 workingDir = "."
-                additionalParams = arrayListOf("--sonar.go.coverage.reportPaths=build/coverage.out")
+                additionalParams = arrayListOf("--Dsonar.go.coverage.reportPaths=build/coverage.out")
             }
             enablePublishMetrics = true
         }
