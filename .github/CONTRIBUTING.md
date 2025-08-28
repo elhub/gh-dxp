@@ -57,7 +57,7 @@ the problem and understanding how to recreate it. Then submit the bug in the [is
 ### Suggesting Enhancements
 
 Before submitting an enhancement, consider whether the idea fits within the scope and aims of the project.
-[Asking a question](#i-have-a-question) can be a good starting point. Then submit the enchancement as a suggestion
+[Asking a question](#i-have-a-question) can be a good starting point. Then submit the enhancement as a suggestion
 through the [issue tracker](#issue-tracker).
 
 ### Your First Code Contribution

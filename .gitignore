@@ -144,7 +144,7 @@ terraform/*.tfstate*
 terraform/*.tfvars
 
 ### Testing ###
-/coverage
+**/coverage
 /allure-report
 /allure-results
 
