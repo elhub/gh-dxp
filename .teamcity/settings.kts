@@ -1,3 +1,4 @@
+import jetbrains.buildServer.configs.kotlin.ArtifactRule
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
@@ -12,7 +13,9 @@ elhubProject(DEVXP, "gh-dxp") {
     pipeline {
         makeVerify {
             sonarScanSettings = {
-                workingDir = "build"
+                buildArtifactRules = listOf(
+                    ArtifactRule.include("build/coverage.*"),
+                )
                 additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
             }
             enablePublishMetrics = true
