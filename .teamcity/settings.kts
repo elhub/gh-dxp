@@ -12,10 +12,12 @@ elhubProject(DEVXP, "gh-dxp") {
 
     pipeline {
         makeVerify {
+            val artifactRules = listOf(
+                ArtifactRule.include("build/coverage.*"),
+            )
+            buildArtifactRules = artifactRules
+            outputArtifactRules = artifactRules
             sonarScanSettings = {
-                buildArtifactRules = listOf(
-                    ArtifactRule.include("build/coverage.*"),
-                )
                 additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
             }
             enablePublishMetrics = true
