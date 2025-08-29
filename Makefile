@@ -12,7 +12,7 @@ build:
 check:
 	mkdir -p ${BUILD_DIR}
 	go test ./... -coverprofile=${BUILD_DIR}/coverage.out
-	go tool cover -func build/coverage.out | grep "total"
+	go tool cover -func ${BUILD_DIR}/coverage.out | grep "total"
 
 clean:
 	go clean

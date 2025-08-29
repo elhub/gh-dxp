@@ -2,7 +2,6 @@ import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
 
-
 elhubProject(DEVXP, "gh-dxp") {
 
     params {
@@ -13,7 +12,7 @@ elhubProject(DEVXP, "gh-dxp") {
     pipeline {
         makeVerify {
             sonarScanSettings = {
-                workingDir = "."
+                workingDir = "build"
                 additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
             }
             enablePublishMetrics = true
