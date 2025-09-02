@@ -12,7 +12,7 @@ elhubProject(DEVXP, "gh-dxp") {
 
     pipeline {
         makeVerify {
-            buildArtifactRules = listOf(ArtifactRule.include("build/*", "build.zip*"))
+            buildArtifactRules = listOf(ArtifactRule.include("build", "build.zip"))
             outputArtifactRules = listOf(ArtifactRule.include("build.zip!**, build"))
             sonarScanSettings = {
                 sonarProjectSources = "."
