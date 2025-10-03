@@ -3,7 +3,7 @@ package cmd
 import (
 	"time"
 
-	"github.com/MakeNowJust/heredoc"
+	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/repo"
 	"github.com/elhub/gh-dxp/pkg/utils"
