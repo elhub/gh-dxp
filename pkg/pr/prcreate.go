@@ -1,6 +1,7 @@
 package pr
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/branch"
@@ -73,10 +74,10 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 		return update(exe, pr.branchID, prID)
 	}
 	// If it doesn't exist, create a new PR
-	return create(exe, options, pr)
+	return create(exe, options, settings, pr)
 }
 
-func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
+func create(exe utils.Executor, options *CreateOptions, settings *config.Settings, pr PullRequest) error {
 	// Push the current branch to git remote
 	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", pr.branchID)
@@ -86,7 +87,7 @@ func create(exe utils.Executor, options *CreateOptions, pr PullRequest) error {
 	}
 	s.Stop()
 	logger.Info("Current Branch:" + currentBranch + "\n")
-	newPR, err := createPR(exe, options, pr, options.baseBranch)
+	newPR, err := createPR(exe, options, settings, pr, options.baseBranch)
 	if err != nil {
 		return err
 	}
@@ -145,6 +146,7 @@ func update(exe utils.Executor, branchID string, prID string) error {
 func createPR(
 	exe utils.Executor,
 	options *CreateOptions,
+	settings *config.Settings,
 	pr PullRequest,
 	mainID string,
 ) (PullRequest, error) {
@@ -163,7 +165,7 @@ func createPR(
 		}
 	}
 
-	pr.Body, err = createBody(exe, pr, options, commits)
+	pr.Body, err = createBody(exe, pr, options, settings, commits)
 	if err != nil {
 		return pr, err
 	}
@@ -173,7 +175,7 @@ func createPR(
 	return pr, nil
 }
 
-func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, commits string) (string, error) {
+func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, settings *config.Settings, commits string) (string, error) {
 	body := ""
 
 	// Add a summary of the commits to the PR body
@@ -211,7 +213,7 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, comm
 	// TODO: What type of PR is this?
 	// Multi-choice: Feature, Bug Fix, Documentation, Test, Refactor, Style, Build, Chore
 	// Type should be set as a label.
-	issueSection, err := issuesChanges(options)
+	issueSection, err := issuesChanges(options, settings)
 	if err != nil {
 		return "", err
 	}
@@ -258,7 +260,7 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, comm
 	return body, nil
 }
 
-func issuesChanges(options *CreateOptions) (string, error) {
+func issuesChanges(options *CreateOptions, settings *config.Settings) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
@@ -279,7 +281,8 @@ func issuesChanges(options *CreateOptions) (string, error) {
 
 		issueIDs := strings.Split(issueIDString, ",")
 		for i, id := range issueIDs {
-			issueIDs[i] = strings.TrimSpace(id)
+			id = strings.TrimSpace(id)
+			issueIDs[i] = fmt.Sprintf("[%s](%s/%s)", id, settings.JiraURL, id)
 		}
 		body += "## 🔗 Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
 	}
