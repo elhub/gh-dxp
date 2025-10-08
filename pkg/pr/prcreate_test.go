@@ -230,7 +230,7 @@ func TestExecuteCreate(t *testing.T) {
 			issues:           "TDX-123,EDIEL-456",
 			currentBranch:    "branch1",
 			repoBranchName:   "main",
-			issueBodySection: "## 🔗 Issue ID(s): TDX-123, EDIEL-456\n\n",
+			issueBodySection: "## 🔗 Issue ID(s): [TDX-123](https://jira-mock/browse/TDX-123), [EDIEL-456](https://jira-mock/browse/EDIEL-456)\n\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
@@ -278,7 +278,9 @@ func TestExecuteCreate(t *testing.T) {
 				Return(tt.repoBranchName, tt.repoBranchErr)
 
 			err := pr.ExecuteCreate(mockExe,
-				&config.Settings{},
+				&config.Settings{
+					JiraURL: "https://jira-mock/browse",
+				},
 				&pr.CreateOptions{
 					TestRun: true,
 					Issues:  tt.issues,

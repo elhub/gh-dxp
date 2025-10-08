@@ -26,6 +26,7 @@ func ReadConfig(filepath string) (*Settings, error) {
 func DefaultSettings() *Settings {
 	return &Settings{
 		ProjectTemplateURI: "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
+		JiraURL:            "https://elhub.atlassian.net/browse",
 		ProjectType:        "",
 	}
 }
