@@ -194,3 +194,212 @@ func TestCheckFilesUpdated(t *testing.T) {
 		})
 	}
 }
+
+func TestGetTrackedChanges(t *testing.T) {
+	tests := []struct {
+		name        string
+		mocks       []testutils.MockContent
+		expected    []string
+		expectedErr error
+	}{
+		{
+			name: "modified files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "M  file1.go\n M file2.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"file1.go", "file2.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "added files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "A  newfile.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"newfile.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "deleted files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "D  oldfile.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"oldfile.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "renamed files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "R  oldname.go -> newname.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"newname.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "mixed changes with untracked files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "M  modified.go\nA  added.go\n?? untracked.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"modified.go", "added.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "no tracked changes",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "?? untracked.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{},
+			expectedErr: nil,
+		},
+		{
+			name: "empty status",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "",
+					Err:    nil,
+				},
+			},
+			expected:    []string{},
+			expectedErr: nil,
+		},
+		{
+			name: "git command error",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "",
+					Err:    errors.New("not a git repository"),
+				},
+			},
+			expected:    []string{},
+			expectedErr: errors.New("not a git repository"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockExe := testutils.NewMockExecutor(tt.mocks)
+			changes, err := utils.GetTrackedChanges(mockExe)
+			assert.Equal(t, tt.expected, changes)
+			assert.Equal(t, tt.expectedErr, err)
+			mockExe.AssertExpectations(t)
+		})
+	}
+}
+
+func TestGetUntrackedChanges(t *testing.T) {
+	tests := []struct {
+		name        string
+		mocks       []testutils.MockContent
+		expected    []string
+		expectedErr error
+	}{
+		{
+			name: "untracked files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "?? untracked1.go\n?? untracked2.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"untracked1.go", "untracked2.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "mixed changes with tracked files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "M  modified.go\n?? untracked.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{"untracked.go"},
+			expectedErr: nil,
+		},
+		{
+			name: "no untracked files",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "M  modified.go\n",
+					Err:    nil,
+				},
+			},
+			expected:    []string{},
+			expectedErr: nil,
+		},
+		{
+			name: "empty status",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "",
+					Err:    nil,
+				},
+			},
+			expected:    []string{},
+			expectedErr: nil,
+		},
+		{
+			name: "git command error",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Out:    "",
+					Err:    errors.New("not a git repository"),
+				},
+			},
+			expected:    []string{},
+			expectedErr: errors.New("not a git repository"),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockExe := testutils.NewMockExecutor(tt.mocks)
+			changes, err := utils.GetUntrackedChanges(mockExe)
+			assert.Equal(t, tt.expected, changes)
+			assert.Equal(t, tt.expectedErr, err)
+			mockExe.AssertExpectations(t)
+		})
+	}
+}

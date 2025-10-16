@@ -1,3 +1,4 @@
+// Package pr contains the functions and types for the pull request command.
 package pr
 
 import (
@@ -11,15 +12,15 @@ import (
 	"github.com/pkg/errors"
 )
 
-var pullRequests []pullRequestInfo
+var pullRequests []PullRequestInfo
 var wg sync.WaitGroup
-var prChan chan pullRequestInfo
+var prChan chan PullRequestInfo
 var errChan chan error
 
 // ExecuteList renders the user's assigned pull requests
 func ExecuteList(exe utils.Executor, options *ListOptions) error {
-	pullRequests = []pullRequestInfo{}
-	prChan = make(chan pullRequestInfo)
+	pullRequests = []PullRequestInfo{}
+	prChan = make(chan PullRequestInfo)
 	errChan = make(chan error)
 
 	if options.Mine {
@@ -91,7 +92,7 @@ func retrievePullRequests(searchTerm string, exe utils.Executor) error {
 	return nil
 }
 
-func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- pullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
+func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 	url := "https://github.com/" + sr.Repository.NameWithOwner + "/pull/" + strconv.Itoa(sr.Number)
 	pullRequestDetails, err := exe.GH("pr", "view", url, "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision")
@@ -101,7 +102,7 @@ func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- 
 		return
 	}
 
-	var pullRequest pullRequestInfo
+	var pullRequest PullRequestInfo
 	err = json.Unmarshal([]byte(pullRequestDetails), &pullRequest)
 	if err != nil {
 		errChan <- errors.Wrap(err, "failed to unmarshal pull request details")
@@ -111,7 +112,7 @@ func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- 
 	prChan <- pullRequest
 }
 
-func sortPullRequests(pullRequests []pullRequestInfo) {
+func sortPullRequests(pullRequests []PullRequestInfo) {
 	sort.Slice(pullRequests, func(i, j int) bool {
 		if pullRequests[i].HeadRepository.ID == pullRequests[j].HeadRepository.ID {
 			return pullRequests[i].Number < pullRequests[j].Number
