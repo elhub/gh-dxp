@@ -38,3 +38,4 @@
 *.xlsx      binary
 *.zip       binary
 *.jks       binary
+*.jar       binary
