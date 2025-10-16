@@ -1,3 +1,4 @@
+// Package logger provides logging functionality with different log levels and color formatting.
 package logger
 
 import (
@@ -21,17 +22,17 @@ func Info(msg string) {
 
 // Warn logs at the warn level.
 func Warn(msg string) {
-	log.Warn(yellow(msg))
+	log.Warn(Yellow(msg))
 }
 
 // Error logs at the error level.
 func Error(msg string) {
-	log.Error(red(msg))
+	log.Error(Red(msg))
 }
 
 // Fatal logs at the fatal levl.
 func Fatal(msg string) {
-	log.Fatal(red(msg))
+	log.Fatal(Red(msg))
 }
 
 // Debugf logs at the debug level with string formatting
@@ -79,10 +80,12 @@ func WithError(err error) *log.Entry {
 	return log.WithError(err)
 }
 
-func red(msg string) string {
+// Red returns text with red color formatting
+func Red(msg string) string {
 	return fmt.Sprintf("\033[31m%s\033[0m", msg)
 }
 
-func yellow(msg string) string {
+// Yellow returns text with yellow color formatting
+func Yellow(msg string) string {
 	return fmt.Sprintf("\033[33m%s\033[0m", msg)
 }
