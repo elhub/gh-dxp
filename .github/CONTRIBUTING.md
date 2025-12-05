@@ -22,7 +22,8 @@ By participating, you are expected to uphold this code.
 ## Issue Tracker
 
 Elhub employees should generally use our internal Jira instance (follow the link in the [README](../README.md));
-everyone else is welcome to [open an issue on GitHub](/issues/).
+everyone else is welcome to [open an issue on GitHub](/issues/). You can also follow our
+[GitHub discussions forum](https://github.com/elhub/elhub/discussions).
 
 When writing issues:
 
@@ -33,7 +34,8 @@ When writing issues:
   expected, steps to reproduce the issue, technical details, etc.
 
 > Do not, **ever**, report security related issues, vulnerabilities or bugs including sensitive information to the
-> public issue tracker or elsewhere in public. For sensitive bugs, <email:security@elhub.no>.
+> public issue tracker or elsewhere in public. For sensitive bugs follow the guidelines of
+> [Elhub's security policy](https://github.com/elhub/elhub?tab=security-ov-file).
 
 ## I Have a Question
 

@@ -134,6 +134,16 @@ thumb
 sketch
 screenshots/*
 !screenshots/.gitkeep
+**/dependency-check-bin
+**/dependency-check-reports
+
+# Playwright
+node_modules/
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/playwright/.cache/
+**/playwright/.auth/
 
 ### TeamCity ###
 .teamcity/bin/
