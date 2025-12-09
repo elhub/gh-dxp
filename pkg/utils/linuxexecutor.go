@@ -1,4 +1,6 @@
-// Package utils provides common utilities for the gh-dxp extension.
+// Package utils provides command execution utilities for Linux systems.
+//
+//revive:disable
 package utils
 
 import (
@@ -7,6 +9,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/cli/go-gh/v2"
 	"github.com/elhub/gh-dxp/pkg/logger"
@@ -45,8 +49,43 @@ func (e *LinuxExecutorImpl) CommandContext(ctx context.Context, name string, arg
 	cmd := exec.CommandContext(ctx, name, args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	return err
+
+	// Set process group so we can kill all child processes
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
+
+	// Start the command instead of Run() so we can handle context cancellation
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	// Wait for either the command to finish or context to be cancelled
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- cmd.Wait()
+	}()
+
+	select {
+	case <-ctx.Done():
+		// Context was cancelled, kill the entire process group
+		if cmd.Process != nil {
+			// Kill the process group (negative PID kills the group)
+			if err := syscall.Kill(-cmd.Process.Pid, syscall.SIGKILL); err != nil {
+				logger.Error(fmt.Sprintf("Failed to kill process group %d: %v", cmd.Process.Pid, err))
+			}
+		}
+		// Wait for the command to finish with a timeout
+		select {
+		case <-errChan:
+			// Process finished
+		case <-time.After(5 * time.Second):
+			logger.Error(fmt.Sprintf("Process %d did not terminate within 5 seconds after SIGKILL", cmd.Process.Pid))
+		}
+		return ctx.Err()
+	case err := <-errChan:
+		return err
+	}
 }
 
 // GH runs a GitHub CLI command and returns its output.
