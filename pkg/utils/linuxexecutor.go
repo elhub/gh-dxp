@@ -1,6 +1,6 @@
 // Package utils provides command execution utilities for Linux systems.
 //
-//revive:disable
+// revive:disable
 package utils
 
 import (
