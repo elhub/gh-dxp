@@ -9,6 +9,7 @@ require (
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.1-0.20250319133953-166f707985bc
+	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3
 	github.com/cli/go-gh/v2 v2.13.0
 	github.com/hmarr/codeowners v1.2.1
 	github.com/stretchr/testify v1.11.1
@@ -17,7 +18,6 @@ require (
 require (
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/charmbracelet/colorprofile v0.3.2 // indirect
-	github.com/charmbracelet/lipgloss/v2 v2.0.0-beta.3 // indirect
 	github.com/charmbracelet/x/ansi v0.10.1 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
