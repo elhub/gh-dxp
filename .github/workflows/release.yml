@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
         with:
           fetch-depth: 0
-      - uses: cli/gh-extension-precompile@9e2237c30f869ad3bcaed6a4be2cd43564dd421b # v1
+      - uses: cli/gh-extension-precompile@ee3e4e5b371bbd6dc7f816dc0742e86de6c64085 #v1.6.0
         name: Create extension release
         with:
           go_version: '1.22'
