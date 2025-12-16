@@ -4,6 +4,9 @@ package lint
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/logger"
@@ -13,8 +16,24 @@ import (
 // Run runs the linting process using megalinter (https://github.com/oxsecurity/megalinter).
 // Megalinter is an open-source linter aggregator that runs multiple linters in parallel. It requires NodeJS (npx) to be installed.
 func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
-	// Run mega-linter-runner with the cupcake flavor.
-	ctx := context.Background()
+	// Create a context that listens for interrupt signals
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Setup signal handling
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	defer signal.Stop(sigChan)
+	go func() {
+		select {
+		case <-sigChan:
+			logger.Info("\nReceived interrupt signal, stopping linter...\n")
+			cancel()
+		case <-ctx.Done():
+			// Context cancelled, exit goroutine
+			return
+		}
+	}()
 
 	args := []string{"npx", "mega-linter-runner"}
 

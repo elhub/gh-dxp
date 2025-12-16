@@ -1,3 +1,4 @@
+// Package pr contains the functions and types for the pull request command.
 package pr
 
 import (
@@ -71,7 +72,8 @@ type searchRepository struct {
 	NameWithOwner string `json:"nameWithOwner"`
 }
 
-type pullRequestInfo struct {
+// PullRequestInfo represents detailed information about a pull request.
+type PullRequestInfo struct {
 	Additions      int          `json:"additions"`
 	Author         prAuthor     `json:"author"`
 	CreatedAt      string       `json:"createdAt"`
@@ -94,6 +96,7 @@ type prAuthor struct {
 	Name  string `json:"name"`
 }
 
-type pullRequestUI struct {
+// PullRequestUI represents the UI model for displaying pull requests.
+type PullRequestUI struct {
 	table table.Model
 }

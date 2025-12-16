@@ -1,3 +1,4 @@
+// Package pr contains the functions and types for the pull request command.
 package pr
 
 import (
@@ -12,7 +13,7 @@ var baseStyle = lipgloss.NewStyle().
 	BorderStyle(lipgloss.NormalBorder()).
 	BorderForeground(lipgloss.Color("240"))
 
-func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
+func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
 
 	rows := []table.Row{}
 	var repoNameLen = 12
@@ -58,19 +59,22 @@ func initialModel(pullRequests []pullRequestInfo) pullRequestUI {
 		Bold(false)
 
 	t.SetStyles(s)
-	return pullRequestUI{
+	return PullRequestUI{
 		table: t,
 	}
 }
 
-func (ui pullRequestUI) Init() tea.Cmd {
+// Init is the initial command for the Bubble Tea program.
+func (ui PullRequestUI) Init() tea.Cmd {
 	return nil
 }
 
-func (ui pullRequestUI) Update(_ tea.Msg) (tea.Model, tea.Cmd) {
+// Update handles messages and updates the model accordingly.
+func (ui PullRequestUI) Update(_ tea.Msg) (tea.Model, tea.Cmd) {
 	return ui, tea.Quit
 }
 
-func (ui pullRequestUI) View() string {
+// View renders the UI.
+func (ui PullRequestUI) View() string {
 	return baseStyle.Render(ui.table.View()) + "\n  "
 }
