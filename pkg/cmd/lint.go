@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"path/filepath"
-	"strings"
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -51,14 +50,10 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 
 			// Convert relative path provided in Directory into a path relative to the git root
 			if opts.Directory != "" {
-				fullPath := filepath.Join(currentPath, opts.Directory)
-
-				gitRoot, err := utils.GetGitRootDirectory(exe)
+				opts.Directory, err = utils.ConvertToGitRootRelativePath(exe, currentPath, opts.Directory)
 				if err != nil {
 					return err
 				}
-
-				opts.Directory = strings.TrimPrefix(fullPath, gitRoot)
 			}
 
 			return lint.Run(exe, settings, opts)
