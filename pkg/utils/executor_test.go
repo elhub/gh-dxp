@@ -110,8 +110,10 @@ func TestLinuxExecutor_Chdir(t *testing.T) {
 	require.NoError(t, err)
 
 	// Evaluate symlinks to ensure paths match (common issue with /tmp on some OSs)
-	evalTmpDir, _ := filepath.EvalSymlinks(tmpDir)
-	evalCurrentWd, _ := filepath.EvalSymlinks(currentWd)
+	evalTmpDir, err := filepath.EvalSymlinks(tmpDir)
+	require.NoError(t, err)
+	evalCurrentWd, err := filepath.EvalSymlinks(currentWd)
+	require.NoError(t, err)
 
 	assert.Equal(t, evalTmpDir, evalCurrentWd)
 }
