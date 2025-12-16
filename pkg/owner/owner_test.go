@@ -97,6 +97,110 @@ src/ @elhub/developers`),
 	}
 }
 
+func TestGetDefaultFile(t *testing.T) {
+	tests := []struct {
+		name        string
+		setupFiles  func(t *testing.T, rootDir string)
+		mockContent []testutils.MockContent
+		expected    string
+		expectErr   bool
+		errContains string
+	}{
+		{
+			name: "CODEOWNERS exists in .github",
+			setupFiles: func(t *testing.T, rootDir string) {
+				err := os.MkdirAll(filepath.Join(rootDir, ".github"), 0755)
+				require.NoError(t, err)
+				f, err := os.Create(filepath.Join(rootDir, ".github", "CODEOWNERS"))
+				require.NoError(t, err)
+				f.Close()
+			},
+			mockContent: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Out:    "ROOT_DIR_PLACEHOLDER\n", // Will be replaced in test loop
+					Err:    nil,
+				},
+			},
+			expected:  filepath.Join(".github", "CODEOWNERS"), // Relative part we expect to be joined
+			expectErr: false,
+		},
+		{
+			name: "CODEOWNERS does not exist",
+			setupFiles: func(_ *testing.T, _ string) {
+				// Do nothing, file doesn't exist
+			},
+			mockContent: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Out:    "ROOT_DIR_PLACEHOLDER\n",
+					Err:    nil,
+				},
+			},
+			expectErr:   true,
+			errContains: "could not find CODEOWNERS file",
+		},
+		{
+			name: "Git root error",
+			setupFiles: func(_ *testing.T, _ string) {
+				// NOOP
+			},
+			mockContent: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Out:    "",
+					Err:    errors.New("git error"),
+				},
+			},
+			expectErr:   true,
+			errContains: "git error",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a temp directory to act as the repo root
+			tempDir := t.TempDir()
+
+			// Setup files in that temp directory
+			if tt.setupFiles != nil {
+				tt.setupFiles(t, tempDir)
+			}
+
+			// Prepare mocks, replacing the placeholder with the actual temp dir path
+			preparedMocks := make([]testutils.MockContent, len(tt.mockContent))
+			for i, m := range tt.mockContent {
+				if m.Out == "ROOT_DIR_PLACEHOLDER\n" {
+					m.Out = tempDir + "\n"
+				}
+				preparedMocks[i] = m
+			}
+
+			mockExe := testutils.NewMockExecutor(preparedMocks)
+
+			// Run the function
+			got, err := owner.GetDefaultFile(mockExe)
+
+			if tt.expectErr {
+				require.Error(t, err)
+				if tt.errContains != "" {
+					assert.Contains(t, err.Error(), tt.errContains)
+				}
+			} else {
+				require.NoError(t, err)
+				// We expect the full path, so join the tempDir with the expected relative path
+				expectedPath := filepath.Join(tempDir, tt.expected)
+				assert.Equal(t, expectedPath, got)
+			}
+
+			mockExe.AssertExpectations(t)
+		})
+	}
+}
+
 // Helper functions
 
 // createTempRepoWithCodeowners creates a temporary directory structure with .github/CODEOWNERS
