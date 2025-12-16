@@ -196,3 +196,61 @@ func TestListFilesInDirectory(t *testing.T) {
 		})
 	}
 }
+
+func TestConvertToGitRootRelativePath(t *testing.T) {
+	tests := []struct {
+		name        string
+		currentPath string
+		dir         string
+		mocks       []testutils.MockContent
+		expected    string
+		wantErr     bool
+	}{
+		{
+			name:        "success",
+			currentPath: "/path/to/repo/subdir",
+			dir:         "file.txt",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Out:    "/path/to/repo\n",
+					Err:    nil,
+				},
+			},
+			expected: "/subdir/file.txt",
+			wantErr:  false,
+		},
+		{
+			name:        "failure: git root error",
+			currentPath: "/path/to/repo/subdir",
+			dir:         "file.txt",
+			mocks: []testutils.MockContent{
+				{
+					Method: "Command",
+					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Out:    "",
+					Err:    errors.New("git error"),
+				},
+			},
+			expected: "",
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockExe := testutils.NewMockExecutor(tt.mocks)
+
+			got, err := utils.ConvertToGitRootRelativePath(mockExe, tt.currentPath, tt.dir)
+			if tt.wantErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected, got)
+			}
+
+			mockExe.AssertExpectations(t)
+		})
+	}
+}

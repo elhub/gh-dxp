@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -17,6 +18,18 @@ func DirectoryExists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+// ConvertToGitRootRelativePath converts a given directory path to a path relative to the git root.
+func ConvertToGitRootRelativePath(exe Executor, currentPath, dir string) (string, error) {
+	fullPath := filepath.Join(currentPath, dir)
+
+	gitRoot, err := GetGitRootDirectory(exe)
+	if err != nil {
+		return "", err
+	}
+
+	return strings.TrimPrefix(fullPath, gitRoot), nil
 }
 
 // GetGitRootDirectory returns the root directory of the current git repo.

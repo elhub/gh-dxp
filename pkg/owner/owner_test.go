@@ -1,60 +1,130 @@
 package owner_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/owner"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/testutils"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-/*
-type MockExecutor struct {
-	mock.Mock
-}
-
-func (m *MockExecutor) Command(name string, arg ...string) (string, error) {
-	args := m.Called(name, arg)
-	return args.String(0), args.Error(1)
-}
-
-func (m *MockExecutor) CommandContext(ctx context.Context, name string, arg ...string) error {
-	args := m.Called(ctx, name, arg)
-	return args.Error(1)
-}
-
-func (m *MockExecutor) GH(arg ...string) (bytes.Buffer, error) {
-	args := m.Called(arg)
-	return *bytes.NewBufferString(args.String(0)), args.Error(1)
-}
-*/
-
 func TestExecute(t *testing.T) {
 	tests := []struct {
-		path   string
-		owners []string
+		name           string
+		path           string
+		gitRoot        string
+		gitRootErr     error
+		codeowners     string
+		expectedOwners []string
+		expectErr      bool
+		errContains    string
 	}{
 		{
-			path:   "README.md",
-			owners: []string{"@elhub/devxp"},
+			name:           "Single owner for README",
+			path:           "README.md",
+			gitRoot:        createTempRepoWithCodeowners(t, `* @elhub/devxp`),
+			expectedOwners: []string{"@elhub/devxp"},
+			expectErr:      false,
+		},
+		{
+			name: "Multiple owners for specific path",
+			path: "src/main.go",
+			gitRoot: createTempRepoWithCodeowners(t, `*.go @elhub/backend @elhub/devxp
+src/ @elhub/developers`),
+			expectedOwners: []string{"@elhub/developers"},
+			expectErr:      false,
+		},
+		{
+			name:        "Git root directory error",
+			path:        "README.md",
+			gitRootErr:  errors.New("not a git repository"),
+			expectErr:   true,
+			errContains: "not a git repository",
+		},
+		{
+			name:        "CODEOWNERS file not found",
+			path:        "README.md",
+			gitRoot:     createTempRepoWithoutCodeowners(t),
+			expectErr:   true,
+			errContains: "no such file or directory",
+		},
+		{
+			name:           "Multiple team owners",
+			path:           "pkg/api/handler.go",
+			gitRoot:        createTempRepoWithCodeowners(t, `pkg/api/ @elhub/api-team @elhub/backend-team @elhub/devxp`),
+			expectedOwners: []string{"@elhub/api-team", "@elhub/backend-team", "@elhub/devxp"},
+			expectErr:      false,
+		},
+		{
+			name:           "User and team owners",
+			path:           "security/auth.go",
+			gitRoot:        createTempRepoWithCodeowners(t, `security/ @user1 @elhub/security-team`),
+			expectedOwners: []string{"@user1", "@elhub/security-team"},
+			expectErr:      false,
 		},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.path, func(t *testing.T) {
-			/*mockExe := new(MockExecutor)
+		t.Run(tt.name, func(t *testing.T) {
+			mockExe := new(testutils.MockExecutor)
 
-			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return(tt.gitRoot, tt.gitRootError)
-			mockExe.On("CommandContext", mock.Anything, "gradlew", []string{"test"}).Return(nil, tt.expectedErr)
-			mockExe.On("CommandContext", mock.Anything, "make", []string{"check"}).Return(nil, tt.expectedErr)
-			mockExe.On("CommandContext", mock.Anything, "npm", []string{"test"}).Return(nil, tt.expectedErr)
-			mockExe.On("CommandContext", mock.Anything, "mvn", []string{"test"}).Return(nil, tt.expectedErr)*/
+			if tt.gitRoot != "" {
+				mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).
+					Return(tt.gitRoot, tt.gitRootErr)
+			} else {
+				mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).
+					Return("", tt.gitRootErr)
+			}
 
-			exe := utils.LinuxExecutor()
+			owners, err := owner.Execute(tt.path, mockExe)
 
-			owners, err := owner.Execute(tt.path, exe)
-			require.NoError(t, err)
-			require.Equal(t, tt.owners, owners)
+			if tt.expectErr {
+				require.Error(t, err)
+				if tt.errContains != "" {
+					assert.Contains(t, err.Error(), tt.errContains)
+				}
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedOwners, owners)
+			}
+
+			mockExe.AssertExpectations(t)
 		})
 	}
+}
+
+// Helper functions
+
+// createTempRepoWithCodeowners creates a temporary directory structure with .github/CODEOWNERS
+func createTempRepoWithCodeowners(t *testing.T, codeownersContent string) string {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	githubDir := filepath.Join(tmpDir, ".github")
+
+	err := os.MkdirAll(githubDir, 0755)
+	require.NoError(t, err)
+
+	codeownersPath := filepath.Join(githubDir, "CODEOWNERS")
+	err = os.WriteFile(codeownersPath, []byte(codeownersContent), 0644)
+	require.NoError(t, err)
+
+	return tmpDir
+}
+
+// createTempRepoWithoutCodeowners creates a temporary directory without CODEOWNERS file
+func createTempRepoWithoutCodeowners(t *testing.T) string {
+	t.Helper()
+
+	tmpDir := t.TempDir()
+	// Create .github directory but no CODEOWNERS file
+	githubDir := filepath.Join(tmpDir, ".github")
+	err := os.MkdirAll(githubDir, 0755)
+	require.NoError(t, err)
+
+	return tmpDir
 }
