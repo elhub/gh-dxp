@@ -13,7 +13,7 @@
     </parent>
 
     <properties>
-        <devxp-build-configuration.version>1.57.2</devxp-build-configuration.version>
+        <devxp-build-configuration.version>1.57.4</devxp-build-configuration.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
