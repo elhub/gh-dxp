@@ -22,8 +22,8 @@ compile() {
   GOOS=${GOOS} GOARCH=${GOARCH} go build -ldflags="-X 'main.version=${PLUGIN_VERSION}'" -o "${OUTPUT}" .
 
   EXIT_CODE=$?
-  
-  if [ $EXIT_CODE -ne 0 ]; then
+
+  if [[ $EXIT_CODE -ne 0 ]]; then
     echo "Error building for ${GOOS}/${GOARCH}"
     exit 1
   fi
