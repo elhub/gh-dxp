@@ -27,6 +27,9 @@ install: clean build
 	-gh extension remove ${BINARY_NAME}
 	cd ${BIN_DIR}; gh extension install .
 
+owasp:
+	go run github.com/securego/gosec/v2/cmd/gosec ./...
+
 run: build
 	${BIN_DIR}/${BINARY_NAME}
 

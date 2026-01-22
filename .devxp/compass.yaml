@@ -21,7 +21,7 @@ links:
     type: DASHBOARD
     url: "https://sonar.elhub.cloud/dashboard?id=no.elhub.devxp.gh-dxp&codeScope=overall"
   - name: Developer Docs
-    type: DOCUMENT
+    type: OTHER_LINK
     url: "https://docs.elhub.cloud/enabling-systems/devxp/gh-dxp/index.html"
 relationships: {}
 customFields: null
