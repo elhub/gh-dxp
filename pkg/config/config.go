@@ -22,6 +22,7 @@ func ReadConfig(filepath string) (*Settings, error) {
 	return &cfg, nil
 }
 
+
 // DefaultSettings loads the default .devxp settings.
 func DefaultSettings() *Settings {
 	return &Settings{
