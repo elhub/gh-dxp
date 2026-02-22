@@ -1,6 +1,6 @@
 module github.com/elhub/gh-dxp
 
-go 1.25.7
+go 1.26.0
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
@@ -48,7 +48,7 @@ require (
 )
 
 require (
-	github.com/caarlos0/log v0.5.4
+	github.com/caarlos0/log v0.6.0
 	github.com/cli/safeexec v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.3.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
