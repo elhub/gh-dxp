@@ -14,6 +14,8 @@ github.com/briandowns/spinner v1.23.2 h1:Zc6ecUnI+YzLmJniCfDNaMbW0Wid1d5+qcTq4L2
 github.com/briandowns/spinner v1.23.2/go.mod h1:LaZeM4wm2Ywy6vO571mvhQNRcWfRUnXOs0RcKV0wYKM=
 github.com/caarlos0/log v0.5.4 h1:4DJwTt8MvvRF8BM4I3j2sbmdf4DYY0HVqKpg09cAgaU=
 github.com/caarlos0/log v0.5.4/go.mod h1:iAv3N3ZkiEQUmZ8fGdD8bMA4zq6jMSlnz9D87333Gi0=
+github.com/caarlos0/log v0.6.0 h1:iS+oZ7DB8wpJxOjA4+BHkZQtrx8sMu8AYNZVQukmEtw=
+github.com/caarlos0/log v0.6.0/go.mod h1:iAv3N3ZkiEQUmZ8fGdD8bMA4zq6jMSlnz9D87333Gi0=
 github.com/charmbracelet/bubbles v0.21.1 h1:nj0decPiixaZeL9diI4uzzQTkkz1kYY8+jgzCZXSmW0=
 github.com/charmbracelet/bubbles v0.21.1/go.mod h1:HHvIYRCpbkCJw2yo0vNX1O5loCwSr9/mWS8GYSg50Sk=
 github.com/charmbracelet/bubbletea v1.3.10 h1:otUDHWMMzQSB0Pkc87rm691KZ3SWa4KUlvF9nRvCICw=
