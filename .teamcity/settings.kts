@@ -1,7 +1,10 @@
 import jetbrains.buildServer.configs.kotlin.ArtifactRule
+import no.elhub.devxp.build.configuration.pipeline.constants.AgentScope.LinuxAgentContext
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
+import no.elhub.devxp.build.configuration.pipeline.jobs.customJob
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
+import no.elhub.devxp.build.configuration.pipeline.jobs.publishTag
 
 elhubProject(DEVXP, "gh-dxp") {
 
@@ -19,6 +22,19 @@ elhubProject(DEVXP, "gh-dxp") {
                 additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
             }
             enablePublishMetrics = true
+        }
+        publishTag()
+        customJob(LinuxAgentContext) {
+            name = "🚀 Release"
+            id("Release")
+            steps {
+                script {
+                    name = "GitHub Release Script"
+                    scriptContent = """
+                        make release
+                    """.trimIndent()
+                }
+            }
         }
     }
 }
