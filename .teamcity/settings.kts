@@ -1,4 +1,5 @@
 import jetbrains.buildServer.configs.kotlin.ArtifactRule
+import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import no.elhub.devxp.build.configuration.pipeline.constants.AgentScope.LinuxAgentContext
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
