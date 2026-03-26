@@ -1,7 +1,7 @@
 BINARY_NAME=gh-dxp
 BUILD_DIR=build
 BIN_DIR=${BUILD_DIR}/gh-dxp
-VERSION ?= $(shell git describe --tags --abbrev=0 2>/dev/null)
+VERSION ?= $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 REPO ?= $(shell git config --get remote.origin.url | sed -E 's#(git@github.com:|https://github.com/)##; s#\.git$$##')
 
 PLATFORMS=linux/amd64 darwin/arm64
