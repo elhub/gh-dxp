@@ -55,7 +55,7 @@ release:
 	@test -n "${VERSION}" || (echo "No git tags found. Create a tag before running make release."; exit 1)
 	@echo "Preparing release for ${VERSION}"
 	@if ! gh release view "${VERSION}" --repo "${REPO}" >/dev/null 2>&1; then \
-		mkdir -p dist; \
+		rm -rf dist; mkdir -p dist; \
 		for platform in $(PLATFORMS); do \
 			GOOS=$$(echo $$platform | cut -d/ -f1); \
 			GOARCH=$$(echo $$platform | cut -d/ -f2); \
