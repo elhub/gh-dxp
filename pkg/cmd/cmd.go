@@ -61,6 +61,7 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 		TestCmd(exe),
 		TemplateCmd(exe, settings),
 		StatusCmd(exe),
+		RenovateCmd(exe, settings),
 	)
 
 	return retCmd, nil

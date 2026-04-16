@@ -7,6 +7,7 @@ import (
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/logger"
+	"github.com/elhub/gh-dxp/pkg/renovate"
 	"github.com/elhub/gh-dxp/pkg/test"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
@@ -138,6 +139,12 @@ func performPreCommitOperations(exe utils.Executor, settings *config.Settings, p
 	// Run lint
 	if !options.NoLint {
 		err = lint.Run(exe, settings, &lint.Options{})
+		if err != nil {
+			return pr, err
+		}
+
+		// Run renovate config validation
+		err = renovate.Run(exe, settings, &renovate.Options{})
 		if err != nil {
 			return pr, err
 		}
