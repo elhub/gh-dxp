@@ -22,6 +22,7 @@ func TestRun_LintNoErrors(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go",
 	}
@@ -44,6 +45,7 @@ func TestRun_LintHasErrors(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go",
 	}
@@ -61,6 +63,7 @@ func TestRun_LintAllFiles(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 	}
 
@@ -82,6 +85,7 @@ func TestRun_LintWithFix(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go", "--fix",
 	}
@@ -101,6 +105,7 @@ func TestRun_LintWithNoExistingBranches(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"--filesonly", "/pkg/source.go", "/pkg/source2.go",
 	}
@@ -118,6 +123,7 @@ func TestRun_LintSpecificDirectory(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"-e", "FILTER_REGEX_INCLUDE=(pkg)",
 	}
@@ -135,6 +141,7 @@ func TestRun_UseProxy(t *testing.T) {
 	linterArgs := []string{
 		"mega-linter-runner", "--flavor", "cupcake",
 		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
 		"-e", "FILTER_REGEX_INCLUDE=(pkg)", "-e", "https_proxy=https://myproxy.no:8080",
 	}

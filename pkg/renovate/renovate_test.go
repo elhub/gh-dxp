@@ -18,28 +18,24 @@ func TestRenovateValidationError(t *testing.T) {
 		name	  		string
 		filesChanged	string
 		forceValidate	bool
-		expectedErr 	error
 		expectedRun		bool
 	}{
 		{
 			name:	 		"Test run on renovate config change",
 			filesChanged:	".github/renovate.json",
 			forceValidate: 	false,
-			expectedErr:	nil,
 			expectedRun: 	true,
 		},
 		{
 			name:	  		"Test don't run with no renovate config changes",
 			filesChanged:	"file1.txt\nfile2.txt",
 			forceValidate: 	false,
-			expectedErr:	nil,
 			expectedRun: 	false,
 		},
 		{
 			name:			"Test run with no renovate config changes and --force used",
 			filesChanged:	"file1.txt\nfile2.txt",
 			forceValidate: 	true,
-			expectedErr:	nil,
 			expectedRun: 	true,
 		},
 	}
@@ -63,11 +59,7 @@ func TestRenovateValidationError(t *testing.T) {
 
 			err := renovate.Run(mockExe, &config.Settings{}, &renovate.Options{Force: tt.forceValidate})
 
-			if tt.expectedErr != nil {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
+			require.NoError(t, err)
 
 			if (!tt.expectedRun) {
 				mockExe.AssertNotCalled(t, "CommandContext", mock.Anything, "npx", renovateArgs)
