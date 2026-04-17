@@ -8,8 +8,9 @@ import (
 	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
+// Run executes the renovate validation process.
 func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
-	err, renovateConfigChanged := isRenovateConfigUpdated(exe)
+	renovateConfigChanged, err := isRenovateConfigUpdated(exe)
 	if err != nil {
 		logger.Info("The validation process returned an error looking for renovate config file: " + err.Error() + "\n")
 		return err
@@ -31,21 +32,22 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	return nil
 }
 
-func isRenovateConfigUpdated(exe utils.Executor) (error, bool) {
+// isRenovateConfigUpdated checks if the renovate config file has been updated compared to the main branch.
+func isRenovateConfigUpdated(exe utils.Executor) (bool, error) {
 	changedFiles, err := utils.GetChangedFiles(exe)
 	if err != nil {
-		return err, false
+		return false, err
 	}
 
 	if len(changedFiles) == 0 {
 		logger.Info("Did not find any changed files to validate")
-		return nil, false
+		return false, nil
 	}
 
 	for _, file := range changedFiles {
 		if file == ".github/renovate.json" {
-			return nil, true
+			return true, nil
 		}
 	}
-	return nil, false
+	return false, nil
 }

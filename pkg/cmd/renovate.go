@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// RenovateCmd creates a new command for working with renovate.
 func RenovateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "renovate",
@@ -23,6 +24,7 @@ func RenovateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	return cmd
 }
 
+// ValidateCmd creates a new command for validating renovate config.
 func ValidateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	opts := &renovate.Options{}
 	cmd := &cobra.Command{
@@ -39,7 +41,7 @@ func ValidateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			# Force validation of renovate config (for example even if it's unchanged)
 			$ gh dxp renovate validate --force
 		`),
-		RunE: func(prCmd *cobra.Command, _ []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			err := utils.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
