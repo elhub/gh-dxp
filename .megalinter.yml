@@ -1,5 +1,0 @@
----
-EXTENDS:
-  - https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml
-
-JSON_JSONLINT_FILTER_REGEX_EXCLUDE: '.github/renovate.json'
