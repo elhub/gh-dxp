@@ -156,6 +156,7 @@ func TestExecuteUpdate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake",
 				"-e", "LINTER_RULES_PATH=/tmp",
+				"-e", "GOTOOLCHAIN=auto",
 				"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
 			linterArgs = append(linterArgs, "--filesonly")
