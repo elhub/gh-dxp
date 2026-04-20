@@ -1,3 +1,4 @@
+// Package renovate provides functionality to validate renovate configuration files.
 package renovate
 
 import (
