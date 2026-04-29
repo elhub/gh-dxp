@@ -37,7 +37,7 @@ func GetPRBody(exe utils.Executor) (string, error) {
 	return getPRField(exe, "body")
 }
 
-// getPRField gets a single field of information about a PR using the gh pr command
+// getPRField gets a single field of information about a PR using the gh pr command.
 func getPRField(exe utils.Executor, field string) (string, error) {
 	stdOut, err := exe.GH("pr", "view", "--json", field, "--jq", "."+field)
 
@@ -102,7 +102,6 @@ func addAndCommitFiles(exe utils.Executor, options *Options) error {
 	if options.CommitMessage != "" {
 		commitMessage = options.CommitMessage
 	} else {
-
 		if !options.TestRun {
 			commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
 			if err != nil {

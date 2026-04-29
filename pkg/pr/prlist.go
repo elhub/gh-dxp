@@ -17,7 +17,7 @@ var wg sync.WaitGroup
 var prChan chan PullRequestInfo
 var errChan chan error
 
-// ExecuteList renders the user's assigned pull requests
+// ExecuteList renders the user's assigned pull requests.
 func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	pullRequests = []PullRequestInfo{}
 	prChan = make(chan PullRequestInfo)
@@ -71,7 +71,6 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 }
 
 func retrievePullRequests(searchTerm string, exe utils.Executor) error {
-
 	res, err := exe.GH("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
 	if err != nil {
 		return errors.Wrap(err, "failed to search prs for my pull requests")

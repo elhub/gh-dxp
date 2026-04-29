@@ -35,57 +35,57 @@ func Fatal(msg string) {
 	log.Fatal(Red(msg))
 }
 
-// Debugf logs at the debug level with string formatting
+// Debugf logs at the debug level with string formatting.
 func Debugf(format string, a ...any) {
 	Debug(fmt.Sprintf(format, a...))
 }
 
-// Infof logs at the debug level with string formatting
+// Infof logs at the debug level with string formatting.
 func Infof(format string, a ...any) {
 	Info(fmt.Sprintf(format, a...))
 }
 
-// Warnf logs at the debug level with string formatting
+// Warnf logs at the debug level with string formatting.
 func Warnf(format string, a ...any) {
 	Warn(fmt.Sprintf(format, a...))
 }
 
-// Errorf logs at the debug level with string formatting
+// Errorf logs at the debug level with string formatting.
 func Errorf(format string, a ...any) {
 	Error(fmt.Sprintf(format, a...))
 }
 
-// Fatalf logs at the debug level with string formatting
+// Fatalf logs at the debug level with string formatting.
 func Fatalf(format string, a ...any) {
 	Fatal(fmt.Sprintf(format, a...))
 }
 
-// SetLevel sets the log level
+// SetLevel sets the log level.
 func SetLevel(level log.Level) {
 	log.SetLevel(level)
 }
 
-// DecreasePadding decreases padding
+// DecreasePadding decreases padding.
 func DecreasePadding() {
 	log.DecreasePadding()
 }
 
-// IncreasePadding increases padding
+// IncreasePadding increases padding.
 func IncreasePadding() {
 	log.IncreasePadding()
 }
 
-// WithError logs an error
+// WithError logs an error.
 func WithError(err error) *log.Entry {
 	return log.WithError(err)
 }
 
-// Red returns text with red color formatting
+// Red returns text with red color formatting.
 func Red(msg string) string {
 	return fmt.Sprintf("\033[31m%s\033[0m", msg)
 }
 
-// Yellow returns text with yellow color formatting
+// Yellow returns text with yellow color formatting.
 func Yellow(msg string) string {
 	return fmt.Sprintf("\033[33m%s\033[0m", msg)
 }

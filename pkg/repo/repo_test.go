@@ -48,7 +48,7 @@ func TestRun_ExecuteClone(t *testing.T) {
 				mockExe.On("GH", []string{"search", "repos", tt.pattern, "--match", "name", "--archived=false", "--json", "name,fullName,url", "--limit=1000", "--owner", "myorg"}).Return(`[{"name": "repo1", "fullName": "myorg/repo1", "url": "https://github.com/myorg/repo1"}, {"name": "repo2", "fullName": "myorg/repo2", "url": "https://github.com/myorg/repo2"}]`, nil)
 			}
 			if !tt.options.DryRun { // If not dry run, we expect the repos to be cloned
-				mockExe.On("GH", []string{"repo", "clone", "myorg/repo1"}).Return("", errors.New("Mocked error")).Once() //This is intended to test the retry logic
+				mockExe.On("GH", []string{"repo", "clone", "myorg/repo1"}).Return("", errors.New("Mocked error")).Once() // This is intended to test the retry logic
 				mockExe.On("GH", []string{"repo", "clone", "myorg/repo1"}).Return("", nil)
 				mockExe.On("GH", []string{"repo", "clone", "myorg/repo2"}).Return("", nil)
 			}

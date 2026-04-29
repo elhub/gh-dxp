@@ -52,7 +52,6 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 
 // PRCreateCmd handles the creation of a pull request.
 func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
-
 	opts := &pr.CreateOptions{}
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -247,14 +246,14 @@ func PRUpdateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 	return cmd
 }
 
-// Patches prOptions into a createOptions object
+// Patches prOptions into a createOptions object.
 func addPrOptionsToCreateOptions(prOptions pr.Options, createOptions *pr.CreateOptions) {
 	createOptions.NoLint = prOptions.NoLint
 	createOptions.NoUnit = prOptions.NoUnit
 	createOptions.CommitMessage = prOptions.CommitMessage
 }
 
-// Patches prOptions into an updateOptions object
+// Patches prOptions into an updateOptions object.
 func addPrOptionsToUpdateOptions(prOptions pr.Options, updateOptions *pr.UpdateOptions) {
 	updateOptions.NoLint = prOptions.NoLint
 	updateOptions.NoUnit = prOptions.NoUnit

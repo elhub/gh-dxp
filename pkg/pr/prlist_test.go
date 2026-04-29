@@ -11,7 +11,6 @@ import (
 )
 
 func TestExecuteList(t *testing.T) {
-
 	prDetails := "{\"additions\":1,\"author\":{\"id\":\"U_kgDOCXKgZ\",\"is_bot\":false," +
 		"\"login\":\"my-user-statnett\",\"name\":\"Stat Nett\"},\"createdAt\":" +
 		"\"2024-08-13T08:23:12Z\",\"deletions\":1,\"headRepository\":{\"id\":\"R_kgDOMCGoz\",\"name\"" +

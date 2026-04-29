@@ -13,16 +13,13 @@ func TestStartSpinner(t *testing.T) {
 	finalMsg := "Final Message"
 
 	t.Run("Spinner is created", func(t *testing.T) {
-
 		s := utils.StartSpinner(suffix, finalMsg)
 
 		assert.Equal(t, fmt.Sprintf(" %s", suffix), s.Suffix)
 		assert.Equal(t, fmt.Sprintf(" %s\n", finalMsg), s.FinalMSG)
-
 	})
 
 	t.Run("Spinner final message is correctly removed", func(t *testing.T) {
-
 		s := utils.StartSpinner(suffix, finalMsg)
 		utils.RemoveFinalMsg(s)
 

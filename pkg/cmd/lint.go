@@ -40,7 +40,6 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			$ gh dxp lint -d .
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
-
 			currentPath, _ := filepath.Abs("./")
 
 			err := utils.SetWorkDirToGitHubRoot(exe)

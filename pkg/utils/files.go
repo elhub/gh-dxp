@@ -2,10 +2,11 @@
 package utils
 
 import (
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/elhub/gh-dxp/pkg/logger"
 )
 
 // FileExists returns true if a given file exists, and false if it doesn't.
@@ -14,7 +15,7 @@ func FileExists(path string) bool {
 	return !os.IsNotExist(err)
 }
 
-// GetChangedFiles returns a list of changed files in the current repo
+// GetChangedFiles returns a list of changed files in the current repo.
 func GetChangedFiles(exe Executor) ([]string, error) {
 	branchString, err := exe.Command("git", "branch")
 	if err != nil {
@@ -26,7 +27,6 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 	var changedFiles []string
 
 	if len(branchList) > 0 {
-
 		// Pull latest changes from main branch
 		logger.Info("Fetching latest changes from the main branch...")
 		_, pullErr := exe.Command("git", "fetch", "origin", "main")
@@ -78,14 +78,14 @@ func CheckFilesUpdated(changedFiles []string, patterns []string) bool {
 	return false
 }
 
-// GetUntrackedChanges returns a list of file names for unchanged files in the current repo
+// GetUntrackedChanges returns a list of file names for unchanged files in the current repo.
 func GetUntrackedChanges(exe Executor) ([]string, error) {
 	re := regexp.MustCompile(`^\?\?`)
 
 	return getChanges(exe, re)
 }
 
-// GetTrackedChanges returns a list of file names for changed files in the current repo
+// GetTrackedChanges returns a list of file names for changed files in the current repo.
 func GetTrackedChanges(exe Executor) ([]string, error) {
 	// This regex is intended to catch all tracked changes except for unmerged conflicts
 	// We need to check for strings like ' M example` and `M  example` to catch both staged and unstaged changes.
@@ -93,7 +93,7 @@ func GetTrackedChanges(exe Executor) ([]string, error) {
 	return getChanges(exe, re)
 }
 
-// Checks the current repo state for any changes matching a given regex 're'
+// Checks the current repo state for any changes matching a given regex 're'.
 func getChanges(exe Executor, re *regexp.Regexp) ([]string, error) {
 	changeString, err := exe.Command("git", "status", "--porcelain")
 	if err != nil {

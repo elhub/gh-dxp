@@ -182,9 +182,11 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	commitLines := strings.Split(commits, "\n")
 	commitSummary := ""
 	if len(commitLines) > 1 {
+		var commitSummarySb185 strings.Builder
 		for _, line := range commitLines[1:] {
-			commitSummary += "* " + line + "\n"
+			commitSummarySb185.WriteString("* " + line + "\n")
 		}
+		commitSummary += commitSummarySb185.String()
 	}
 
 	bodySurvey := "No description. Do you want to add one?"
@@ -300,7 +302,6 @@ func testingChanges(options *CreateOptions) (string, error) {
 		if newTestConfirm {
 			return "* ✅ This PR adds new tests.", nil
 		}
-
 	}
 
 	return "", nil

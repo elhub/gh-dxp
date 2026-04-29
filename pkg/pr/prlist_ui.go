@@ -14,7 +14,6 @@ var baseStyle = lipgloss.NewStyle().
 	BorderForeground(lipgloss.Color("240"))
 
 func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
-
 	rows := []table.Row{}
 	var repoNameLen = 12
 	var titleLen = 40

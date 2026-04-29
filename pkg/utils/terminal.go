@@ -6,7 +6,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-// ConvertTerminalOutputIntoList converts terminal output on multiple lines to a list of strings
+// ConvertTerminalOutputIntoList converts terminal output on multiple lines to a list of strings.
 func ConvertTerminalOutputIntoList(changedFilesString string) []string {
 	if len(changedFilesString) == 0 {
 		return []string{}

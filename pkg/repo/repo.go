@@ -18,7 +18,7 @@ type repositoryInfo struct {
 	URL      string `json:"url"`
 }
 
-// ExecuteClone carries out a clone all on the given pattern
+// ExecuteClone carries out a clone all on the given pattern.
 func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Duration), opts *Options) error {
 	repositoryInfo, err := retrieveRepositories(pattern, exe)
 	if err != nil {
@@ -104,7 +104,6 @@ func retrieveRepositories(pattern string, exe utils.Executor) ([]repositoryInfo,
 }
 
 func cloneRepoWithRetries(reponame string, sleep func(time.Duration), exe utils.Executor) error {
-
 	maxAttempts := 5
 
 	for i := 0; i <= maxAttempts; i++ {

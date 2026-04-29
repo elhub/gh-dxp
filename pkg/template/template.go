@@ -78,7 +78,6 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 	}
 
 	if options.IsGradleProject {
-
 		// Create gradle directories if we are setting up a gradle project
 		gradleDir, err := createDirectory(workingDir, "gradle")
 		if err != nil {

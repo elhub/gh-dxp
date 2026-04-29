@@ -42,7 +42,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		statusReport.WriteString(fmt.Sprintf("Repository: %s\n", strings.TrimSpace(repo)))
+		fmt.Fprintf(&statusReport, "Repository: %s\n", strings.TrimSpace(repo))
 	}
 
 	if opts.All || opts.Pr {
@@ -50,7 +50,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		statusReport.WriteString(fmt.Sprintf("PR Status:\n%s\n", prStatus))
+		fmt.Fprintf(&statusReport, "PR Status:\n%s\n", prStatus)
 	}
 
 	if opts.All || opts.Branches {
@@ -58,7 +58,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		statusReport.WriteString(fmt.Sprintf("Branches:\n%s\n", branches))
+		fmt.Fprintf(&statusReport, "Branches:\n%s\n", branches)
 	}
 
 	if opts.All || opts.Issue {
@@ -66,7 +66,7 @@ func Execute(exe utils.Executor, opts *Options) error {
 		if err != nil {
 			return err
 		}
-		statusReport.WriteString(fmt.Sprintf("Assigned PRs/Review Requests:\n%s\n", assignedPRs))
+		fmt.Fprintf(&statusReport, "Assigned PRs/Review Requests:\n%s\n", assignedPRs)
 	}
 
 	logger.Info(statusReport.String())
