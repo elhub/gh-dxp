@@ -51,10 +51,18 @@ func TestExecuteList(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(testutils.MockExecutor)
 
-			mockExe.On("GH", []string{"search", "prs", "--author=@me", "--state=open", "--json", "number,repository"}).Return(tt.authorSearchResponse, tt.expectedErr)
-			mockExe.On("GH", []string{"search", "prs", "--review-requested=@me", "--state=open", "--json", "number,repository"}).Return(tt.reviewerSearchResponse, tt.expectedErr)
+			mockExe.On("GH", []string{"search", "prs", "--author=@me", "--state=open", "--json", "number,repository"}).Return(
+				tt.authorSearchResponse, tt.expectedErr,
+			)
+			mockExe.On("GH", []string{"search", "prs", "--review-requested=@me", "--state=open", "--json", "number,repository"}).Return(
+				tt.reviewerSearchResponse, tt.expectedErr,
+			)
 
-			mockExe.On("GH", []string{"pr", "view", "https://github.com/elhub/gh-xyz/pull/1", "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision"}).Return(tt.prDetailResponse, tt.expectedErr)
+			mockExe.On(
+				"GH",
+				[]string{"pr", "view", "https://github.com/elhub/gh-xyz/pull/1",
+					"--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision"},
+			).Return(tt.prDetailResponse, tt.expectedErr)
 
 			opts := &pr.ListOptions{TestRun: true, Mine: true, ReviewRequested: true}
 

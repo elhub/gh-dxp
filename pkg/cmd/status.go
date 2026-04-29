@@ -12,23 +12,23 @@ func StatusCmd(exe utils.Executor) *cobra.Command {
 	opts := &status.Options{}
 
 	cmd := &cobra.Command{
-		Use:   "status",
-		Short: "Get the status of the current repository",
-		Long: heredoc.Docf(`
-            Get the status of the current repository or specific aspects related to it. This command allows you to:
+		Use:	"status",
+		Short: 	"Get the status of the current repository",
+		Long: 	heredoc.Docf(`
+			Get the status of the current repository or specific aspects related to it. This command allows you to:
 
-            * View a comprehensive status report covering all aspects (All)
-            * Check the status of the current repository
-            * View the status of pull requests (PRs)
-            * List all branches within the repository
-            * View assigned PRs/Review Requests
+			* View a comprehensive status report covering all aspects (All)
+			* Check the status of the current repository
+			* View the status of pull requests (PRs)
+			* List all branches within the repository
+			* View assigned PRs/Review Requests
 
-            This command supports both interactive mode and non-interactive mode via flags for quick access to specific information.
-        `, "`"),
+			This command supports both interactive mode and non-interactive mode via flags for quick access to specific information.
+		`, "`"),
 		Example: heredoc.Doc(`
-            # Interactive mode
-            $ gh dxp status
-        `),
+			# Interactive mode
+			$ gh dxp status
+		`),
 		Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
 			err := utils.SetWorkDirToGitHubRoot(exe)
