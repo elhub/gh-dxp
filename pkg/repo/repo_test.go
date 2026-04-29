@@ -7,7 +7,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/repo"
 	"github.com/elhub/gh-dxp/pkg/testutils"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRun_ExecuteClone(t *testing.T) {
@@ -64,7 +64,7 @@ func TestRun_ExecuteClone(t *testing.T) {
 			}
 
 			err := repo.ExecuteClone(mockExe, tt.pattern, mockSleep, tt.options)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			mockExe.AssertExpectations(t)
 		})
 	}
