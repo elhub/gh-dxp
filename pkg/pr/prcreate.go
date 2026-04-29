@@ -11,6 +11,28 @@ import (
 	"github.com/pkg/errors"
 )
 
+// CreateTemporaryBranch creates a new temporary branch from the current base branch and checks it out. It updates the pr struct with the new branch name.
+func CreateTemporaryBranch(exe utils.Executor, options *CreateOptions, pr *PullRequest) error {
+	newBranchName, err := getNewBranchName(options)
+	if err != nil {
+		return err
+	}
+
+	branchExists, err := branch.Exists(exe, newBranchName)
+	if err != nil {
+		return err
+	}
+	if branchExists {
+		return errors.New("Branch already exists. Please delete it or specify another one")
+	}
+	_, err = exe.Command("git", "checkout", "-b", newBranchName)
+	if err != nil {
+		return err
+	}
+	pr.branchID = newBranchName
+	return nil
+}
+
 // ExecuteCreate creates or updates a pull request, depending on its current state.
 func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *CreateOptions) error {
 	pr := PullRequest{}
@@ -28,26 +50,9 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 
 	// If we're currently in the base branch, we need to make a new temporary branch to contain the diff
 	if pr.branchID == baseBranch {
-		newBranchName, err := getNewBranchName(options)
+		err := CreateTemporaryBranch(exe, options, &pr)
 		if err != nil {
 			return err
-		}
-
-		branchExists, err := branch.Exists(exe, newBranchName)
-		if err != nil {
-			return err
-		}
-		if branchExists {
-			return errors.New("Branch already exists. Please delete it or specify another one")
-		}
-		_, err = exe.Command("git", "checkout", "-b", newBranchName)
-		if err != nil {
-			return err
-		}
-		pr.branchID = newBranchName
-	} else {
-		if options.Branch != "" && options.Branch != pr.branchID {
-			logger.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + pr.branchID)
 		}
 	}
 

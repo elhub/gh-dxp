@@ -101,16 +101,15 @@ func addAndCommitFiles(exe utils.Executor, options *Options) error {
 
 	if options.CommitMessage != "" {
 		commitMessage = options.CommitMessage
+	} else if options.TestRun {
+		commitMessage = "default commit message"
 	} else {
-		if !options.TestRun {
-			commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
-			if err != nil {
-				return err
-			} else if len(commitMessage) == 0 {
-				return errors.New("Empty commit message not allowed")
-			}
-		} else {
-			commitMessage = "default commit message"
+		commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
+		if err != nil {
+			return err
+		}
+		if len(commitMessage) == 0 {
+			return errors.New("Empty commit message not allowed")
 		}
 	}
 

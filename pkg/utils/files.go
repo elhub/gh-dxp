@@ -26,39 +26,41 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 
 	var changedFiles []string
 
-	if len(branchList) > 0 {
-		// Pull latest changes from main branch
-		logger.Info("Fetching latest changes from the main branch...")
-		_, pullErr := exe.Command("git", "fetch", "origin", "main")
-		if pullErr != nil {
-			return nil, err
-		}
-
-		// Locally update origin/HEAD symbolic reference to point at the default branch
-		_, err := exe.Command("git", "remote", "set-head", "origin", "--auto")
-		if err != nil {
-			return nil, err
-		}
-
-		// Fetch the default branch (should be the main branch or a temporary working branch that’s intended to be merged back into main)
-		headRef, err := exe.Command("git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD")
-		if err != nil {
-			return nil, err
-		}
-
-		headRef = strings.TrimSpace(headRef)
-		logger.Info("Checking for changes relative to the default branch: " + headRef)
-		changedFilesString, err := exe.Command("git", "diff", "--name-only", headRef, "--relative")
-		changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
-		if err != nil {
-			return []string{}, err
-		}
-	} else {
+	if len(branchList) == 0 {
 		changedFiles, err = GetTrackedChanges(exe)
 		if err != nil {
 			return []string{}, err
 		}
+		return changedFiles, nil
 	}
+
+	// Fetch latest changes from main branch
+	logger.Info("Fetching latest changes from the main branch...")
+	_, pullErr := exe.Command("git", "fetch", "origin", "main")
+	if pullErr != nil {
+		return nil, err
+	}
+
+	// Locally update origin/HEAD symbolic reference to point at the default branch
+	_, err = exe.Command("git", "remote", "set-head", "origin", "--auto")
+	if err != nil {
+		return nil, err
+	}
+
+	// Fetch the default branch (should be the main branch or a temporary working branch that’s intended to be merged back into main)
+	headRef, err := exe.Command("git", "symbolic-ref", "--short", "refs/remotes/origin/HEAD")
+	if err != nil {
+		return nil, err
+	}
+
+	headRef = strings.TrimSpace(headRef)
+	logger.Info("Checking for changes relative to the default branch: " + headRef)
+	changedFilesString, err := exe.Command("git", "diff", "--name-only", headRef, "--relative")
+	changedFiles = ConvertTerminalOutputIntoList(changedFilesString)
+	if err != nil {
+		return []string{}, err
+	}
+
 	return changedFiles, nil
 }
 
