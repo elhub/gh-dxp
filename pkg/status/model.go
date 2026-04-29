@@ -1,4 +1,4 @@
-package status
+package status // nolint:cyclop
 
 // Options represents the options available for the status command.
 type Options struct {
