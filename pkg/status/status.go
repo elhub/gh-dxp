@@ -1,6 +1,6 @@
 // pkg/status/status.go
 
-package status // nolint:cyclop
+package status //nolint:cyclop
 
 import (
 	"fmt"

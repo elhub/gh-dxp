@@ -13,7 +13,7 @@ import (
 )
 
 // Execute downloads the project template files and writes them to the working directory.
-func Execute(workingDir string, settings *config.Settings, options *Options) error { // nolint:funlen
+func Execute(workingDir string, settings *config.Settings, options *Options) error { //nolint:funlen
 	// Get the project template URI
 	uri := settings.ProjectTemplateURI
 
