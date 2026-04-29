@@ -353,13 +353,6 @@ func getDefaultTitle(commits string) string {
 	return ""
 }
 
-func getCheckboxMark(confirm bool) string {
-	if confirm {
-		return "x"
-	}
-	return " "
-}
-
 func logPullRequest(pr PullRequest) {
 	logger.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
 }
