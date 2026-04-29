@@ -44,7 +44,7 @@ func TestNewMockExecutor(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test CommandContext method
-	err = mockExe.CommandContext(nil, "git", "rev-parse", "--show-toplevel")
+	err = mockExe.CommandContext(nil, "git", "rev-parse", "--show-toplevel") // nolint:staticcheck
 	require.NoError(t, err)
 
 	// Test GH method
