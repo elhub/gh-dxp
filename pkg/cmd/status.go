@@ -12,9 +12,9 @@ func StatusCmd(exe utils.Executor) *cobra.Command {
 	opts := &status.Options{}
 
 	cmd := &cobra.Command{
-		Use:	"status",
-		Short: 	"Get the status of the current repository",
-		Long: 	heredoc.Docf(`
+		Use:   "status",
+		Short: "Get the status of the current repository",
+		Long: heredoc.Docf(`
 			Get the status of the current repository or specific aspects related to it. This command allows you to:
 
 			* View a comprehensive status report covering all aspects (All)
