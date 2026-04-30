@@ -256,7 +256,7 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 }
 
 func docIsTestedLine(pr PullRequest, options *CreateOptions) string {
-		switch {
+	switch {
 	case pr.isTested:
 		return "* ✅ Unit tests passed on local machine."
 	case options.NoUnit:
@@ -267,7 +267,7 @@ func docIsTestedLine(pr PullRequest, options *CreateOptions) string {
 }
 
 func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
-switch {
+	switch {
 	case pr.isLinted:
 		return "* ✅ Lint checks passed on local machine."
 	case options.NoLint:
