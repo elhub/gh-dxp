@@ -3,12 +3,12 @@ package cmd
 import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/status"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
 // StatusCmd creates a new cobra.Command for the status functionality.
-func StatusCmd(exe utils.Executor) *cobra.Command {
+func StatusCmd(exe ghutil.Executor) *cobra.Command {
 	opts := &status.Options{}
 
 	cmd := &cobra.Command{
@@ -31,7 +31,7 @@ func StatusCmd(exe utils.Executor) *cobra.Command {
 		`),
 		Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := utils.SetWorkDirToGitHubRoot(exe)
+			err := ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}

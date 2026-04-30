@@ -6,11 +6,11 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 )
 
 // ExecuteMerge merges a pull request on the current branch.
-func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
+func ExecuteMerge(exe ghutil.Executor, options *MergeOptions) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {

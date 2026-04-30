@@ -8,11 +8,11 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 )
 
 // Execute retrieves the status of the current repository.
-func Execute(exe utils.Executor, opts *Options) error {
+func Execute(exe ghutil.Executor, opts *Options) error {
 	var statusReport strings.Builder
 
 	if optsIsEmpty(opts) {
@@ -55,7 +55,7 @@ func promptForOptions(opts *Options) error {
 	return nil
 }
 
-func buildStatusReport(exe utils.Executor, opts *Options, statusReport *strings.Builder) error {
+func buildStatusReport(exe ghutil.Executor, opts *Options, statusReport *strings.Builder) error {
 	type section struct {
 		enabled bool
 		fn      func() error
@@ -79,7 +79,7 @@ func buildStatusReport(exe utils.Executor, opts *Options, statusReport *strings.
 	return nil
 }
 
-func appendRepo(exe utils.Executor, statusReport *strings.Builder) error {
+func appendRepo(exe ghutil.Executor, statusReport *strings.Builder) error {
 	repo, err := exe.Command("git", "remote", "get-url", "origin")
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func appendRepo(exe utils.Executor, statusReport *strings.Builder) error {
 	return nil
 }
 
-func appendPRStatus(exe utils.Executor, statusReport *strings.Builder) error {
+func appendPRStatus(exe ghutil.Executor, statusReport *strings.Builder) error {
 	prStatus, err := exe.GH("pr", "status")
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func appendPRStatus(exe utils.Executor, statusReport *strings.Builder) error {
 	return nil
 }
 
-func appendBranches(exe utils.Executor, statusReport *strings.Builder) error {
+func appendBranches(exe ghutil.Executor, statusReport *strings.Builder) error {
 	branches, err := exe.Command("git", "branch", "-a")
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func appendBranches(exe utils.Executor, statusReport *strings.Builder) error {
 	return nil
 }
 
-func appendIssues(exe utils.Executor, statusReport *strings.Builder) error {
+func appendIssues(exe ghutil.Executor, statusReport *strings.Builder) error {
 	assignedPRs, err := exe.GH("issue", "status")
 	if err != nil {
 		return err

@@ -1,11 +1,11 @@
-package utils_test
+package ghutil_test
 
 import (
 	"errors"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/testutils"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -54,7 +54,7 @@ func TestGetGitRootDirectory(t *testing.T) {
 			//		mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
 			//	}
 
-			got, err := utils.GetGitRootDirectory(mockExe)
+			got, err := ghutil.GetGitRootDirectory(mockExe)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -127,7 +127,7 @@ func TestSetWorkDirToGitHubRoot(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := testutils.NewMockExecutor(tt.mocks)
 
-			err := utils.SetWorkDirToGitHubRoot(mockExe)
+			err := ghutil.SetWorkDirToGitHubRoot(mockExe)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -178,7 +178,7 @@ func TestListFilesInDirectory(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := testutils.NewMockExecutor(tt.mocks)
 
-			got, err := utils.ListFilesInDirectory(mockExe, "/path/to/dir")
+			got, err := ghutil.ListFilesInDirectory(mockExe, "/path/to/dir")
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {
@@ -236,7 +236,7 @@ func TestConvertToGitRootRelativePath(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := testutils.NewMockExecutor(tt.mocks)
 
-			got, err := utils.ConvertToGitRootRelativePath(mockExe, tt.currentPath, tt.dir)
+			got, err := ghutil.ConvertToGitRootRelativePath(mockExe, tt.currentPath, tt.dir)
 			if tt.wantErr {
 				require.Error(t, err)
 			} else {

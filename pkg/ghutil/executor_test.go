@@ -1,4 +1,4 @@
-package utils_test
+package ghutil_test
 
 import (
 	"context"
@@ -8,14 +8,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestLinuxExecutor_Command(t *testing.T) {
 	t.Run("should return command output", func(t *testing.T) {
-		executor := &utils.LinuxExecutorImpl{
+		executor := &ghutil.LinuxExecutorImpl{
 			ExecCommand: func(_ string, _ ...string) *exec.Cmd {
 				return exec.Command("echo", "hello")
 			},
@@ -30,7 +30,7 @@ func TestLinuxExecutor_Command(t *testing.T) {
 	})
 
 	t.Run("should return error if command fails", func(t *testing.T) {
-		executor := &utils.LinuxExecutorImpl{
+		executor := &ghutil.LinuxExecutorImpl{
 			ExecCommand: func(_ string, _ ...string) *exec.Cmd {
 				return exec.Command("ls", "/nonexistent")
 			},
@@ -50,7 +50,7 @@ func TestLinuxExecutor_CommandContext(t *testing.T) {
 	// which is standard for Linux environments.
 
 	t.Run("should execute command successfully", func(t *testing.T) {
-		executor := utils.LinuxExecutor()
+		executor := ghutil.LinuxExecutor()
 		ctx := context.Background()
 
 		// 'true' command exits with 0 immediately
@@ -60,7 +60,7 @@ func TestLinuxExecutor_CommandContext(t *testing.T) {
 	})
 
 	t.Run("should return error for failing command", func(t *testing.T) {
-		executor := utils.LinuxExecutor()
+		executor := ghutil.LinuxExecutor()
 		ctx := context.Background()
 
 		// 'false' command exits with 1
@@ -70,7 +70,7 @@ func TestLinuxExecutor_CommandContext(t *testing.T) {
 	})
 
 	t.Run("should kill process on context cancellation", func(t *testing.T) {
-		executor := utils.LinuxExecutor()
+		executor := ghutil.LinuxExecutor()
 
 		// Create a context that cancels quickly (100ms)
 		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
@@ -91,7 +91,7 @@ func TestLinuxExecutor_CommandContext(t *testing.T) {
 }
 
 func TestLinuxExecutor_Chdir(t *testing.T) {
-	executor := utils.LinuxExecutor()
+	executor := ghutil.LinuxExecutor()
 
 	// Create a temporary directory for the test
 	tmpDir := t.TempDir()

@@ -6,12 +6,12 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/repo"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
 // RepoCmd extends the functionality of the gh repo command.
-func RepoCmd(exe utils.Executor, _ *config.Settings) *cobra.Command {
+func RepoCmd(exe ghutil.Executor, _ *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "repo",
 		Short: "Work with Repositories",
@@ -28,7 +28,7 @@ func RepoCmd(exe utils.Executor, _ *config.Settings) *cobra.Command {
 }
 
 // RepoCloneCmd creates a new command to clone all repositories (or just those with a given name).
-func RepoCloneCmd(exe utils.Executor) *cobra.Command {
+func RepoCloneCmd(exe ghutil.Executor) *cobra.Command {
 	opts := &repo.Options{}
 
 	cmd := &cobra.Command{

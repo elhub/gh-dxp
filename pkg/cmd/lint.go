@@ -6,12 +6,12 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/lint"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
 // LintCmd creates a new command to run the linters defined in the .devxp config.
-func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func LintCmd(exe ghutil.Executor, settings *config.Settings) *cobra.Command {
 	opts := &lint.Options{}
 
 	cmd := &cobra.Command{
@@ -42,14 +42,14 @@ func LintCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 		RunE: func(_ *cobra.Command, _ []string) error {
 			currentPath, _ := filepath.Abs("./")
 
-			err := utils.SetWorkDirToGitHubRoot(exe)
+			err := ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
 
 			// Convert relative path provided in Directory into a path relative to the git root
 			if opts.Directory != "" {
-				opts.Directory, err = utils.ConvertToGitRootRelativePath(exe, currentPath, opts.Directory)
+				opts.Directory, err = ghutil.ConvertToGitRootRelativePath(exe, currentPath, opts.Directory)
 				if err != nil {
 					return err
 				}

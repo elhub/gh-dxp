@@ -6,12 +6,12 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/owner"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
 // OwnerCmd creates a new cobra command for retrieving code owner information.
-func OwnerCmd(exe utils.Executor, _ *config.Settings) *cobra.Command {
+func OwnerCmd(exe ghutil.Executor, _ *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "owner",
 		Short: "Determines the owner of the specified file.",

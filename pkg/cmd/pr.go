@@ -5,12 +5,12 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/pr"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
 // PRCmd extends the functionality of the gh pr command.
-func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func PRCmd(exe ghutil.Executor, settings *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pr",
 		Short: "Work with PRs (Pull Requests)",
@@ -51,7 +51,7 @@ func PRCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 }
 
 // PRCreateCmd handles the creation of a pull request.
-func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func PRCreateCmd(exe ghutil.Executor, settings *config.Settings) *cobra.Command {
 	opts := &pr.CreateOptions{}
 	cmd := &cobra.Command{
 		Use:   "create",
@@ -77,7 +77,7 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 
 			addPrOptionsToCreateOptions(prOpts, opts)
 
-			err = utils.SetWorkDirToGitHubRoot(exe)
+			err = ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
@@ -126,7 +126,7 @@ func PRCreateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 }
 
 // PRListCmd handles the listing of pull requests.
-func PRListCmd(exe utils.Executor) *cobra.Command {
+func PRListCmd(exe ghutil.Executor) *cobra.Command {
 	opts := &pr.ListOptions{}
 
 	cmd := &cobra.Command{
@@ -142,7 +142,7 @@ func PRListCmd(exe utils.Executor) *cobra.Command {
 		`),
 		Args: cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := utils.SetWorkDirToGitHubRoot(exe)
+			err := ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
@@ -171,7 +171,7 @@ func PRListCmd(exe utils.Executor) *cobra.Command {
 }
 
 // PRMergeCmd handles the merging of a pull request.
-func PRMergeCmd(exe utils.Executor) *cobra.Command {
+func PRMergeCmd(exe ghutil.Executor) *cobra.Command {
 	opts := &pr.MergeOptions{}
 
 	cmd := &cobra.Command{
@@ -190,7 +190,7 @@ func PRMergeCmd(exe utils.Executor) *cobra.Command {
 		Aliases: []string{"land", "merge"},
 		Args:    cobra.NoArgs,
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := utils.SetWorkDirToGitHubRoot(exe)
+			err := ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}
@@ -213,7 +213,7 @@ func PRMergeCmd(exe utils.Executor) *cobra.Command {
 }
 
 // PRUpdateCmd handles the updating of a pull request. This is a more limited version of the create command.
-func PRUpdateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func PRUpdateCmd(exe ghutil.Executor, settings *config.Settings) *cobra.Command {
 	opts := &pr.UpdateOptions{}
 
 	cmd := &cobra.Command{
@@ -235,7 +235,7 @@ func PRUpdateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			}
 
 			addPrOptionsToUpdateOptions(prOpts, opts)
-			err = utils.SetWorkDirToGitHubRoot(exe)
+			err = ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}

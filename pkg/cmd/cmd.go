@@ -7,7 +7,7 @@ import (
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
@@ -49,7 +49,7 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 
 	retCmd.PersistentFlags().BoolVar(&debug, "debug", false, "verbose logging")
 
-	exe := utils.LinuxExecutor()
+	exe := ghutil.LinuxExecutor()
 
 	retCmd.AddCommand(
 		AliasCmd(exe),

@@ -1,5 +1,5 @@
 // Package utils provides common utilities for the gh-dxp extension.
-package utils
+package ghutil
 
 import (
 	"context"

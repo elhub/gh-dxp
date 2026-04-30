@@ -6,14 +6,14 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
 
 // AliasCmd extends the functionality of the gh alias command to facilitate the import of Elhub's preferred
 // aliases.
-func AliasCmd(exe utils.Executor) *cobra.Command {
+func AliasCmd(exe ghutil.Executor) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "alias",
 		Short: "Import default aliases.",
@@ -30,7 +30,7 @@ func AliasCmd(exe utils.Executor) *cobra.Command {
 }
 
 // AliasImportCmd imports the default aliases from github.
-func AliasImportCmd(exe utils.Executor) *cobra.Command {
+func AliasImportCmd(exe ghutil.Executor) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import default aliases.",

@@ -8,12 +8,12 @@ import (
 	"sync"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 )
 
 // ExecuteList renders the user's assigned pull requests.
-func ExecuteList(exe utils.Executor, options *ListOptions) error {
+func ExecuteList(exe ghutil.Executor, options *ListOptions) error {
 	var wg sync.WaitGroup
 	prChan := make(chan PullRequestInfo)
 	errChan := make(chan error)
@@ -54,7 +54,7 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	return nil
 }
 
-func retrievePullRequests(searchTerm string, exe utils.Executor, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) error {
+func retrievePullRequests(searchTerm string, exe ghutil.Executor, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) error {
 	res, err := exe.GH("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
 	if err != nil {
 		return errors.Wrap(err, "failed to search prs for my pull requests")
@@ -75,7 +75,7 @@ func retrievePullRequests(searchTerm string, exe utils.Executor, prChan chan<- P
 	return nil
 }
 
-func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
+func fetchPullRequestDetails(exe ghutil.Executor, sr searchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 	url := "https://github.com/" + sr.Repository.NameWithOwner + "/pull/" + strconv.Itoa(sr.Number)
 	pullRequestDetails, err := exe.GH("pr", "view", url, "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision")

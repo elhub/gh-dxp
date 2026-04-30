@@ -9,12 +9,12 @@ import (
 	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/renovate"
 	"github.com/elhub/gh-dxp/pkg/test"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 )
 
 // CheckForExistingPR checks if a PR already exists for the current branch.
-func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
+func CheckForExistingPR(exe ghutil.Executor, branchID string) (string, error) {
 	stdOut, err := exe.GH("pr", "list", "-H", branchID, "--json", "number", "--jq", ".[].number")
 
 	if err != nil {
@@ -28,17 +28,17 @@ func CheckForExistingPR(exe utils.Executor, branchID string) (string, error) {
 }
 
 // GetPRTitle gets the title of the current PR.
-func GetPRTitle(exe utils.Executor) (string, error) {
+func GetPRTitle(exe ghutil.Executor) (string, error) {
 	return getPRField(exe, "title")
 }
 
 // GetPRBody gets the body of the current PR.
-func GetPRBody(exe utils.Executor) (string, error) {
+func GetPRBody(exe ghutil.Executor) (string, error) {
 	return getPRField(exe, "body")
 }
 
 // getPRField gets a single field of information about a PR using the gh pr command.
-func getPRField(exe utils.Executor, field string) (string, error) {
+func getPRField(exe ghutil.Executor, field string) (string, error) {
 	stdOut, err := exe.GH("pr", "view", "--json", field, "--jq", "."+field)
 
 	if err != nil {
@@ -50,15 +50,15 @@ func getPRField(exe utils.Executor, field string) (string, error) {
 	return value, nil
 }
 
-func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, error) {
+func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, error) {
 	// Handle presence of untracked changes - ignore or abort
-	untrackedChanges, err := utils.GetUntrackedChanges(exe)
+	untrackedChanges, err := ghutil.GetUntrackedChanges(exe)
 	if err != nil {
 		return []string{}, err
 	}
 
 	if len(untrackedChanges) > 0 && !options.TestRun {
-		res, err := utils.AskToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
+		res, err := ghutil.AskToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
 		if err != nil {
 			return []string{}, err
 		}
@@ -68,7 +68,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	}
 
 	// Handle presence of tracked changes - commit or abort
-	trackedChanges, err := utils.GetTrackedChanges(exe)
+	trackedChanges, err := ghutil.GetTrackedChanges(exe)
 	if err != nil {
 		return []string{}, err
 	}
@@ -83,7 +83,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	}
 
 	if !options.TestRun && options.CommitMessage == "" {
-		res, err := utils.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
+		res, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
 		if err != nil {
 			return []string{}, err
 		}
@@ -95,7 +95,7 @@ func handleUncommittedChanges(exe utils.Executor, options *Options) ([]string, e
 	return trackedChanges, nil
 }
 
-func addAndCommitFiles(exe utils.Executor, options *Options) error {
+func addAndCommitFiles(exe ghutil.Executor, options *Options) error {
 	var commitMessage string
 	var err error
 
@@ -105,7 +105,7 @@ func addAndCommitFiles(exe utils.Executor, options *Options) error {
 	case options.TestRun:
 		commitMessage = "default commit message"
 	default:
-		commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
+		commitMessage, err = ghutil.AskForString("Please enter a commit message: ", "")
 		if err != nil {
 			return err
 		}
@@ -128,7 +128,7 @@ func addAndCommitFiles(exe utils.Executor, options *Options) error {
 	return nil
 }
 
-func performPreCommitOperations(exe utils.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+func performPreCommitOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
 	// Handle uncommitted changes
 	filesToCommit, err := handleUncommittedChanges(exe, options)
 	if err != nil {

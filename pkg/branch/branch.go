@@ -6,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 )
 
 // CheckoutBranch checks out to the branch with the given ID.
-func CheckoutBranch(exe utils.Executor, branchID string) error {
+func CheckoutBranch(exe ghutil.Executor, branchID string) error {
 	// Does the branch exist?
 	branchExists, existsErr := Exists(exe, branchID)
 	if existsErr != nil {
@@ -38,7 +38,7 @@ func CheckoutBranch(exe utils.Executor, branchID string) error {
 }
 
 // Exists checks whether a specified branch exists.
-func Exists(exe utils.Executor, branchID string) (bool, error) {
+func Exists(exe ghutil.Executor, branchID string) (bool, error) {
 	_, err := exe.Command("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branchID)
 	if err != nil {
 		var exitErr *exec.ExitError
@@ -55,6 +55,6 @@ func Exists(exe utils.Executor, branchID string) (bool, error) {
 }
 
 // GetCommitMessages returns the commit messages between the main branch and the branch with the given ID.
-func GetCommitMessages(exe utils.Executor, mainID string, branchID string) (string, error) {
+func GetCommitMessages(exe ghutil.Executor, mainID string, branchID string) (string, error) {
 	return exe.Command("git", "log", mainID+".."+branchID, "--oneline", "--pretty=format:%s")
 }

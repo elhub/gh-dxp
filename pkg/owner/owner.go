@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/hmarr/codeowners"
 )
 
 // Execute determines the owner of the specified file based on the CODEOWNERS file given in the .github directory.
-func Execute(path string, exe utils.Executor) ([]string, error) {
-	gitRoot, err := utils.GetGitRootDirectory(exe)
+func Execute(path string, exe ghutil.Executor) ([]string, error) {
+	gitRoot, err := ghutil.GetGitRootDirectory(exe)
 	if err != nil {
 		return nil, err
 	}
@@ -43,15 +43,15 @@ func Execute(path string, exe utils.Executor) ([]string, error) {
 }
 
 // GetDefaultFile returns the default file to check for codeowners.
-func GetDefaultFile(exe utils.Executor) (string, error) {
-	rootDir, err := utils.GetGitRootDirectory(exe)
+func GetDefaultFile(exe ghutil.Executor) (string, error) {
+	rootDir, err := ghutil.GetGitRootDirectory(exe)
 	if err != nil {
 		return "", err
 	}
 
 	ownersFile := filepath.Join(rootDir, ".github/CODEOWNERS")
 
-	if utils.FileExists(ownersFile) {
+	if ghutil.FileExists(ownersFile) {
 		return ownersFile, nil
 	}
 

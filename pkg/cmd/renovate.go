@@ -5,12 +5,12 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/renovate"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/spf13/cobra"
 )
 
 // RenovateCmd creates a new command for working with renovate.
-func RenovateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func RenovateCmd(exe ghutil.Executor, settings *config.Settings) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "renovate",
 		Short: "Work with renovate",
@@ -26,7 +26,7 @@ func RenovateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 }
 
 // ValidateCmd creates a new command for validating renovate config.
-func ValidateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
+func ValidateCmd(exe ghutil.Executor, settings *config.Settings) *cobra.Command {
 	opts := &renovate.Options{}
 	cmd := &cobra.Command{
 		Use:   "validate",
@@ -43,7 +43,7 @@ func ValidateCmd(exe utils.Executor, settings *config.Settings) *cobra.Command {
 			$ gh dxp renovate validate --force
 		`),
 		RunE: func(_ *cobra.Command, _ []string) error {
-			err := utils.SetWorkDirToGitHubRoot(exe)
+			err := ghutil.SetWorkDirToGitHubRoot(exe)
 			if err != nil {
 				return err
 			}

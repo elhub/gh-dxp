@@ -1,4 +1,4 @@
-package utils
+package ghutil
 
 import (
 	"fmt"
