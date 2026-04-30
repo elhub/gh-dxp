@@ -43,22 +43,11 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 		close(errChan)
 	}()
 
-	for prChan != nil || errChan != nil {
-		select {
-		case pr, ok := <-prChan:
-			if !ok {
-				prChan = nil
-			} else {
-				pullRequests = append(pullRequests, pr)
-			}
-		case err, ok := <-errChan:
-			if ok {
-				return err
-			} else {
-				errChan = nil
-			}
-		}
+	collected, err := drainChannels()
+	if err != nil {
+		return err
 	}
+	pullRequests = collected
 	sortPullRequests(pullRequests)
 
 	// Check content of pullRequests
@@ -112,6 +101,26 @@ func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- 
 	}
 
 	prChan <- pullRequest
+}
+
+func drainChannels() ([]PullRequestInfo, error) {
+	var result []PullRequestInfo
+	for prChan != nil || errChan != nil {
+		select {
+		case pr, ok := <-prChan:
+			if !ok {
+				prChan = nil
+			} else {
+				result = append(result, pr)
+			}
+		case err, ok := <-errChan:
+			if ok {
+				return nil, err
+			}
+			errChan = nil
+		}
+	}
+	return result, nil
 }
 
 func sortPullRequests(pullRequests []PullRequestInfo) {

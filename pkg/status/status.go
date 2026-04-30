@@ -16,63 +16,102 @@ func Execute(exe utils.Executor, opts *Options) error {
 	var statusReport strings.Builder
 
 	if optsIsEmpty(opts) {
-		statusOptions := []string{"All", "Current repository", "PR status", "List branches", "Get all relevant Issues"}
-		var selectedOption string
-		err := survey.AskOne(&survey.Select{
-			Message: "Choose the status type:",
-			Options: statusOptions,
-		}, &selectedOption)
-		if err != nil {
+		if err := promptForOptions(opts); err != nil {
 			return err
-		}
-
-		switch selectedOption {
-		case "All":
-			opts.All = true
-		case "Current repository":
-			opts.Repo = true
-		case "PR status":
-			opts.Pr = true
-		case "List branches":
-			opts.Branches = true
-		case "Get all relevant Issues":
-			opts.Issue = true
 		}
 	}
 
-	if opts.All || opts.Repo {
-		repo, err := exe.Command("git", "remote", "get-url", "origin")
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(&statusReport, "Repository: %s\n", strings.TrimSpace(repo))
-	}
-
-	if opts.All || opts.Pr {
-		prStatus, err := exe.GH("pr", "status")
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(&statusReport, "PR Status:\n%s\n", prStatus)
-	}
-
-	if opts.All || opts.Branches {
-		branches, err := exe.Command("git", "branch", "-a")
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(&statusReport, "Branches:\n%s\n", branches)
-	}
-
-	if opts.All || opts.Issue {
-		assignedPRs, err := exe.GH("issue", "status")
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(&statusReport, "Assigned PRs/Review Requests:\n%s\n", assignedPRs)
+	if err := buildStatusReport(exe, opts, &statusReport); err != nil {
+		return err
 	}
 
 	logger.Info(statusReport.String())
+	return nil
+}
+
+func promptForOptions(opts *Options) error {
+	statusOptions := []string{"All", "Current repository", "PR status", "List branches", "Get all relevant Issues"}
+	var selectedOption string
+	err := survey.AskOne(&survey.Select{
+		Message: "Choose the status type:",
+		Options: statusOptions,
+	}, &selectedOption)
+	if err != nil {
+		return err
+	}
+
+	switch selectedOption {
+	case "All":
+		opts.All = true
+	case "Current repository":
+		opts.Repo = true
+	case "PR status":
+		opts.Pr = true
+	case "List branches":
+		opts.Branches = true
+	case "Get all relevant Issues":
+		opts.Issue = true
+	}
+	return nil
+}
+
+func buildStatusReport(exe utils.Executor, opts *Options, statusReport *strings.Builder) error {
+	type section struct {
+		enabled bool
+		fn      func() error
+	}
+
+	sections := []section{
+		{opts.All || opts.Repo, func() error { return appendRepo(exe, statusReport) }},
+		{opts.All || opts.Pr, func() error { return appendPRStatus(exe, statusReport) }},
+		{opts.All || opts.Branches, func() error { return appendBranches(exe, statusReport) }},
+		{opts.All || opts.Issue, func() error { return appendIssues(exe, statusReport) }},
+	}
+
+	for _, s := range sections {
+		if s.enabled {
+			if err := s.fn(); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func appendRepo(exe utils.Executor, statusReport *strings.Builder) error {
+	repo, err := exe.Command("git", "remote", "get-url", "origin")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(statusReport, "Repository: %s\n", strings.TrimSpace(repo))
+	return nil
+}
+
+func appendPRStatus(exe utils.Executor, statusReport *strings.Builder) error {
+	prStatus, err := exe.GH("pr", "status")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(statusReport, "PR Status:\n%s\n", prStatus)
+	return nil
+}
+
+func appendBranches(exe utils.Executor, statusReport *strings.Builder) error {
+	branches, err := exe.Command("git", "branch", "-a")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(statusReport, "Branches:\n%s\n", branches)
+	return nil
+}
+
+func appendIssues(exe utils.Executor, statusReport *strings.Builder) error {
+	assignedPRs, err := exe.GH("issue", "status")
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(statusReport, "Assigned PRs/Review Requests:\n%s\n", assignedPRs)
 	return nil
 }
 
