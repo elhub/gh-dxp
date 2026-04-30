@@ -1,5 +1,6 @@
 import jetbrains.buildServer.configs.kotlin.ArtifactRule
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
+import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
 import no.elhub.devxp.build.configuration.pipeline.constants.AgentScope.LinuxAgentContext
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
@@ -25,7 +26,7 @@ elhubProject(DEVXP, "gh-dxp") {
             }
             enablePublishMetrics = true
         }
-        publishTag()
+        val publishBuildType = publishTag()
         customJob(LinuxAgentContext) {
             name = "🚀 Release"
             id("Release")
@@ -36,6 +37,14 @@ elhubProject(DEVXP, "gh-dxp") {
                     scriptContent = """
                         make release
                     """.trimIndent()
+                }
+            }
+
+            triggers {
+                finishBuildTrigger {
+                    buildType = "${publishBuildType.id}"
+                    successfulOnly = true
+                    branchFilter = "+:refs/heads/main"
                 }
             }
         }
