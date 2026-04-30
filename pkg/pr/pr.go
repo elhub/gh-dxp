@@ -51,23 +51,42 @@ func getPRField(exe ghutil.Executor, field string) (string, error) {
 }
 
 func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, error) {
-	// Handle presence of untracked changes - ignore or abort
-	untrackedChanges, err := ghutil.GetUntrackedChanges(exe)
+	if err := handleUntrackedChanges(exe, options); err != nil {
+		return []string{}, err
+	}
+
+	trackedChanges, err := handleTrackedChanges(exe, options)
 	if err != nil {
 		return []string{}, err
 	}
 
-	if len(untrackedChanges) > 0 && !options.TestRun {
-		res, err := ghutil.AskToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
-		if err != nil {
-			return []string{}, err
-		}
-		if !res {
-			return []string{}, errors.New("User aborted workflow")
-		}
+	return trackedChanges, nil
+}
+
+func handleUntrackedChanges(exe ghutil.Executor, options *Options) error {
+	untrackedChanges, err := ghutil.GetUntrackedChanges(exe)
+	if err != nil {
+		return err
 	}
 
-	// Handle presence of tracked changes - commit or abort
+	// Skip if no untracked changes or in test mode
+	if len(untrackedChanges) == 0 || options.TestRun {
+		return nil
+	}
+
+	confirmed, err := ghutil.AskToConfirm(formatUntrackedFileChangesQuestion(untrackedChanges))
+	if err != nil {
+		return err
+	}
+
+	if !confirmed {
+		return errors.New("User aborted workflow")
+	}
+
+	return nil
+}
+
+func handleTrackedChanges(exe ghutil.Executor, options *Options) ([]string, error) {
 	trackedChanges, err := ghutil.GetTrackedChanges(exe)
 	if err != nil {
 		return []string{}, err
@@ -82,16 +101,20 @@ func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, 
 		return []string{}, errors.New("No tracked changes found, skipping commit")
 	}
 
-	if !options.TestRun && options.CommitMessage == "" {
-		res, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
-		if err != nil {
-			return []string{}, err
-		}
-
-		if !res {
-			return []string{}, errors.New("User aborted workflow")
-		}
+	// Skip confirmation if test run or commit message already provided
+	if options.TestRun || options.CommitMessage != "" {
+		return trackedChanges, nil
 	}
+
+	confirmed, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
+	if err != nil {
+		return []string{}, err
+	}
+
+	if !confirmed {
+		return []string{}, errors.New("User aborted workflow")
+	}
+
 	return trackedChanges, nil
 }
 
