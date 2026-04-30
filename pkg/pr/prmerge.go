@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 )
 
 // ExecuteMerge merges a pull request on the current branch.

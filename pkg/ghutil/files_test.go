@@ -5,8 +5,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

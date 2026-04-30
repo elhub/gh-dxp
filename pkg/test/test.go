@@ -5,8 +5,8 @@ import (
 	"errors"
 	"path/filepath"
 
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 )
 
 // FileExists checks to see whether a file exists in the file system.

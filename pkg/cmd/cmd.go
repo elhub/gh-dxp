@@ -6,8 +6,8 @@ import (
 
 	"github.com/caarlos0/log"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/spf13/cobra"
 )
 

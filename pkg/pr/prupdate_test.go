@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/testutils"
-	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"

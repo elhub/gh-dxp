@@ -5,8 +5,8 @@ import (
 	"os/exec"
 
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )

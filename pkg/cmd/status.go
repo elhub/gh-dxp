@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"github.com/MakeNowJust/heredoc/v2"
-	"github.com/elhub/gh-dxp/pkg/status"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/status"
 	"github.com/spf13/cobra"
 )
 

@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/pkg/errors"
 )
 

@@ -5,8 +5,8 @@ import (
 	"context"
 
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 )
 
 // Run executes the renovate validation process.

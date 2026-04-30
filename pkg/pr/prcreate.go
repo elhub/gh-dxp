@@ -6,8 +6,8 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/pkg/errors"
 )
 

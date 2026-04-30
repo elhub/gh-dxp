@@ -5,11 +5,11 @@ import (
 	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/lint"
 	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/renovate"
 	"github.com/elhub/gh-dxp/pkg/test"
-	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 )
 

@@ -9,8 +9,8 @@ import (
 	"syscall"
 
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 )
 
 // Run runs the linting process using megalinter (https://github.com/oxsecurity/megalinter).
