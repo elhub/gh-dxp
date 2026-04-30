@@ -28,7 +28,7 @@ func AskToConfirm(question string) (bool, error) {
 }
 
 // AskForString prompts the user for a string input and returns the response.
-func AskForString(question string, defaultAnswer string) (string, error) {
+func AskForString(question, defaultAnswer string) (string, error) {
 	var title string
 	prompt := &survey.Input{
 		Message: question,

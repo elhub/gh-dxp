@@ -199,7 +199,7 @@ func writeFile(client *http.Client, uri string, filepath string) error {
 	return err
 }
 
-func createDirectory(path string, name string) (string, error) {
+func createDirectory(path, name string) (string, error) {
 	dir := filepath.Join(path, name)
 
 	// Check if the directory already exists
