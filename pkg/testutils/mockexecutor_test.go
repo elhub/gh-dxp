@@ -12,25 +12,25 @@ func TestNewMockExecutor(t *testing.T) {
 	mocks := []testutils.MockContent{
 		{
 			Method: "Command",
-			Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+			Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 			Out:    "/path/to/repo\n",
 			Err:    nil,
 		},
 		{
 			Method: "CommandContext",
-			Args:   []interface{}{nil, "git", []string{"rev-parse", "--show-toplevel"}},
+			Args:   []any{nil, "git", []string{"rev-parse", "--show-toplevel"}},
 			Out:    "",
 			Err:    nil,
 		},
 		{
 			Method: "GH",
-			Args:   []interface{}{[]string{"repo", "view"}},
+			Args:   []any{[]string{"repo", "view"}},
 			Out:    "mocked output",
 			Err:    nil,
 		},
 		{
 			Method: "Chdir",
-			Args:   []interface{}{"/mock/path"},
+			Args:   []any{"/mock/path"},
 			Out:    "",
 			Err:    nil,
 		},

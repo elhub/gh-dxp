@@ -22,7 +22,7 @@ func TestGetGitRootDirectory(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "/path/to/repo\n",
 					Err:    nil,
 				},
@@ -35,7 +35,7 @@ func TestGetGitRootDirectory(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "",
 					Err:    errors.New("not a git repository"),
 				},
@@ -78,19 +78,19 @@ func TestSetWorkDirToGitHubRoot(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "get-url", "origin"}},
+					Args:   []any{"git", []string{"remote", "get-url", "origin"}},
 					Out:    "git@github.com:example/test.git",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "/path/to/repo\n",
 					Err:    nil,
 				},
 				{
 					Method: "Chdir",
-					Args:   []interface{}{"/path/to/repo"},
+					Args:   []any{"/path/to/repo"},
 					Out:    "",
 					Err:    nil,
 				},
@@ -102,7 +102,7 @@ func TestSetWorkDirToGitHubRoot(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "get-url", "origin"}},
+					Args:   []any{"git", []string{"remote", "get-url", "origin"}},
 					Out:    "",
 					Err:    errors.New("not a git repository"),
 				},
@@ -114,7 +114,7 @@ func TestSetWorkDirToGitHubRoot(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "get-url", "origin"}},
+					Args:   []any{"git", []string{"remote", "get-url", "origin"}},
 					Out:    "thiswasnotagithuburl",
 					Err:    nil,
 				},
@@ -151,7 +151,7 @@ func TestListFilesInDirectory(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"ls", []string{"/path/to/dir"}},
+					Args:   []any{"ls", []string{"/path/to/dir"}},
 					Out:    "file1\nfile2\n",
 					Err:    nil,
 				},
@@ -164,7 +164,7 @@ func TestListFilesInDirectory(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"ls", []string{"/path/to/dir"}},
+					Args:   []any{"ls", []string{"/path/to/dir"}},
 					Out:    "",
 					Err:    errors.New("directory does not exist"),
 				},
@@ -207,7 +207,7 @@ func TestConvertToGitRootRelativePath(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "/path/to/repo\n",
 					Err:    nil,
 				},
@@ -222,7 +222,7 @@ func TestConvertToGitRootRelativePath(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "",
 					Err:    errors.New("git error"),
 				},

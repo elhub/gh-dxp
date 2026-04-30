@@ -118,7 +118,7 @@ func TestGetDefaultFile(t *testing.T) {
 			mockContent: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "ROOT_DIR_PLACEHOLDER\n", // Will be replaced in test loop
 					Err:    nil,
 				},
@@ -134,7 +134,7 @@ func TestGetDefaultFile(t *testing.T) {
 			mockContent: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "ROOT_DIR_PLACEHOLDER\n",
 					Err:    nil,
 				},
@@ -150,7 +150,7 @@ func TestGetDefaultFile(t *testing.T) {
 			mockContent: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"rev-parse", "--show-toplevel"}},
+					Args:   []any{"git", []string{"rev-parse", "--show-toplevel"}},
 					Out:    "",
 					Err:    errors.New("git error"),
 				},
