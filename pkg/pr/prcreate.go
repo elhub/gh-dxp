@@ -293,7 +293,7 @@ func issuesChanges(options *CreateOptions, settings *config.Settings) (string, e
 	body := ""
 	var issueIDString string
 	if !options.TestRun && options.Issues == "" {
-		userIssueString, errI := ghutil.AskForString("Issue IDs (seperate with commas):", "")
+		userIssueString, errI := ghutil.AskForString("Issue IDs (separate with commas):", "")
 		if errI != nil {
 			return "", errI
 		}
