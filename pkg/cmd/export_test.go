@@ -5,8 +5,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var AddPrOptionsToCreateOptions = addPrOptionsToCreateOptions
-var AddPrOptionsToUpdateOptions = addPrOptionsToUpdateOptions
+var AddPrOptionsToCreateOptions = addPrOptionsToCreateOptions //nolint:gochecknoglobals // Expose for testing
+var AddPrOptionsToUpdateOptions = addPrOptionsToUpdateOptions //nolint:gochecknoglobals // Expose for testing
 
 func GetPrOptionsFromCmd(cmd *cobra.Command) (pr.Options, error) {
 	return getPrOptionsFromCmd(cmd)
