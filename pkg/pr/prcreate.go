@@ -244,7 +244,7 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 	return body, nil
 }
 
-func promptForDescription(body string, commitSummary string, bodySurvey string) (string, error) {
+func promptForDescription(body, commitSummary, bodySurvey string) (string, error) {
 	editBody, err := ghutil.AskToConfirm(bodySurvey)
 	if err != nil {
 		return "", err
@@ -354,7 +354,7 @@ func documentationChanges(exe ghutil.Executor) (string, error) {
 	return body, nil
 }
 
-func addDocSection(body string, section string) string {
+func addDocSection(body, section string) string {
 	if (section == "") || (section == "\n") {
 		return body
 	}

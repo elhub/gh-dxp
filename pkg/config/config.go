@@ -32,7 +32,7 @@ func DefaultSettings() *Settings {
 }
 
 // MergeSettings merges two settings.
-func MergeSettings(source *Settings, newSettings *Settings) *Settings {
+func MergeSettings(source, newSettings *Settings) *Settings {
 	if newSettings.ProjectType != "" {
 		source.ProjectTemplateURI = newSettings.ProjectTemplateURI
 		source.ProjectType = newSettings.ProjectType

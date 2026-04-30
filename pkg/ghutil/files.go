@@ -65,7 +65,7 @@ func GetChangedFiles(exe Executor) ([]string, error) {
 }
 
 // CheckFilesUpdated checks if any of the specified patterns match the changed files.
-func CheckFilesUpdated(changedFiles []string, patterns []string) bool {
+func CheckFilesUpdated(changedFiles, patterns []string) bool {
 	for _, file := range changedFiles {
 		for _, pattern := range patterns {
 			matched, err := regexp.MatchString(pattern, file)
