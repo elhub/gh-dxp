@@ -1,15 +1,16 @@
+// Package pr provides utilities for managing pull requests in gh-dxp.
 package pr
 
 import (
 	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 )
 
 // ExecuteUpdate updates a pull request, depending on its current state.
-func ExecuteUpdate(exe utils.Executor, settings *config.Settings, options *UpdateOptions) error {
+func ExecuteUpdate(exe ghutil.Executor, settings *config.Settings, options *UpdateOptions) error {
 	pr := PullRequest{}
 
 	// Get branchID

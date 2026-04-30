@@ -1,3 +1,4 @@
+// Package testutils provides utilities for testing in gh-dxp.
 package testutils
 
 import (
@@ -38,7 +39,7 @@ func (m *MockExecutor) Chdir(dir string) error {
 // MockContent represents the content of a mock method call to MockExecutor.
 type MockContent struct {
 	Method string
-	Args   interface{}
+	Args   []any
 	Out    string
 	Err    error
 }
@@ -47,7 +48,7 @@ type MockContent struct {
 func NewMockExecutor(mocks []MockContent) *MockExecutor {
 	mockExe := new(MockExecutor)
 	for _, mock := range mocks {
-		mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
+		_ = mockExe.On(mock.Method, mock.Args...).Return(mock.Out, mock.Err)
 	}
 	return mockExe
 }

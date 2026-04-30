@@ -7,7 +7,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/repo"
 	"github.com/elhub/gh-dxp/pkg/testutils"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRun_ExecuteClone(t *testing.T) {
@@ -43,18 +43,28 @@ func TestRun_ExecuteClone(t *testing.T) {
 			mockExe := new(testutils.MockExecutor)
 			mockExe.On("GH", []string{"api", "user/orgs"}).Return(`[{"login": "myorg","id": 3679327}]`, nil)
 			if tt.pattern == "" {
-				mockExe.On("GH", []string{"search", "repos", "--archived=false", "--json", "name,fullName,url", "--limit=1000", "--owner", "myorg"}).Return(`[{"name": "repo1", "fullName": "myorg/repo1", "url": "https://github.com/myorg/repo1"}, {"name": "repo2", "fullName": "myorg/repo2", "url": "https://github.com/myorg/repo2"}]`, nil)
+				mockExe.On(
+					"GH",
+					[]string{"search", "repos", "--archived=false", "--json", "name,fullName,url", "--limit=1000", "--owner", "myorg"},
+				).Return(`[{"name": "repo1", "fullName": "myorg/repo1", "url": "https://github.com/myorg/repo1"}, {"name": "repo2",
+						"fullName": "myorg/repo2", "url": "https://github.com/myorg/repo2"}]`, nil)
 			} else {
-				mockExe.On("GH", []string{"search", "repos", tt.pattern, "--match", "name", "--archived=false", "--json", "name,fullName,url", "--limit=1000", "--owner", "myorg"}).Return(`[{"name": "repo1", "fullName": "myorg/repo1", "url": "https://github.com/myorg/repo1"}, {"name": "repo2", "fullName": "myorg/repo2", "url": "https://github.com/myorg/repo2"}]`, nil)
+				mockExe.On(
+					"GH",
+					[]string{"search", "repos", tt.pattern, "--match", "name", "--archived=false", "--json", "name,fullName,url", "--limit=1000", "--owner",
+						"myorg"},
+				).Return(`[{"name": "repo1", "fullName": "myorg/repo1", "url": "https://github.com/myorg/repo1"}, {"name": "repo2",`+
+					`"fullName": "myorg/repo2", "url": "https://github.com/myorg/repo2"}]`, nil)
 			}
 			if !tt.options.DryRun { // If not dry run, we expect the repos to be cloned
-				mockExe.On("GH", []string{"repo", "clone", "myorg/repo1"}).Return("", errors.New("Mocked error")).Once() //This is intended to test the retry logic
+				// This is intended to test the retry logic
+				mockExe.On("GH", []string{"repo", "clone", "myorg/repo1"}).Return("", errors.New("Mocked error")).Once()
 				mockExe.On("GH", []string{"repo", "clone", "myorg/repo1"}).Return("", nil)
 				mockExe.On("GH", []string{"repo", "clone", "myorg/repo2"}).Return("", nil)
 			}
 
 			err := repo.ExecuteClone(mockExe, tt.pattern, mockSleep, tt.options)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			mockExe.AssertExpectations(t)
 		})
 	}

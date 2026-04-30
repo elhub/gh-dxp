@@ -203,7 +203,7 @@ func TestGetDefaultFile(t *testing.T) {
 
 // Helper functions
 
-// createTempRepoWithCodeowners creates a temporary directory structure with .github/CODEOWNERS
+// createTempRepoWithCodeowners creates a temporary directory structure with .github/CODEOWNERS.
 func createTempRepoWithCodeowners(t *testing.T, codeownersContent string) string {
 	t.Helper()
 
@@ -220,7 +220,7 @@ func createTempRepoWithCodeowners(t *testing.T, codeownersContent string) string
 	return tmpDir
 }
 
-// createTempRepoWithoutCodeowners creates a temporary directory without CODEOWNERS file
+// createTempRepoWithoutCodeowners creates a temporary directory without CODEOWNERS file.
 func createTempRepoWithoutCodeowners(t *testing.T) string {
 	t.Helper()
 

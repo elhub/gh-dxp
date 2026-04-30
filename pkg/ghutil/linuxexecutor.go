@@ -1,7 +1,7 @@
 // Package utils provides command execution utilities for Linux systems.
 //
 // revive:disable
-package utils
+package ghutil
 
 import (
 	"context"

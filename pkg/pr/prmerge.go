@@ -1,3 +1,4 @@
+// Package pr provides utilities for managing pull requests in gh-dxp.
 package pr
 
 import (
@@ -5,12 +6,12 @@ import (
 	"strings"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 // ExecuteMerge merges a pull request on the current branch.
-func ExecuteMerge(exe utils.Executor, options *MergeOptions) error {
+func ExecuteMerge(exe ghutil.Executor, options *MergeOptions) error {
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
 	if errBranch != nil {

@@ -1,3 +1,4 @@
+// Package lint provides utilities for linting source code in gh-dxp.
 package lint
 
 // Options represents the options for the lint command.

@@ -9,13 +9,13 @@ import (
 	"syscall"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 // Run runs the linting process using megalinter (https://github.com/oxsecurity/megalinter).
 // Megalinter is an open-source linter aggregator that runs multiple linters in parallel. It requires NodeJS (npx) to be installed.
-func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
+func Run(exe ghutil.Executor, _ *config.Settings, opts *Options) error {
 	// Create a context that listens for interrupt signals
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -44,16 +44,16 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 	}
 
 	args = append(args, "-e", "LINTER_RULES_PATH=/tmp") // Prevents mega-linter from spamming lint configuration files into the repository
-	args = append(args, "-e", "GOTOOLCHAIN=auto")   // Allow go to upgrade to latest version when running the linter, preventing linting errors
+	args = append(args, "-e", "GOTOOLCHAIN=auto")       // Allow go to upgrade to latest version when running the linter, preventing linting errors
 
 	// Check if mega-lint configuration is present in the repository.
-	if !utils.FileExists(".mega-linter.yml") {
+	if !ghutil.FileExists(".mega-linter.yml") {
 		logger.Info("Using the default Elhub mega-linter configuration.\n")
 		// Append the default configuration file to the args.
 		args = append(args, "-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml")
 	}
 	if !opts.LintAll && opts.Directory == "" {
-		changedFiles, err := utils.GetChangedFiles(exe)
+		changedFiles, err := ghutil.GetChangedFiles(exe)
 		if err != nil {
 			return err
 		}

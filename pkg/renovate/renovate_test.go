@@ -12,31 +12,30 @@ import (
 
 const MainBranch = "origin/main"
 
-
 func TestRenovateValidationError(t *testing.T) {
 	test := []struct {
-		name	  		string
-		filesChanged	string
-		forceValidate	bool
-		expectedRun		bool
+		name          string
+		filesChanged  string
+		forceValidate bool
+		expectedRun   bool
 	}{
 		{
-			name:	 		"Test run on renovate config change",
-			filesChanged:	".github/renovate.json",
-			forceValidate: 	false,
-			expectedRun: 	true,
+			name:          "Test run on renovate config change",
+			filesChanged:  ".github/renovate.json",
+			forceValidate: false,
+			expectedRun:   true,
 		},
 		{
-			name:	  		"Test don't run with no renovate config changes",
-			filesChanged:	"file1.txt\nfile2.txt",
-			forceValidate: 	false,
-			expectedRun: 	false,
+			name:          "Test don't run with no renovate config changes",
+			filesChanged:  "file1.txt\nfile2.txt",
+			forceValidate: false,
+			expectedRun:   false,
 		},
 		{
-			name:			"Test run with no renovate config changes and --force used",
-			filesChanged:	"file1.txt\nfile2.txt",
-			forceValidate: 	true,
-			expectedRun: 	true,
+			name:          "Test run with no renovate config changes and --force used",
+			filesChanged:  "file1.txt\nfile2.txt",
+			forceValidate: true,
+			expectedRun:   true,
 		},
 	}
 
@@ -53,7 +52,7 @@ func TestRenovateValidationError(t *testing.T) {
 				"--package", "renovate@43.78.0", "renovate-config-validator", "--strict",
 			}
 
-			if (tt.expectedRun) {
+			if tt.expectedRun {
 				mockExe.On("CommandContext", mock.Anything, "npx", renovateArgs).Return(nil, nil)
 			}
 
@@ -61,7 +60,7 @@ func TestRenovateValidationError(t *testing.T) {
 
 			require.NoError(t, err)
 
-			if (!tt.expectedRun) {
+			if !tt.expectedRun {
 				mockExe.AssertNotCalled(t, "CommandContext", mock.Anything, "npx", renovateArgs)
 			}
 

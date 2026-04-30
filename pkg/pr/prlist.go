@@ -8,30 +8,26 @@ import (
 	"sync"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/pkg/errors"
 )
 
-var pullRequests []PullRequestInfo
-var wg sync.WaitGroup
-var prChan chan PullRequestInfo
-var errChan chan error
-
-// ExecuteList renders the user's assigned pull requests
-func ExecuteList(exe utils.Executor, options *ListOptions) error {
-	pullRequests = []PullRequestInfo{}
-	prChan = make(chan PullRequestInfo)
-	errChan = make(chan error)
+// ExecuteList renders the user's assigned pull requests.
+func ExecuteList(exe ghutil.Executor, options *ListOptions) error {
+	var wg sync.WaitGroup
+	prChan := make(chan PullRequestInfo)
+	errChan := make(chan error)
 
 	if options.Mine {
-		err := retrievePullRequests("--author=@me", exe)
-		if err != nil {
+		if err := retrievePullRequests("--author=@me", exe, prChan, errChan, &wg); err != nil {
 			return err
 		}
 	}
 
 	if options.ReviewRequested {
-		retrievePullRequests("--review-requested=@me", exe)
+		if err := retrievePullRequests("--review-requested=@me", exe, prChan, errChan, &wg); err != nil {
+			return err
+		}
 	}
 
 	go func() {
@@ -40,21 +36,9 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 		close(errChan)
 	}()
 
-	for prChan != nil || errChan != nil {
-		select {
-		case pr, ok := <-prChan:
-			if !ok {
-				prChan = nil
-			} else {
-				pullRequests = append(pullRequests, pr)
-			}
-		case err, ok := <-errChan:
-			if ok {
-				return err
-			} else {
-				errChan = nil
-			}
-		}
+	pullRequests, err := drainChannels(prChan, errChan)
+	if err != nil {
+		return err
 	}
 	sortPullRequests(pullRequests)
 
@@ -70,8 +54,7 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	return nil
 }
 
-func retrievePullRequests(searchTerm string, exe utils.Executor) error {
-
+func retrievePullRequests(searchTerm string, exe ghutil.Executor, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) error {
 	res, err := exe.GH("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
 	if err != nil {
 		return errors.Wrap(err, "failed to search prs for my pull requests")
@@ -86,13 +69,13 @@ func retrievePullRequests(searchTerm string, exe utils.Executor) error {
 	// Fetching the details of each PR is slow, so we do this in parallel
 	for _, sr := range searchResults {
 		wg.Add(1)
-		go fetchPullRequestDetails(exe, sr, prChan, errChan, &wg)
+		go fetchPullRequestDetails(exe, sr, prChan, errChan, wg)
 	}
 
 	return nil
 }
 
-func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
+func fetchPullRequestDetails(exe ghutil.Executor, sr searchResult, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) {
 	defer wg.Done()
 	url := "https://github.com/" + sr.Repository.NameWithOwner + "/pull/" + strconv.Itoa(sr.Number)
 	pullRequestDetails, err := exe.GH("pr", "view", url, "--json", "additions,author,createdAt,deletions,headRepository,number,title,reviewDecision")
@@ -110,6 +93,29 @@ func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- 
 	}
 
 	prChan <- pullRequest
+}
+
+func drainChannels(prChan <-chan PullRequestInfo, errChan <-chan error) ([]PullRequestInfo, error) {
+	var result []PullRequestInfo
+	var firstErr error
+	var openPR, openErr = true, true
+	for openPR || openErr {
+		select {
+		case pr, ok := <-prChan:
+			if !ok {
+				openPR = false
+			} else {
+				result = append(result, pr)
+			}
+		case err, ok := <-errChan:
+			if !ok {
+				openErr = false
+			} else if firstErr == nil {
+				firstErr = err
+			}
+		}
+	}
+	return result, firstErr
 }
 
 func sortPullRequests(pullRequests []PullRequestInfo) {

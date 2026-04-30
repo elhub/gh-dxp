@@ -1,8 +1,9 @@
-package cmd
+package cmd_test
 
 import (
 	"testing"
 
+	"github.com/elhub/gh-dxp/pkg/cmd"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/spf13/cobra"
 )
@@ -15,7 +16,7 @@ func TestAddPrOptionsToCreateOptions(t *testing.T) {
 	}
 	createOptions := &pr.CreateOptions{}
 
-	addPrOptionsToCreateOptions(prOptions, createOptions)
+	cmd.AddPrOptionsToCreateOptions(prOptions, createOptions)
 
 	if createOptions.NoLint != prOptions.NoLint {
 		t.Errorf("Expected NoLint to be %v, got %v", prOptions.NoLint, createOptions.NoLint)
@@ -36,7 +37,7 @@ func TestAddPrOptionsToUpdateOptions(t *testing.T) {
 	}
 	updateOptions := &pr.UpdateOptions{}
 
-	addPrOptionsToUpdateOptions(prOptions, updateOptions)
+	cmd.AddPrOptionsToUpdateOptions(prOptions, updateOptions)
 
 	if updateOptions.NoLint != prOptions.NoLint {
 		t.Errorf("Expected NoLint to be %v, got %v", prOptions.NoLint, updateOptions.NoLint)
@@ -78,12 +79,12 @@ func TestGetPrOptionsFromCmd(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cmd := &cobra.Command{}
-			cmd.Flags().Bool("nolint", tt.noLint, "")
-			cmd.Flags().Bool("nounit", tt.noUnit, "")
-			cmd.Flags().String("commitmessage", tt.commitMessage, "")
+			cobraCmd := &cobra.Command{}
+			cobraCmd.Flags().Bool("nolint", tt.noLint, "")
+			cobraCmd.Flags().Bool("nounit", tt.noUnit, "")
+			cobraCmd.Flags().String("commitmessage", tt.commitMessage, "")
 
-			result, err := getPrOptionsFromCmd(cmd)
+			result, err := cmd.GetPrOptionsFromCmd(cobraCmd)
 
 			if err != nil {
 				t.Fatalf("Unexpected error: %v", err)
@@ -102,11 +103,11 @@ func TestGetPrOptionsFromCmd(t *testing.T) {
 }
 
 func TestGetPrOptionsFromCmd_MissingFlags(t *testing.T) {
-	cmd := &cobra.Command{}
+	cobraCmd := &cobra.Command{}
 	// Only add one flag to test error handling
-	cmd.Flags().Bool("nolint", false, "")
+	cobraCmd.Flags().Bool("nolint", false, "")
 
-	_, err := getPrOptionsFromCmd(cmd)
+	_, err := cmd.GetPrOptionsFromCmd(cobraCmd)
 
 	if err == nil {
 		t.Error("Expected error when flags are missing, got nil")

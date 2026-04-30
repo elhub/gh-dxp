@@ -1,3 +1,4 @@
+// Package repo provides utilities for managing repositories in gh-dxp.
 package repo
 
 import (
@@ -7,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
 
@@ -18,8 +19,8 @@ type repositoryInfo struct {
 	URL      string `json:"url"`
 }
 
-// ExecuteClone carries out a clone all on the given pattern
-func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Duration), opts *Options) error {
+// ExecuteClone carries out a clone all on the given pattern.
+func ExecuteClone(exe ghutil.Executor, pattern string, sleepFunction func(time.Duration), opts *Options) error {
 	repositoryInfo, err := retrieveRepositories(pattern, exe)
 	if err != nil {
 		return err
@@ -27,23 +28,22 @@ func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Du
 
 	for _, repo := range repositoryInfo {
 		// If directory exits, skip cloning
-		exists, err := utils.DirectoryExists(repo.Name)
+		exists, err := ghutil.DirectoryExists(repo.Name)
 		if err != nil {
 			return errors.Wrap(err, "failed to check if directory exists")
 		}
 
-		if !exists {
-			if opts.DryRun {
-				logger.Infof("Dry run: Clone repository %s", repo.FullName)
-			} else {
-				logger.Infof("Cloning repository: %s", repo.FullName)
+		switch {
+		case !exists && opts.DryRun:
+			logger.Infof("Dry run: Clone repository %s", repo.FullName)
+		case !exists:
+			logger.Infof("Cloning repository: %s", repo.FullName)
 
-				err := cloneRepoWithRetries(repo.FullName, sleepFunction, exe)
-				if err != nil {
-					logger.Warn(err.Error())
-				}
+			err := cloneRepoWithRetries(repo.FullName, sleepFunction, exe)
+			if err != nil {
+				logger.Warn(err.Error())
 			}
-		} else {
+		default:
 			logger.Infof("Skipped cloning of repository %s as directory already exists", repo.FullName)
 		}
 	}
@@ -51,7 +51,7 @@ func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Du
 	return nil
 }
 
-func retrieveUserOrgs(exe utils.Executor) ([]string, error) {
+func retrieveUserOrgs(exe ghutil.Executor) ([]string, error) {
 	type Org struct {
 		Login string `json:"login"`
 	}
@@ -74,7 +74,7 @@ func retrieveUserOrgs(exe utils.Executor) ([]string, error) {
 	return orgLogins, nil
 }
 
-func retrieveRepositories(pattern string, exe utils.Executor) ([]repositoryInfo, error) {
+func retrieveRepositories(pattern string, exe ghutil.Executor) ([]repositoryInfo, error) {
 	orgs, err := retrieveUserOrgs(exe)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to retrieve user organizations")
@@ -103,8 +103,7 @@ func retrieveRepositories(pattern string, exe utils.Executor) ([]repositoryInfo,
 	return searchResults, nil
 }
 
-func cloneRepoWithRetries(reponame string, sleep func(time.Duration), exe utils.Executor) error {
-
+func cloneRepoWithRetries(reponame string, sleep func(time.Duration), exe ghutil.Executor) error {
 	maxAttempts := 5
 
 	for i := 0; i <= maxAttempts; i++ {

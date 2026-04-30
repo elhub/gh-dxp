@@ -1,3 +1,4 @@
+// Package cmd provides CLI commands for the gh-dxp extension.
 package cmd
 
 import (
@@ -6,14 +7,14 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/template"
-	"github.com/elhub/gh-dxp/pkg/utils"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/projecttemplate"
 	"github.com/spf13/cobra"
 )
 
 // TemplateCmd initializes a repository with default files.
-func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &template.Options{}
+func TemplateCmd(_ ghutil.Executor, settings *config.Settings) *cobra.Command {
+	opts := &projecttemplate.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "template",
@@ -32,7 +33,7 @@ func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
 				return fmt.Errorf("could not get current working directory: %w", err)
 			}
 
-			return template.Execute(cwd, settings, opts)
+			return projecttemplate.Execute(cwd, settings, opts, nil)
 		},
 	}
 

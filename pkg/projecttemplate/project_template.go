@@ -1,19 +1,24 @@
-// Package template provides utilities to set up new repositories using our project template.
-package template
+// Package projecttemplate provides utilities to set up new repositories using our project template.
+package projecttemplate
 
 import (
 	"context"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 )
 
+// DefaultClient is the HTTP client used by Execute when none is provided.
+var DefaultClient = http.DefaultClient
+
 // Execute downloads the project template files and writes them to the working directory.
-func Execute(workingDir string, settings *config.Settings, options *Options) error {
+// If client is nil, DefaultClient (http.DefaultClient) is used.
+func Execute(workingDir string, settings *config.Settings, options *Options, client *http.Client) error { //nolint:funlen //
 	// Get the project template URI
 	uri := settings.ProjectTemplateURI
 
@@ -78,7 +83,6 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 	}
 
 	if options.IsGradleProject {
-
 		// Create gradle directories if we are setting up a gradle project
 		gradleDir, err := createDirectory(workingDir, "gradle")
 		if err != nil {
@@ -130,6 +134,10 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 		files = append(files, gradleFiles...)
 	}
 
+	if client == nil {
+		client = DefaultClient
+	}
+
 	// Only write file if overwrite = true or file does not exist
 	for _, file := range files {
 		// Check if the file exists
@@ -137,7 +145,7 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 
 		// If the file does not exist or overwrite is true, write the file
 		if file.overwrite || os.IsNotExist(err) {
-			err = writeFile(uri+file.fileName, file.path)
+			err = writeFile(client, uri+file.fileName, file.path)
 			if err != nil {
 				return fmt.Errorf("failed to write file: %w", err)
 			}
@@ -148,15 +156,32 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 }
 
 // Downloads a file from an URI and writes it to path.
-func writeFile(uri string, filepath string) error {
+func writeFile(client *http.Client, uri string, filepath string) error {
+	// Validate the URL scheme to prevent SSRF
+	parsed, err := url.Parse(uri)
+	if err != nil {
+		return fmt.Errorf("invalid URI: %w", err)
+	}
+	if parsed.Scheme != "https" {
+		return fmt.Errorf("URI scheme %q not allowed: only https is permitted", parsed.Scheme)
+	}
+
+	// Reconstruct URL from parsed components to break taint chain
+	safeURL := &url.URL{
+		Scheme:   "https",
+		Host:     parsed.Host,
+		Path:     parsed.Path,
+		RawQuery: parsed.RawQuery,
+	}
+
 	// Create a new request
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, uri, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, safeURL.String(), nil)
 	if err != nil {
 		return err
 	}
 
 	// Create a new HTTP client and send the request
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req) //nolint:gosec // G704: URL is validated above (https-only scheme check) before use
 	if err != nil {
 		return err
 	}

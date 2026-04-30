@@ -1,3 +1,4 @@
+// Package pr provides utilities for managing pull requests in gh-dxp.
 package pr
 
 import (
@@ -6,13 +7,35 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 )
 
+// CreateTemporaryBranch creates a new temporary branch from the current base branch and checks it out. It updates the pr struct with the new branch name.
+func CreateTemporaryBranch(exe ghutil.Executor, options *CreateOptions, pr *PullRequest) error {
+	newBranchName, err := getNewBranchName(options)
+	if err != nil {
+		return err
+	}
+
+	branchExists, err := branch.Exists(exe, newBranchName)
+	if err != nil {
+		return err
+	}
+	if branchExists {
+		return errors.New("Branch already exists. Please delete it or specify another one")
+	}
+	_, err = exe.Command("git", "checkout", "-b", newBranchName)
+	if err != nil {
+		return err
+	}
+	pr.branchID = newBranchName
+	return nil
+}
+
 // ExecuteCreate creates or updates a pull request, depending on its current state.
-func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *CreateOptions) error {
+func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *CreateOptions) error {
 	pr := PullRequest{}
 	// Get branchID
 	currentBranch, errBranch := exe.Command("git", "branch", "--show-current")
@@ -28,26 +51,9 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 
 	// If we're currently in the base branch, we need to make a new temporary branch to contain the diff
 	if pr.branchID == baseBranch {
-		newBranchName, err := getNewBranchName(options)
+		err := CreateTemporaryBranch(exe, options, &pr)
 		if err != nil {
 			return err
-		}
-
-		branchExists, err := branch.Exists(exe, newBranchName)
-		if err != nil {
-			return err
-		}
-		if branchExists {
-			return errors.New("Branch already exists. Please delete it or specify another one")
-		}
-		_, err = exe.Command("git", "checkout", "-b", newBranchName)
-		if err != nil {
-			return err
-		}
-		pr.branchID = newBranchName
-	} else {
-		if options.Branch != "" && options.Branch != pr.branchID {
-			logger.Info("Branch option was specified, but we are not currently on the default branch. Proceeding with branch " + pr.branchID)
 		}
 	}
 
@@ -77,12 +83,12 @@ func ExecuteCreate(exe utils.Executor, settings *config.Settings, options *Creat
 	return create(exe, options, settings, pr)
 }
 
-func create(exe utils.Executor, options *CreateOptions, settings *config.Settings, pr PullRequest) error {
+func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settings, pr PullRequest) error {
 	// Push the current branch to git remote
-	s := utils.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
+	s := ghutil.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", pr.branchID)
 	if err != nil {
-		utils.RemoveFinalMsg(s)
+		ghutil.RemoveFinalMsg(s)
 		return err
 	}
 	s.Stop()
@@ -92,12 +98,12 @@ func create(exe utils.Executor, options *CreateOptions, settings *config.Setting
 		return err
 	}
 
-	s = utils.StartSpinner("Processing pull request...", "Pull request "+newPR.Title+" created.")
+	s = ghutil.StartSpinner("Processing pull request...", "Pull request "+newPR.Title+" created.")
 	args := []string{"pr", "create", "--title", newPR.Title, "--body", newPR.Body, "--base", options.baseBranch}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
 	if err != nil {
-		utils.RemoveFinalMsg(s)
+		ghutil.RemoveFinalMsg(s)
 		return errors.Wrap(err, "Failed to create pull request")
 	}
 	s.Stop()
@@ -122,12 +128,12 @@ func generatePRArgs(options *CreateOptions) []string {
 	return args
 }
 
-func update(exe utils.Executor, branchID string, prID string) error {
+func update(exe ghutil.Executor, branchID string, prID string) error {
 	// Push the current branch to the already existing git remote
-	s := utils.StartSpinner("Updating Pull Request #"+prID+"...", "Pull Request #"+prID+" has been updated.")
+	s := ghutil.StartSpinner("Updating Pull Request #"+prID+"...", "Pull Request #"+prID+" has been updated.")
 	_, err := exe.Command("git", "push")
 	if err != nil {
-		utils.RemoveFinalMsg(s)
+		ghutil.RemoveFinalMsg(s)
 		return err
 	}
 	s.Stop()
@@ -144,7 +150,7 @@ func update(exe utils.Executor, branchID string, prID string) error {
 }
 
 func createPR(
-	exe utils.Executor,
+	exe ghutil.Executor,
 	options *CreateOptions,
 	settings *config.Settings,
 	pr PullRequest,
@@ -159,7 +165,7 @@ func createPR(
 	// Get the title
 	pr.Title = getDefaultTitle(commits)
 	if !options.TestRun {
-		pr.Title, err = utils.AskForString("Title", pr.Title)
+		pr.Title, err = ghutil.AskForString("Title", pr.Title)
 		if err != nil {
 			return pr, err
 		}
@@ -175,16 +181,18 @@ func createPR(
 	return pr, nil
 }
 
-func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, settings *config.Settings, commits string) (string, error) {
+func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, settings *config.Settings, commits string) (string, error) {
 	body := ""
 
 	// Add a summary of the commits to the PR body
 	commitLines := strings.Split(commits, "\n")
 	commitSummary := ""
 	if len(commitLines) > 1 {
+		var commitSummarySb185 strings.Builder
 		for _, line := range commitLines[1:] {
-			commitSummary += "* " + line + "\n"
+			commitSummarySb185.WriteString("* " + line + "\n")
 		}
+		commitSummary += commitSummarySb185.String()
 	}
 
 	bodySurvey := "No description. Do you want to add one?"
@@ -194,19 +202,10 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	}
 
 	if !options.TestRun {
-		editBody, err := utils.AskToConfirm(bodySurvey)
+		var err error
+		body, err = promptForDescription(body, commitSummary, bodySurvey)
 		if err != nil {
 			return "", err
-		}
-
-		if editBody {
-			editedBody, errB := utils.AskForMultiline("Description:\n")
-			if errB != nil {
-				return "", errB
-			}
-			body = "## 📝 Description\n\n" + editedBody + "\n"
-		} else if commitSummary != "" {
-			body = "## 📝 Description\n\n" + commitSummary
 		}
 	}
 
@@ -223,20 +222,8 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	// CheckList
 	body = addDocSection(body, "## 📋 Checklist\n")
 
-	if pr.isLinted {
-		body = addDocSection(body, "* ✅ Lint checks passed on local machine.")
-	} else if options.NoLint {
-		body = addDocSection(body, "* ⛔ **This PR has not been linted! The --nolint option was used.**")
-	} else {
-		body = addDocSection(body, "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️")
-	}
-	if pr.isTested {
-		body = addDocSection(body, "* ✅ Unit tests passed on local machine.")
-	} else if options.NoUnit {
-		body = addDocSection(body, "* ⛔ **This PR has not been unit tested! The --notest option was used.**")
-	} else {
-		body = addDocSection(body, "* ⚠️ **No tests could be run for this PR.**")
-	}
+	body = addDocSection(body, docIsLintedLine(pr, options))
+	body = addDocSection(body, docIsTestedLine(pr, options))
 
 	// New tests checkmark
 	testSection, err := testingChanges(options)
@@ -260,13 +247,53 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	return body, nil
 }
 
+func promptForDescription(body string, commitSummary string, bodySurvey string) (string, error) {
+	editBody, err := ghutil.AskToConfirm(bodySurvey)
+	if err != nil {
+		return "", err
+	}
+	if editBody {
+		editedBody, errB := ghutil.AskForMultiline("Description:\n")
+		if errB != nil {
+			return "", errB
+		}
+		return "## 📝 Description\n\n" + editedBody + "\n", nil
+	}
+	if commitSummary != "" {
+		return "## 📝 Description\n\n" + commitSummary, nil
+	}
+	return body, nil
+}
+
+func docIsTestedLine(pr PullRequest, options *CreateOptions) string {
+	switch {
+	case pr.isTested:
+		return "* ✅ Unit tests passed on local machine."
+	case options.NoUnit:
+		return "* ⛔ **This PR has not been unit tested! The --notest option was used.**"
+	default:
+		return "* ⚠️ **No tests could be run for this PR.**"
+	}
+}
+
+func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
+	switch {
+	case pr.isLinted:
+		return "* ✅ Lint checks passed on local machine."
+	case options.NoLint:
+		return "* ⛔ **This PR has not been linted! The --nolint option was used.**"
+	default:
+		return "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️"
+	}
+}
+
 func issuesChanges(options *CreateOptions, settings *config.Settings) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
 	var issueIDString string
 	if !options.TestRun && options.Issues == "" {
-		userIssueString, errI := utils.AskForString("Issue IDs (seperate with commas):", "")
+		userIssueString, errI := ghutil.AskForString("Issue IDs (separate with commas):", "")
 		if errI != nil {
 			return "", errI
 		}
@@ -292,7 +319,7 @@ func issuesChanges(options *CreateOptions, settings *config.Settings) (string, e
 
 func testingChanges(options *CreateOptions) (string, error) {
 	if !options.TestRun {
-		newTestConfirm, err := utils.AskToConfirm("Did you add new tests?")
+		newTestConfirm, err := ghutil.AskToConfirm("Did you add new tests?")
 		if err != nil {
 			return "", err
 		}
@@ -300,20 +327,19 @@ func testingChanges(options *CreateOptions) (string, error) {
 		if newTestConfirm {
 			return "* ✅ This PR adds new tests.", nil
 		}
-
 	}
 
 	return "", nil
 }
 
-func documentationChanges(exe utils.Executor) (string, error) {
-	changedFiles, err := utils.GetChangedFiles(exe)
+func documentationChanges(exe ghutil.Executor) (string, error) {
+	changedFiles, err := ghutil.GetChangedFiles(exe)
 	if err != nil {
 		return "", err
 	}
 
-	readmewasUpdated := utils.CheckFilesUpdated(changedFiles, []string{"README.md$"})
-	docsWereUpdated := utils.CheckFilesUpdated(changedFiles, []string{"/docs/"})
+	readmewasUpdated := ghutil.CheckFilesUpdated(changedFiles, []string{"README.md$"})
+	docsWereUpdated := ghutil.CheckFilesUpdated(changedFiles, []string{"/docs/"})
 
 	selectedDocs := []string{}
 	if readmewasUpdated {
@@ -352,13 +378,6 @@ func getDefaultTitle(commits string) string {
 	return ""
 }
 
-func getCheckboxMark(confirm bool) string {
-	if confirm {
-		return "x"
-	}
-	return " "
-}
-
 func logPullRequest(pr PullRequest) {
 	logger.Info("Submitting the following pull request\n" + pr.Title + "\n\n" + pr.Body)
 }
@@ -372,14 +391,14 @@ func formatTrackedFileChangesQuestion(changes []string) string {
 }
 
 // If the baseBranch option is not set, set it to the base branch of the remote.
-func setBaseBranch(exe utils.Executor, options *CreateOptions) (string, error) {
+func setBaseBranch(exe ghutil.Executor, options *CreateOptions) (string, error) {
 	// Fetch the default branch
 	baseBranch := options.baseBranch
 	if baseBranch == "" {
-		s := utils.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
+		s := ghutil.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
 		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
 		if errV != nil {
-			utils.RemoveFinalMsg(s)
+			ghutil.RemoveFinalMsg(s)
 			return "", errors.Wrap(errV, "Failed to fetch default branch")
 		}
 		s.Stop()
@@ -397,7 +416,7 @@ func getNewBranchName(options *CreateOptions) (string, error) {
 	}
 
 	if !options.TestRun {
-		inputBranchName, err := utils.AskForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
+		inputBranchName, err := ghutil.AskForString("You are currently on the base branch. Please specify a temporary branch name: ", "")
 		if err != nil {
 			return "", err
 		}

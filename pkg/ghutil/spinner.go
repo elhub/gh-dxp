@@ -1,4 +1,5 @@
-package utils
+// Package ghutil provides common utilities for the gh-dxp extension.
+package ghutil
 
 import (
 	"fmt"
@@ -24,7 +25,7 @@ func StartSpinner(msg string, finalMsg string) *spinner.Spinner {
 }
 
 /*
-RemoveFinalMsg removes the finalmsg from a spinner. This is intended to be used if an error occurs to prevent conflicting terminal output
+RemoveFinalMsg removes the finalmsg from a spinner. This is intended to be used if an error occurs to prevent conflicting terminal output.
 */
 func RemoveFinalMsg(s *spinner.Spinner) {
 	s.FinalMSG = ""

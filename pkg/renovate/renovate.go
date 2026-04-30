@@ -5,12 +5,12 @@ import (
 	"context"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 // Run executes the renovate validation process.
-func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
+func Run(exe ghutil.Executor, _ *config.Settings, opts *Options) error {
 	renovateConfigChanged, err := isRenovateConfigUpdated(exe)
 	if err != nil {
 		logger.Info("The validation process returned an error looking for renovate config file: " + err.Error() + "\n")
@@ -34,8 +34,8 @@ func Run(exe utils.Executor, _ *config.Settings, opts *Options) error {
 }
 
 // isRenovateConfigUpdated checks if the renovate config file has been updated compared to the main branch.
-func isRenovateConfigUpdated(exe utils.Executor) (bool, error) {
-	changedFiles, err := utils.GetChangedFiles(exe)
+func isRenovateConfigUpdated(exe ghutil.Executor) (bool, error) {
+	changedFiles, err := ghutil.GetChangedFiles(exe)
 	if err != nil {
 		return false, err
 	}

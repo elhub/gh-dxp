@@ -4,9 +4,9 @@ import (
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/pr"
 	"github.com/elhub/gh-dxp/pkg/testutils"
-	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -244,7 +244,7 @@ func TestExecuteCreate(t *testing.T) {
 				"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
 
 			linterArgs = append(linterArgs, "--filesonly")
-			linterArgs = append(linterArgs, utils.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
+			linterArgs = append(linterArgs, ghutil.ConvertTerminalOutputIntoList(tt.modifiedFiles)...)
 
 			mockExe := new(testutils.MockExecutor)
 			mockExe.On("Command", "git", []string{"rev-parse", "--show-toplevel"}).Return("/home/repo-name", nil)

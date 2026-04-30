@@ -1,12 +1,12 @@
-package utils_test
+package ghutil_test
 
 import (
 	"errors"
 	"os"
 	"testing"
 
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/testutils"
-	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -278,7 +278,7 @@ func TestGetChangedFiles(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := testutils.NewMockExecutor(tt.mocks)
-			changedFiles, err := utils.GetChangedFiles(mockExe)
+			changedFiles, err := ghutil.GetChangedFiles(mockExe)
 			assert.Equal(t, tt.expected, changedFiles)
 			if tt.expectedErr != nil {
 				require.Error(t, err)
@@ -368,7 +368,7 @@ func TestCheckFilesUpdated(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			match := utils.CheckFilesUpdated(tt.changedFiles, tt.patterns)
+			match := ghutil.CheckFilesUpdated(tt.changedFiles, tt.patterns)
 			assert.Equal(t, tt.expectedMatch, match)
 		})
 	}
@@ -542,7 +542,7 @@ func TestGetTrackedChanges(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := testutils.NewMockExecutor(tt.mocks)
-			changes, err := utils.GetTrackedChanges(mockExe)
+			changes, err := ghutil.GetTrackedChanges(mockExe)
 			assert.Equal(t, tt.expected, changes)
 			if tt.expectedErr != nil {
 				require.Error(t, err)
@@ -671,7 +671,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := testutils.NewMockExecutor(tt.mocks)
-			changes, err := utils.GetUntrackedChanges(mockExe)
+			changes, err := ghutil.GetUntrackedChanges(mockExe)
 			assert.Equal(t, tt.expected, changes)
 			if tt.expectedErr != nil {
 				require.Error(t, err)
@@ -719,7 +719,7 @@ func TestFileExists(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			path := tt.setup(t)
-			result := utils.FileExists(path)
+			result := ghutil.FileExists(path)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

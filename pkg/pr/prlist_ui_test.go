@@ -1,31 +1,32 @@
-package pr
+package pr_test
 
 import (
 	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/elhub/gh-dxp/pkg/pr"
 )
 
 func TestInitialModel(t *testing.T) {
-	testPRs := []PullRequestInfo{
+	testPRs := []pr.PullRequestInfo{
 		{
 			Number: 123,
 			Title:  "Test PR",
-			Author: prAuthor{
+			Author: pr.PrAuthor{
 				Login: "testuser",
 				Name:  "Test User",
 			},
-			HeadRepository: prRepository{Name: "test-repo"},
+			HeadRepository: pr.PrRepository{Name: "test-repo"},
 			ReviewDecision: "APPROVED",
 			Additions:      10,
 			Deletions:      5,
 		},
 	}
 
-	model := initialModel(testPRs)
+	model := pr.InitialModel(testPRs)
 
-	rows := model.table.Rows()
+	rows := model.Rows()
 	if len(rows) != 1 {
 		t.Fatalf("Expected 1 row, got %d", len(rows))
 	}
@@ -51,8 +52,8 @@ func TestInitialModel(t *testing.T) {
 }
 
 func TestInitialModelEmpty(t *testing.T) {
-	model := initialModel([]PullRequestInfo{})
-	rows := model.table.Rows()
+	model := pr.InitialModel([]pr.PullRequestInfo{})
+	rows := model.Rows()
 
 	if len(rows) != 0 {
 		t.Errorf("Expected 0 rows, got %d", len(rows))
@@ -60,12 +61,12 @@ func TestInitialModelEmpty(t *testing.T) {
 }
 
 func TestInitialModelMultiple(t *testing.T) {
-	testPRs := []PullRequestInfo{
+	testPRs := []pr.PullRequestInfo{
 		{
 			Number:         1,
 			Title:          "PR 1",
-			Author:         prAuthor{Name: "User1"},
-			HeadRepository: prRepository{Name: "repo1"},
+			Author:         pr.PrAuthor{Name: "User1"},
+			HeadRepository: pr.PrRepository{Name: "repo1"},
 			ReviewDecision: "APPROVED",
 			Additions:      10,
 			Deletions:      5,
@@ -73,16 +74,16 @@ func TestInitialModelMultiple(t *testing.T) {
 		{
 			Number:         2,
 			Title:          "PR 2",
-			Author:         prAuthor{Name: "User2"},
-			HeadRepository: prRepository{Name: "repo2"},
+			Author:         pr.PrAuthor{Name: "User2"},
+			HeadRepository: pr.PrRepository{Name: "repo2"},
 			ReviewDecision: "CHANGES_REQUESTED",
 			Additions:      20,
 			Deletions:      15,
 		},
 	}
 
-	model := initialModel(testPRs)
-	rows := model.table.Rows()
+	model := pr.InitialModel(testPRs)
+	rows := model.Rows()
 
 	if len(rows) != 2 {
 		t.Fatalf("Expected 2 rows, got %d", len(rows))
@@ -97,7 +98,7 @@ func TestInitialModelMultiple(t *testing.T) {
 }
 
 func TestUIInit(t *testing.T) {
-	model := initialModel([]PullRequestInfo{})
+	model := pr.InitialModel([]pr.PullRequestInfo{})
 	cmd := model.Init()
 
 	if cmd != nil {
@@ -106,33 +107,33 @@ func TestUIInit(t *testing.T) {
 }
 
 func TestUIUpdate(t *testing.T) {
-	model := initialModel([]PullRequestInfo{})
+	model := pr.InitialModel([]pr.PullRequestInfo{})
 	newModel, cmd := model.Update(tea.KeyMsg{})
 
 	if cmd == nil {
 		t.Error("Expected Update to return tea.Quit command")
 	}
 
-	_, ok := newModel.(PullRequestUI)
+	_, ok := newModel.(pr.PullRequestUI)
 	if !ok {
 		t.Error("Expected Update to return PullRequestUI model")
 	}
 }
 
 func TestUIView(t *testing.T) {
-	testPRs := []PullRequestInfo{
+	testPRs := []pr.PullRequestInfo{
 		{
 			Number:         123,
 			Title:          "Test",
-			Author:         prAuthor{Name: "User"},
-			HeadRepository: prRepository{Name: "repo"},
+			Author:         pr.PrAuthor{Name: "User"},
+			HeadRepository: pr.PrRepository{Name: "repo"},
 			ReviewDecision: "APPROVED",
 			Additions:      10,
 			Deletions:      5,
 		},
 	}
 
-	model := initialModel(testPRs)
+	model := pr.InitialModel(testPRs)
 	view := model.View()
 
 	if view == "" {
@@ -165,18 +166,18 @@ func TestChangesFormatting(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		pr := PullRequestInfo{
+		prInfo := pr.PullRequestInfo{
 			Number:         1,
 			Title:          "Test",
-			Author:         prAuthor{Name: "User"},
-			HeadRepository: prRepository{Name: "repo"},
+			Author:         pr.PrAuthor{Name: "User"},
+			HeadRepository: pr.PrRepository{Name: "repo"},
 			ReviewDecision: "APPROVED",
 			Additions:      tt.additions,
 			Deletions:      tt.deletions,
 		}
 
-		model := initialModel([]PullRequestInfo{pr})
-		rows := model.table.Rows()
+		model := pr.InitialModel([]pr.PullRequestInfo{prInfo})
+		rows := model.Rows()
 
 		if rows[0][5] != tt.expected {
 			t.Errorf("Expected changes '%s', got '%s'", tt.expected, rows[0][5])

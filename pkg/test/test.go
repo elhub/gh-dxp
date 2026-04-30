@@ -1,3 +1,4 @@
+// Package test provides utilities for running tests in gh-dxp.
 package test
 
 import (
@@ -5,15 +6,15 @@ import (
 	"errors"
 	"path/filepath"
 
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/logger"
-	"github.com/elhub/gh-dxp/pkg/utils"
 )
 
 // FileExists checks to see whether a file exists in the file system.
-var FileExists = utils.FileExists //nolint: gochecknoglobals // Exported to allow mocking during tests.
+var FileExists = ghutil.FileExists //nolint: gochecknoglobals // Exported to allow mocking during tests.
 
 // RunTest runs a workflow to automatically determine relevant tests in the current repo and run them.
-func RunTest(exe utils.Executor) (bool, error) {
+func RunTest(exe ghutil.Executor) (bool, error) {
 	cmd, args, err := resolveTestCommand(exe)
 	if err != nil {
 		var ntcErr *NoTestCommandError
@@ -33,8 +34,8 @@ func RunTest(exe utils.Executor) (bool, error) {
 	return true, nil
 }
 
-func resolveTestCommand(exe utils.Executor) (string, []string, error) {
-	root, err := utils.GetGitRootDirectory(exe)
+func resolveTestCommand(exe ghutil.Executor) (string, []string, error) {
+	root, err := ghutil.GetGitRootDirectory(exe)
 	if err != nil {
 		return "", nil, err
 	}
@@ -52,7 +53,8 @@ func resolveTestCommand(exe utils.Executor) (string, []string, error) {
 	if npmTestInGitRoot(root) {
 		return "npm", []string{"test"}, nil
 	}
-	return "", []string{}, &NoTestCommandError{Msg: "No test command could be automatically detected. If you want to automatically run tests as part of pr creation, please have a look at the documentation."}
+	return "", []string{}, &NoTestCommandError{Msg: "No test command could be automatically detected. If you want to " +
+		"automatically run tests as part of pr creation, please have a look at the documentation."}
 }
 
 func gradleTestInGitRoot(root string) bool {

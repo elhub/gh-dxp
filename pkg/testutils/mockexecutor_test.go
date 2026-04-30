@@ -5,6 +5,7 @@ import (
 
 	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewMockExecutor(t *testing.T) {
@@ -40,20 +41,20 @@ func TestNewMockExecutor(t *testing.T) {
 	// Test Command method
 	cOutput, err := mockExe.Command("git", "rev-parse", "--show-toplevel")
 	assert.Equal(t, "/path/to/repo\n", cOutput)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Test CommandContext method
-	err = mockExe.CommandContext(nil, "git", "rev-parse", "--show-toplevel")
-	assert.NoError(t, err)
+	err = mockExe.CommandContext(nil, "git", "rev-parse", "--show-toplevel") //nolint:staticcheck // Context is not used in the mock, so we can pass nil
+	require.NoError(t, err)
 
 	// Test GH method
 	ghOutput, err := mockExe.GH("repo", "view")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "mocked output", ghOutput)
 
 	// Test Chdir method
 	err = mockExe.Chdir("/mock/path")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	mockExe.AssertExpectations(t)
 }
