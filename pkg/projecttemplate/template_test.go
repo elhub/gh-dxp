@@ -1,4 +1,4 @@
-package template_test
+package projecttemplate_test
 
 import (
 	"os"
@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/template"
+	"github.com/elhub/gh-dxp/pkg/projecttemplate"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,7 +21,7 @@ func TestExecute(t *testing.T) {
 		ProjectTemplateURI: "https://example.com/template/",
 	}
 
-	options := &template.Options{}
+	options := &projecttemplate.Options{}
 
 	// Set up the expected file paths
 	expectedFilePaths := []string{
@@ -36,7 +36,7 @@ func TestExecute(t *testing.T) {
 	}
 
 	// Execute the function
-	err = template.Execute(tempDir, settings, options)
+	err = projecttemplate.Execute(tempDir, settings, options)
 	require.NoError(t, err)
 
 	// Check if the files were created
@@ -60,7 +60,7 @@ func TestExecuteGradle(t *testing.T) {
 		ProjectTemplateURI: "https://example.com/template/",
 	}
 
-	options := &template.Options{
+	options := &projecttemplate.Options{
 		true,
 	}
 
@@ -85,7 +85,7 @@ func TestExecuteGradle(t *testing.T) {
 	}
 
 	// Execute the function
-	err = template.Execute(tempDir, settings, options)
+	err = projecttemplate.Execute(tempDir, settings, options)
 	require.NoError(t, err)
 
 	// Check if the files were created

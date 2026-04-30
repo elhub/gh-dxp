@@ -6,14 +6,14 @@ import (
 
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/config"
-	"github.com/elhub/gh-dxp/pkg/template"
+	"github.com/elhub/gh-dxp/pkg/projecttemplate"
 	"github.com/elhub/gh-dxp/pkg/utils"
 	"github.com/spf13/cobra"
 )
 
 // TemplateCmd initializes a repository with default files.
 func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
-	opts := &template.Options{}
+	opts := &projecttemplate.Options{}
 
 	cmd := &cobra.Command{
 		Use:   "template",
@@ -32,7 +32,7 @@ func TemplateCmd(_ utils.Executor, settings *config.Settings) *cobra.Command {
 				return fmt.Errorf("could not get current working directory: %w", err)
 			}
 
-			return template.Execute(cwd, settings, opts)
+			return projecttemplate.Execute(cwd, settings, opts)
 		},
 	}
 
