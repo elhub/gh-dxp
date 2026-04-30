@@ -201,19 +201,10 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 	}
 
 	if !options.TestRun {
-		editBody, err := ghutil.AskToConfirm(bodySurvey)
+		var err error
+		body, err = promptForDescription(body, commitSummary, bodySurvey)
 		if err != nil {
 			return "", err
-		}
-
-		if editBody {
-			editedBody, errB := ghutil.AskForMultiline("Description:\n")
-			if errB != nil {
-				return "", errB
-			}
-			body = "## 📝 Description\n\n" + editedBody + "\n"
-		} else if commitSummary != "" {
-			body = "## 📝 Description\n\n" + commitSummary
 		}
 	}
 
@@ -252,6 +243,24 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 		body += "\n"
 	}
 
+	return body, nil
+}
+
+func promptForDescription(body string, commitSummary string, bodySurvey string) (string, error) {
+	editBody, err := ghutil.AskToConfirm(bodySurvey)
+	if err != nil {
+		return "", err
+	}
+	if editBody {
+		editedBody, errB := ghutil.AskForMultiline("Description:\n")
+		if errB != nil {
+			return "", errB
+		}
+		return "## 📝 Description\n\n" + editedBody + "\n", nil
+	}
+	if commitSummary != "" {
+		return "## 📝 Description\n\n" + commitSummary, nil
+	}
 	return body, nil
 }
 
