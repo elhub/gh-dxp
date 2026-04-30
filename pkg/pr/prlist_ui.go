@@ -9,9 +9,11 @@ import (
 	"github.com/charmbracelet/lipgloss"
 )
 
-var baseStyle = lipgloss.NewStyle().
-	BorderStyle(lipgloss.NormalBorder()).
-	BorderForeground(lipgloss.Color("240"))
+func baseStyle() lipgloss.Style {
+	return lipgloss.NewStyle().
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240"))
+}
 
 func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
 	rows := []table.Row{}
@@ -75,5 +77,5 @@ func (ui PullRequestUI) Update(_ tea.Msg) (tea.Model, tea.Cmd) {
 
 // View renders the UI.
 func (ui PullRequestUI) View() string {
-	return baseStyle.Render(ui.table.View()) + "\n  "
+	return baseStyle().Render(ui.table.View()) + "\n  "
 }

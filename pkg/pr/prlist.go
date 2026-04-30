@@ -12,27 +12,20 @@ import (
 	"github.com/pkg/errors"
 )
 
-var pullRequests []PullRequestInfo
-var wg sync.WaitGroup
-var prChan chan PullRequestInfo
-var errChan chan error
-
 // ExecuteList renders the user's assigned pull requests.
 func ExecuteList(exe utils.Executor, options *ListOptions) error {
-	pullRequests = []PullRequestInfo{}
-	prChan = make(chan PullRequestInfo)
-	errChan = make(chan error)
+	var wg sync.WaitGroup
+	prChan := make(chan PullRequestInfo)
+	errChan := make(chan error)
 
 	if options.Mine {
-		err := retrievePullRequests("--author=@me", exe)
-		if err != nil {
+		if err := retrievePullRequests("--author=@me", exe, prChan, errChan, &wg); err != nil {
 			return err
 		}
 	}
 
 	if options.ReviewRequested {
-		err := retrievePullRequests("--review-requested=@me", exe)
-		if err != nil {
+		if err := retrievePullRequests("--review-requested=@me", exe, prChan, errChan, &wg); err != nil {
 			return err
 		}
 	}
@@ -43,11 +36,10 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 		close(errChan)
 	}()
 
-	collected, err := drainChannels()
+	pullRequests, err := drainChannels(prChan, errChan)
 	if err != nil {
 		return err
 	}
-	pullRequests = collected
 	sortPullRequests(pullRequests)
 
 	// Check content of pullRequests
@@ -62,7 +54,7 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	return nil
 }
 
-func retrievePullRequests(searchTerm string, exe utils.Executor) error {
+func retrievePullRequests(searchTerm string, exe utils.Executor, prChan chan<- PullRequestInfo, errChan chan<- error, wg *sync.WaitGroup) error {
 	res, err := exe.GH("search", "prs", searchTerm, "--state=open", "--json", "number,repository")
 	if err != nil {
 		return errors.Wrap(err, "failed to search prs for my pull requests")
@@ -77,7 +69,7 @@ func retrievePullRequests(searchTerm string, exe utils.Executor) error {
 	// Fetching the details of each PR is slow, so we do this in parallel
 	for _, sr := range searchResults {
 		wg.Add(1)
-		go fetchPullRequestDetails(exe, sr, prChan, errChan, &wg)
+		go fetchPullRequestDetails(exe, sr, prChan, errChan, wg)
 	}
 
 	return nil
@@ -103,13 +95,14 @@ func fetchPullRequestDetails(exe utils.Executor, sr searchResult, prChan chan<- 
 	prChan <- pullRequest
 }
 
-func drainChannels() ([]PullRequestInfo, error) {
+func drainChannels(prChan <-chan PullRequestInfo, errChan <-chan error) ([]PullRequestInfo, error) {
 	var result []PullRequestInfo
-	for prChan != nil || errChan != nil {
+	var openPR, openErr = true, true
+	for openPR || openErr {
 		select {
 		case pr, ok := <-prChan:
 			if !ok {
-				prChan = nil
+				openPR = false
 			} else {
 				result = append(result, pr)
 			}
@@ -117,7 +110,7 @@ func drainChannels() ([]PullRequestInfo, error) {
 			if ok {
 				return nil, err
 			}
-			errChan = nil
+			openErr = false
 		}
 	}
 	return result, nil
