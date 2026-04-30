@@ -23,31 +23,31 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "* main\n  feature-branch\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "set-head", "origin", "--auto"}},
+					Args:   []any{"git", []string{"remote", "set-head", "origin", "--auto"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Args:   []any{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
 					Out:    "origin/main",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
+					Args:   []any{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
 					Out:    "README.md\nsrc/main.go\n",
 					Err:    nil,
 				},
@@ -60,31 +60,31 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "set-head", "origin", "--auto"}},
+					Args:   []any{"git", []string{"remote", "set-head", "origin", "--auto"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Args:   []any{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
 					Out:    "origin/main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
+					Args:   []any{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
 					Out:    "README.md\n",
 					Err:    nil,
 				},
@@ -97,13 +97,13 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "M  file1.go\nA  file2.go\n",
 					Err:    nil,
 				},
@@ -116,7 +116,7 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "",
 					Err:    errors.New("not a git repository"),
 				},
@@ -129,13 +129,13 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    errors.New("fetch failed"),
 				},
@@ -148,19 +148,19 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "set-head", "origin", "--auto"}},
+					Args:   []any{"git", []string{"remote", "set-head", "origin", "--auto"}},
 					Out:    "",
 					Err:    errors.New("set-head failed"),
 				},
@@ -173,25 +173,25 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "set-head", "origin", "--auto"}},
+					Args:   []any{"git", []string{"remote", "set-head", "origin", "--auto"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Args:   []any{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
 					Out:    "",
 					Err:    errors.New("symbolic-ref failed"),
 				},
@@ -204,31 +204,31 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "set-head", "origin", "--auto"}},
+					Args:   []any{"git", []string{"remote", "set-head", "origin", "--auto"}},
 					Out:    "origin/main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Args:   []any{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
 					Out:    "origin/main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
+					Args:   []any{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
 					Out:    "",
 					Err:    errors.New("error in git diff command"),
 				},
@@ -241,31 +241,31 @@ func TestGetChangedFiles(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"branch"}},
+					Args:   []any{"git", []string{"branch"}},
 					Out:    "main\n",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"fetch", "origin", "main"}},
+					Args:   []any{"git", []string{"fetch", "origin", "main"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"remote", "set-head", "origin", "--auto"}},
+					Args:   []any{"git", []string{"remote", "set-head", "origin", "--auto"}},
 					Out:    "",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
+					Args:   []any{"git", []string{"symbolic-ref", "--short", "refs/remotes/origin/HEAD"}},
 					Out:    "origin/main",
 					Err:    nil,
 				},
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
+					Args:   []any{"git", []string{"diff", "--name-only", "origin/main", "--relative"}},
 					Out:    "",
 					Err:    nil,
 				},
@@ -386,7 +386,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "M  file1.go\nM  file2.go\n",
 					Err:    nil,
 				},
@@ -399,7 +399,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    " M file1.go\n M file2.go\n",
 					Err:    nil,
 				},
@@ -412,7 +412,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "A  newfile.go\n",
 					Err:    nil,
 				},
@@ -425,7 +425,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "D  oldfile.go\n",
 					Err:    nil,
 				},
@@ -438,7 +438,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "R  oldname.go -> newname.go\n",
 					Err:    nil,
 				},
@@ -451,7 +451,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "M  modified.go\nA  added.go\n?? untracked.go\n",
 					Err:    nil,
 				},
@@ -464,7 +464,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "?? untracked.go\n",
 					Err:    nil,
 				},
@@ -477,7 +477,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "",
 					Err:    nil,
 				},
@@ -490,7 +490,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "",
 					Err:    errors.New("not a git repository"),
 				},
@@ -503,7 +503,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "MM file1.go\n M file2.go\nM  file3.go\n",
 					Err:    nil,
 				},
@@ -516,7 +516,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "R  old name.go -> new name.go\n",
 					Err:    nil,
 				},
@@ -529,7 +529,7 @@ func TestGetTrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "T  changed.go\n",
 					Err:    nil,
 				},
@@ -567,7 +567,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "?? untracked1.go\n?? untracked2.go\n",
 					Err:    nil,
 				},
@@ -580,7 +580,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "M  modified.go\n?? untracked.go\n",
 					Err:    nil,
 				},
@@ -593,7 +593,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "M  modified.go\n",
 					Err:    nil,
 				},
@@ -606,7 +606,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "",
 					Err:    nil,
 				},
@@ -619,7 +619,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "",
 					Err:    errors.New("not a git repository"),
 				},
@@ -632,7 +632,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "?? newdir/\n",
 					Err:    nil,
 				},
@@ -645,7 +645,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "?? file with spaces.go\n",
 					Err:    nil,
 				},
@@ -658,7 +658,7 @@ func TestGetUntrackedChanges(t *testing.T) {
 			mocks: []testutils.MockContent{
 				{
 					Method: "Command",
-					Args:   []interface{}{"git", []string{"status", "--porcelain"}},
+					Args:   []any{"git", []string{"status", "--porcelain"}},
 					Out:    "?? file1.go\n?? dir1/\n?? file2.txt\nM  tracked.go\n",
 					Err:    nil,
 				},

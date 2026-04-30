@@ -3,6 +3,7 @@ package renovate
 
 import (
 	"context"
+	"slices"
 
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
@@ -45,10 +46,8 @@ func isRenovateConfigUpdated(exe ghutil.Executor) (bool, error) {
 		return false, nil
 	}
 
-	for _, file := range changedFiles {
-		if file == ".github/renovate.json" {
-			return true, nil
-		}
+	if slices.Contains(changedFiles, ".github/renovate.json") {
+		return true, nil
 	}
 	return false, nil
 }
