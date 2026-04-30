@@ -3,6 +3,7 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.script
 import no.elhub.devxp.build.configuration.pipeline.constants.AgentScope.LinuxAgentContext
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
+import no.elhub.devxp.build.configuration.pipeline.extensions.fetchTags
 import no.elhub.devxp.build.configuration.pipeline.jobs.customJob
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
 import no.elhub.devxp.build.configuration.pipeline.jobs.publishTag
@@ -29,6 +30,7 @@ elhubProject(DEVXP, "gh-dxp") {
             name = "🚀 Release"
             id("Release")
             steps {
+                fetchTags()
                 script {
                     name = "GitHub Release Script"
                     scriptContent = """
