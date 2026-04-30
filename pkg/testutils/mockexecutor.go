@@ -1,3 +1,4 @@
+// Package testutils provides utilities for testing in gh-dxp.
 package testutils
 
 import (

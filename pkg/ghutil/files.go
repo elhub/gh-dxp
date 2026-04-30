@@ -1,4 +1,4 @@
-// Package utils provides common utilities for the gh-dxp extension.
+// Package ghutil provides common utilities for the gh-dxp extension.
 package ghutil
 
 import (

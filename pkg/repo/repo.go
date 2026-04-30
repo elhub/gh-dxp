@@ -1,3 +1,4 @@
+// Package repo provides utilities for managing repositories in gh-dxp.
 package repo
 
 import (

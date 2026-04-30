@@ -1,5 +1,4 @@
-// pkg/status/status.go
-
+// Package status provides utilities for displaying repository status in gh-dxp.
 package status
 
 import (

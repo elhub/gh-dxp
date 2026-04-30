@@ -1,3 +1,4 @@
+// Package cmd provides CLI commands for the gh-dxp extension.
 package cmd
 
 import (

@@ -1,4 +1,4 @@
-// Package template provides utilities to set up new repositories using our project template.
+// Package projecttemplate provides utilities to set up new repositories using our project template.
 package projecttemplate
 
 import (

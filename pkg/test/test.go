@@ -1,3 +1,4 @@
+// Package test provides utilities for running tests in gh-dxp.
 package test
 
 import (

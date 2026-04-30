@@ -1,3 +1,4 @@
+// Package pr provides utilities for managing pull requests in gh-dxp.
 package pr
 
 import (
