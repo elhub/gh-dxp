@@ -36,7 +36,7 @@ func ExecuteMerge(exe ghutil.Executor, options *MergeOptions) error {
 	}
 
 	logger.Info("Merging pull request #" + prID + "(" + prTitle + ")")
-	// TODO: Add list of commits
+
 	doMerge := false
 	if options.AutoConfirm {
 		doMerge = true
