@@ -209,9 +209,6 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 		}
 	}
 
-	// TODO: What type of PR is this?
-	// Multi-choice: Feature, Bug Fix, Documentation, Test, Refactor, Style, Build, Chore
-	// Type should be set as a label.
 	issueSection, err := issuesChanges(options, settings)
 	if err != nil {
 		return "", err
