@@ -1,4 +1,4 @@
-package lint //nolint:cyclop
+package lint //nolint:cyclop //nolint:nolintlint
 
 // Options represents the options for the lint command.
 type Options struct {
