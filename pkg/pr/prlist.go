@@ -97,6 +97,7 @@ func fetchPullRequestDetails(exe ghutil.Executor, sr searchResult, prChan chan<-
 
 func drainChannels(prChan <-chan PullRequestInfo, errChan <-chan error) ([]PullRequestInfo, error) {
 	var result []PullRequestInfo
+	var firstErr error
 	var openPR, openErr = true, true
 	for openPR || openErr {
 		select {
@@ -107,13 +108,14 @@ func drainChannels(prChan <-chan PullRequestInfo, errChan <-chan error) ([]PullR
 				result = append(result, pr)
 			}
 		case err, ok := <-errChan:
-			if ok {
-				return nil, err
+			if !ok {
+				openErr = false
+			} else if firstErr == nil {
+				firstErr = err
 			}
-			openErr = false
 		}
 	}
-	return result, nil
+	return result, firstErr
 }
 
 func sortPullRequests(pullRequests []PullRequestInfo) {
