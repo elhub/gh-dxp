@@ -230,22 +230,8 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	// CheckList
 	body = addDocSection(body, "## 📋 Checklist\n")
 
-	switch {
-	case pr.isLinted:
-		body = addDocSection(body, "* ✅ Lint checks passed on local machine.")
-	case options.NoLint:
-		body = addDocSection(body, "* ⛔ **This PR has not been linted! The --nolint option was used.**")
-	default:
-		body = addDocSection(body, "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️")
-	}
-	switch {
-	case pr.isTested:
-		body = addDocSection(body, "* ✅ Unit tests passed on local machine.")
-	case options.NoUnit:
-		body = addDocSection(body, "* ⛔ **This PR has not been unit tested! The --notest option was used.**")
-	default:
-		body = addDocSection(body, "* ⚠️ **No tests could be run for this PR.**")
-	}
+	body = addDocSection(body, docIsLintedLine(pr, options))
+	body = addDocSection(body, docIsTestedLine(pr, options))
 
 	// New tests checkmark
 	testSection, err := testingChanges(options)
@@ -267,6 +253,28 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	}
 
 	return body, nil
+}
+
+func docIsTestedLine(pr PullRequest, options *CreateOptions) string {
+		switch {
+	case pr.isTested:
+		return "* ✅ Unit tests passed on local machine."
+	case options.NoUnit:
+		return "* ⛔ **This PR has not been unit tested! The --notest option was used.**"
+	default:
+		return "* ⚠️ **No tests could be run for this PR.**"
+	}
+}
+
+func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
+switch {
+	case pr.isLinted:
+		return "* ✅ Lint checks passed on local machine."
+	case options.NoLint:
+		return "* ⛔ **This PR has not been linted! The --nolint option was used.**"
+	default:
+		return "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️"
+	}
 }
 
 func issuesChanges(options *CreateOptions, settings *config.Settings) (string, error) {
