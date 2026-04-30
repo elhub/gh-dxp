@@ -1,6 +1,8 @@
 package projecttemplate_test
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -10,15 +12,29 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// newTestServer returns an httptest TLS server that responds with dummy content for any path.
+func newTestServer(t *testing.T) *httptest.Server {
+	t.Helper()
+	s := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("dummy template content"))
+	}))
+	t.Cleanup(s.Close)
+	return s
+}
+
 func TestExecute(t *testing.T) {
 	// Create a temporary directory for testing
 	tempDir, err := os.MkdirTemp("", "template-test")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
 
+	// Use a local TLS test server instead of hitting the network
+	server := newTestServer(t)
+
 	// Set up the test settings
 	settings := &config.Settings{
-		ProjectTemplateURI: "https://example.com/template/",
+		ProjectTemplateURI: server.URL + "/template/",
 	}
 
 	options := &projecttemplate.Options{}
@@ -36,7 +52,7 @@ func TestExecute(t *testing.T) {
 	}
 
 	// Execute the function
-	err = projecttemplate.Execute(tempDir, settings, options)
+	err = projecttemplate.Execute(tempDir, settings, options, server.Client())
 	require.NoError(t, err)
 
 	// Check if the files were created
@@ -55,9 +71,12 @@ func TestExecuteGradle(t *testing.T) {
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
 
+	// Use a local TLS test server instead of hitting the network
+	server := newTestServer(t)
+
 	// Set up the test settings
 	settings := &config.Settings{
-		ProjectTemplateURI: "https://example.com/template/",
+		ProjectTemplateURI: server.URL + "/template/",
 	}
 
 	options := &projecttemplate.Options{
@@ -85,7 +104,7 @@ func TestExecuteGradle(t *testing.T) {
 	}
 
 	// Execute the function
-	err = projecttemplate.Execute(tempDir, settings, options)
+	err = projecttemplate.Execute(tempDir, settings, options, server.Client())
 	require.NoError(t, err)
 
 	// Check if the files were created

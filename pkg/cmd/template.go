@@ -33,7 +33,7 @@ func TemplateCmd(_ ghutil.Executor, settings *config.Settings) *cobra.Command {
 				return fmt.Errorf("could not get current working directory: %w", err)
 			}
 
-			return projecttemplate.Execute(cwd, settings, opts)
+			return projecttemplate.Execute(cwd, settings, opts, nil)
 		},
 	}
 

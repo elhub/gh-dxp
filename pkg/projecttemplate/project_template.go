@@ -13,8 +13,12 @@ import (
 	"github.com/elhub/gh-dxp/pkg/config"
 )
 
+// DefaultClient is the HTTP client used by Execute when none is provided.
+var DefaultClient = http.DefaultClient
+
 // Execute downloads the project template files and writes them to the working directory.
-func Execute(workingDir string, settings *config.Settings, options *Options) error { //nolint:funlen //
+// If client is nil, DefaultClient (http.DefaultClient) is used.
+func Execute(workingDir string, settings *config.Settings, options *Options, client *http.Client) error { //nolint:funlen //
 	// Get the project template URI
 	uri := settings.ProjectTemplateURI
 
@@ -130,6 +134,10 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 		files = append(files, gradleFiles...)
 	}
 
+	if client == nil {
+		client = DefaultClient
+	}
+
 	// Only write file if overwrite = true or file does not exist
 	for _, file := range files {
 		// Check if the file exists
@@ -137,7 +145,7 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 
 		// If the file does not exist or overwrite is true, write the file
 		if file.overwrite || os.IsNotExist(err) {
-			err = writeFile(uri+file.fileName, file.path)
+			err = writeFile(client, uri+file.fileName, file.path)
 			if err != nil {
 				return fmt.Errorf("failed to write file: %w", err)
 			}
@@ -148,7 +156,7 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 }
 
 // Downloads a file from an URI and writes it to path.
-func writeFile(uri string, filepath string) error {
+func writeFile(client *http.Client, uri string, filepath string) error {
 	// Validate the URL scheme to prevent SSRF
 	parsed, err := url.Parse(uri)
 	if err != nil {
@@ -173,7 +181,7 @@ func writeFile(uri string, filepath string) error {
 	}
 
 	// Create a new HTTP client and send the request
-	resp, err := http.DefaultClient.Do(req) //nolint:gosec // G704: URL is validated above (https-only scheme check) before use
+	resp, err := client.Do(req) //nolint:gosec // G704: URL is validated above (https-only scheme check) before use
 	if err != nil {
 		return err
 	}
