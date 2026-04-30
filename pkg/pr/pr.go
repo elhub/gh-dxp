@@ -99,11 +99,12 @@ func addAndCommitFiles(exe utils.Executor, options *Options) error {
 	var commitMessage string
 	var err error
 
-	if options.CommitMessage != "" {
+	switch {
+	case options.CommitMessage != "":
 		commitMessage = options.CommitMessage
-	} else if options.TestRun {
+	case options.TestRun:
 		commitMessage = "default commit message"
-	} else {
+	default:
 		commitMessage, err = utils.AskForString("Please enter a commit message: ", "")
 		if err != nil {
 			return err

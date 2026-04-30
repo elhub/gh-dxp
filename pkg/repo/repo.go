@@ -32,16 +32,17 @@ func ExecuteClone(exe utils.Executor, pattern string, sleepFunction func(time.Du
 			return errors.Wrap(err, "failed to check if directory exists")
 		}
 
-		if !exists && opts.DryRun {
-				logger.Infof("Dry run: Clone repository %s", repo.FullName)
-		} else if !exists {
+		switch {
+		case !exists && opts.DryRun:
+			logger.Infof("Dry run: Clone repository %s", repo.FullName)
+		case !exists:
 			logger.Infof("Cloning repository: %s", repo.FullName)
 
 			err := cloneRepoWithRetries(repo.FullName, sleepFunction, exe)
 			if err != nil {
 				logger.Warn(err.Error())
 			}
-		} else {
+		default:
 			logger.Infof("Skipped cloning of repository %s as directory already exists", repo.FullName)
 		}
 	}

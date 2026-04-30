@@ -230,18 +230,20 @@ func createBody(exe utils.Executor, pr PullRequest, options *CreateOptions, sett
 	// CheckList
 	body = addDocSection(body, "## 📋 Checklist\n")
 
-	if pr.isLinted {
+	switch {
+	case pr.isLinted:
 		body = addDocSection(body, "* ✅ Lint checks passed on local machine.")
-	} else if options.NoLint {
+	case options.NoLint:
 		body = addDocSection(body, "* ⛔ **This PR has not been linted! The --nolint option was used.**")
-	} else {
+	default:
 		body = addDocSection(body, "* ⛔ **This PR has not been linted! Unspecified lint error!** ⚠️")
 	}
-	if pr.isTested {
+	switch {
+	case pr.isTested:
 		body = addDocSection(body, "* ✅ Unit tests passed on local machine.")
-	} else if options.NoUnit {
+	case options.NoUnit:
 		body = addDocSection(body, "* ⛔ **This PR has not been unit tested! The --notest option was used.**")
-	} else {
+	default:
 		body = addDocSection(body, "* ⚠️ **No tests could be run for this PR.**")
 	}
 
