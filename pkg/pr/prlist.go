@@ -31,7 +31,10 @@ func ExecuteList(exe utils.Executor, options *ListOptions) error {
 	}
 
 	if options.ReviewRequested {
-		retrievePullRequests("--review-requested=@me", exe)
+		err := retrievePullRequests("--review-requested=@me", exe)
+		if err != nil {
+			return err
+		}
 	}
 
 	go func() {

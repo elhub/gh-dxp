@@ -18,10 +18,13 @@ func Execute(exe utils.Executor, opts *Options) error {
 	if optsIsEmpty(opts) {
 		statusOptions := []string{"All", "Current repository", "PR status", "List branches", "Get all relevant Issues"}
 		var selectedOption string
-		survey.AskOne(&survey.Select{
+		err := survey.AskOne(&survey.Select{
 			Message: "Choose the status type:",
 			Options: statusOptions,
 		}, &selectedOption)
+		if err != nil {
+			return err
+		}
 
 		switch selectedOption {
 		case "All":

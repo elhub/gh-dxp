@@ -125,10 +125,7 @@ func TestSetWorkDirToGitHubRoot(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockExe := new(testutils.MockExecutor)
-			for _, mock := range tt.mocks {
-				mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
-			}
+			mockExe := testutils.NewMockExecutor(tt.mocks)
 
 			err := utils.SetWorkDirToGitHubRoot(mockExe)
 			if tt.wantErr {
@@ -179,10 +176,7 @@ func TestListFilesInDirectory(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			mockExe := new(testutils.MockExecutor)
-			for _, mock := range tt.mocks {
-				mockExe.On(mock.Method, mock.Args.([]interface{})...).Return(mock.Out, mock.Err)
-			}
+			mockExe := testutils.NewMockExecutor(tt.mocks)
 
 			got, err := utils.ListFilesInDirectory(mockExe, "/path/to/dir")
 			if tt.wantErr {
