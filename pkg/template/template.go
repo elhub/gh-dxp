@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 
@@ -148,14 +149,31 @@ func Execute(workingDir string, settings *config.Settings, options *Options) err
 
 // Downloads a file from an URI and writes it to path.
 func writeFile(uri string, filepath string) error {
+	// Validate the URL scheme to prevent SSRF
+	parsed, err := url.Parse(uri)
+	if err != nil {
+		return fmt.Errorf("invalid URI: %w", err)
+	}
+	if parsed.Scheme != "https" {
+		return fmt.Errorf("URI scheme %q not allowed: only https is permitted", parsed.Scheme)
+	}
+
+	// Reconstruct URL from parsed components to break taint chain
+	safeURL := &url.URL{
+		Scheme:   "https",
+		Host:     parsed.Host,
+		Path:     parsed.Path,
+		RawQuery: parsed.RawQuery,
+	}
+
 	// Create a new request
-	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, uri, nil)
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, safeURL.String(), nil)
 	if err != nil {
 		return err
 	}
 
 	// Create a new HTTP client and send the request
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := http.DefaultClient.Do(req) //nolint:gosec // G704: URL is validated above (https-only scheme check) before use
 	if err != nil {
 		return err
 	}

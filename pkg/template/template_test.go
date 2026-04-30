@@ -18,7 +18,7 @@ func TestExecute(t *testing.T) {
 
 	// Set up the test settings
 	settings := &config.Settings{
-		ProjectTemplateURI: "http://example.com/template/",
+		ProjectTemplateURI: "https://example.com/template/",
 	}
 
 	options := &template.Options{}
@@ -57,7 +57,7 @@ func TestExecuteGradle(t *testing.T) {
 
 	// Set up the test settings
 	settings := &config.Settings{
-		ProjectTemplateURI: "http://example.com/template/",
+		ProjectTemplateURI: "https://example.com/template/",
 	}
 
 	options := &template.Options{
