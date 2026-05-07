@@ -69,7 +69,7 @@ func validateLocalChanges(exe ghutil.Executor, options *Options) ([]string, erro
 	}
 
 	if len(uncommittedChanges) == 0 && len(committedChanges) == 0 {
-		return []string{}, errors.New("No changes found, aborting PR creation")
+		return []string{}, errors.New("No changes found, aborting PR operation")
 	}
 
 	return uncommittedChanges, nil
