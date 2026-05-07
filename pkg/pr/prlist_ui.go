@@ -2,11 +2,10 @@
 package pr
 
 import (
-	"strconv"
-
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"strconv"
 )
 
 func baseStyle() lipgloss.Style {
