@@ -136,15 +136,14 @@ func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, 
 		return uncommittedTrackedChanges, nil
 	}
 
-	if len(uncommittedTrackedChanges) > 0 {
-		confirmed, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(uncommittedTrackedChanges))
-		if err != nil {
-			return []string{}, err
-		}
-		if !confirmed {
-			return []string{}, errors.New("User aborted workflow")
-		}
+	confirmed, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(uncommittedTrackedChanges))
+	if err != nil {
+		return []string{}, err
 	}
+	if !confirmed {
+		return []string{}, errors.New("User aborted workflow")
+	}
+
 
 	return uncommittedTrackedChanges, nil
 }
