@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
 	"github.com/elhub/gh-dxp/pkg/pr"
 )
 
@@ -108,7 +108,7 @@ func TestUIInit(t *testing.T) {
 
 func TestUIUpdate(t *testing.T) {
 	model := pr.InitialModel([]pr.PullRequestInfo{})
-	newModel, cmd := model.Update(tea.KeyMsg{})
+	newModel, cmd := model.Update(tea.KeyPressMsg{})
 
 	if cmd == nil {
 		t.Error("Expected Update to return tea.Quit command")
@@ -134,7 +134,7 @@ func TestUIView(t *testing.T) {
 	}
 
 	model := pr.InitialModel(testPRs)
-	view := model.View()
+	view := model.View().Content
 
 	if view == "" {
 		t.Error("Expected non-empty view")

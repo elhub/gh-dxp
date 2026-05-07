@@ -1,6 +1,6 @@
 package pr
 
-import "github.com/charmbracelet/bubbles/table"
+import "charm.land/bubbles/v2/table"
 
 type PrAuthor = prAuthor
 type PrRepository = prRepository

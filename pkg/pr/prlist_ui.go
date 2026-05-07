@@ -2,9 +2,9 @@
 package pr
 
 import (
-	"github.com/charmbracelet/bubbles/table"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/table"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 	"strconv"
 )
 
@@ -19,6 +19,14 @@ func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
 	var repoNameLen = 12
 	var titleLen = 40
 	var changesLen = 8
+	cols := []table.Column{
+		{Title: "Repository", Width: repoNameLen},
+		{Title: "ID", Width: 4},
+		{Title: "Title", Width: titleLen},
+		{Title: "Author", Width: 20},
+		{Title: "Status", Width: 16},
+		{Title: "Changes", Width: changesLen},
+	}
 	for _, pr := range pullRequests {
 		changes := "+" + strconv.Itoa(pr.Additions) + " -" + strconv.Itoa(pr.Deletions)
 		rows = append(rows, table.Row{
@@ -31,18 +39,17 @@ func initialModel(pullRequests []PullRequestInfo) PullRequestUI {
 		})
 	}
 
+	totalWidth := 0
+	for _, col := range cols {
+		totalWidth += col.Width + 2
+	}
+
 	t := table.New(
-		table.WithColumns([]table.Column{
-			{Title: "Repository", Width: repoNameLen},
-			{Title: "ID", Width: 4},
-			{Title: "Title", Width: titleLen},
-			{Title: "Author", Width: 20},
-			{Title: "Status", Width: 16},
-			{Title: "Changes", Width: changesLen},
-		}),
+		table.WithColumns(cols),
 		table.WithRows(rows),
 		table.WithFocused(true),
 		table.WithHeight(len(pullRequests)+1),
+		table.WithWidth(totalWidth),
 	)
 
 	s := table.DefaultStyles()
@@ -75,6 +82,6 @@ func (ui PullRequestUI) Update(_ tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 // View renders the UI.
-func (ui PullRequestUI) View() string {
-	return baseStyle().Render(ui.table.View()) + "\n  "
+func (ui PullRequestUI) View() tea.View {
+	return tea.NewView(baseStyle().Render(ui.table.View()) + "\n  ")
 }
