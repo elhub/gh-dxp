@@ -211,7 +211,7 @@ func TestValidateLocalChanges(t *testing.T) {
 			branchOnlyCommits:	"",
 			options:          	&pr.Options{TestRun: true},
 			expectedFiles:    	[]string{},
-			expectedErr:     	"No changes found, aborting PR creation",
+			expectedErr:     	"No changes found, aborting PR operation",
 		},
 		{
 			name:             	"Tracked and untracked changes",
