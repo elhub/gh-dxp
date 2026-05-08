@@ -2,7 +2,7 @@
 package pr
 
 import (
-	"github.com/charmbracelet/bubbles/table"
+	"charm.land/bubbles/v2/table"
 )
 
 // Options represents the options for the pr command.
