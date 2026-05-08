@@ -49,7 +49,7 @@ func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *Crea
 		return err
 	}
 	if baseBranch == "" {
-		return errors.New("Base branch cannot empty")
+		return errors.New("Base branch cannot be empty")
 	}
 	pr.targetBranch = baseBranch
 
