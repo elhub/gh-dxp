@@ -99,7 +99,7 @@ func TestExecuteUpdate(t *testing.T) {
 			gitLog:           "commit 1",
 			repoBranchName:   "main",
 			prCreate:         "pull request created",
-			expectedErr:      errors.New("No tracked changes found, skipping commit"),
+			expectedErr:      errors.New("No changes found, aborting PR operation"),
 			currentChanges:   "?? untracked_change.go",
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",

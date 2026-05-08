@@ -1,3 +1,5 @@
+// NOSONAR
+
 package pr_test
 
 import (
@@ -190,103 +192,112 @@ func TestGetPRBody(t *testing.T) {
 	}
 }
 
-func TestHandleUncommittedChanges(t *testing.T) {
+func TestValidateLocalChanges(t *testing.T) {
 	tests := []struct {
-		name             string
-		untrackedChanges string
-		untrackedErr     error
-		trackedChanges   string
-		trackedErr       error
-		gitLog           string
-		gitLogErr        error
-		options          *pr.Options
-		expectedFiles    []string
-		expectedErr      string
+		name             	string
+		untrackedChanges 	string
+		trackedChanges   	string
+		branchOnlyCommits 	string
+		gitStatusErr  		error
+		gitLogErr        	error
+		options          	*pr.Options
+		expectedFiles    	[]string
+		expectedErr      	string
 	}{
 		{
-			name:             "No changes",
-			untrackedChanges: "",
-			trackedChanges:   "",
-			gitLog:           "",
-			options:          &pr.Options{TestRun: true},
-			expectedFiles:    []string{},
-			expectedErr:      "No tracked changes found, skipping commit",
+			name:             	"No changes",
+			untrackedChanges: 	"",
+			trackedChanges:   	"",
+			branchOnlyCommits:	"",
+			options:          	&pr.Options{TestRun: true},
+			expectedFiles:    	[]string{},
+			expectedErr:     	"No changes found, aborting PR operation",
 		},
 		{
-			name:             "Only tracked changes with commits",
-			untrackedChanges: "",
-			trackedChanges:   "M  file1.go\nM  file2.go\n",
-			gitLog:           "abc123 commit message",
-			options:          &pr.Options{TestRun: true},
-			expectedFiles:    []string{"M  file1.go", "M  file2.go"},
-			expectedErr:      "",
+			name:             	"Tracked and untracked changes",
+			untrackedChanges: 	"?? file3.go\n",
+			trackedChanges:   	"M  file1.go\n",
+			branchOnlyCommits: 	"",
+			options:          	&pr.Options{TestRun: true},
+			expectedFiles:    	[]string{"file1.go"},
+			expectedErr:      	"",
 		},
 		{
-			name:             "Tracked changes without commits",
-			untrackedChanges: "",
-			trackedChanges:   "M  file1.go\n",
-			gitLog:           "",
-			options:          &pr.Options{TestRun: true},
-			expectedFiles:    []string{"M  file1.go"},
-			expectedErr:      "",
+			name:             	"Only tracked changes found",
+			untrackedChanges: 	"",
+			trackedChanges:   	"M  file1.go\nM  file2.go\n",
+			branchOnlyCommits:	"",
+			options:          	&pr.Options{TestRun: true},
+			expectedFiles:    	[]string{"file1.go", "file2.go"}, //nosonar
+			expectedErr:      	"",
 		},
 		{
-			name:          "Error getting untracked changes",
-			untrackedErr:  errors.New("git status error"),
-			options:       &pr.Options{TestRun: true},
-			expectedFiles: []string{},
-			expectedErr:   "git status error",
+			name:             	"Only commits found",
+			untrackedChanges: 	"",
+			trackedChanges:   	"",
+			branchOnlyCommits:	"abc123 commit message",
+			options:          	&pr.Options{TestRun: true},
+			expectedFiles:    	[]string{},
+			expectedErr:      	"",
 		},
 		{
-			name:             "Error getting tracked changes",
-			untrackedChanges: "",
-			trackedErr:       errors.New("git diff error"),
-			options:          &pr.Options{TestRun: true},
-			expectedFiles:    []string{},
-			expectedErr:      "git diff error",
+			name:             	"Untracked, uncommitted, and commits found",
+			untrackedChanges: 	"?? file3.go\n",
+			trackedChanges:   	"M  file1.go\n",
+			branchOnlyCommits:	"abc123 commit message",
+			options:          	&pr.Options{TestRun: true},
+			expectedFiles:    	[]string{"file1.go"},
+			expectedErr:     	"",
 		},
 		{
-			name:             "Error getting git log",
-			untrackedChanges: "",
-			trackedChanges:   "M  file1.go\n",
-			gitLogErr:        errors.New("git log error"),
-			options:          &pr.Options{TestRun: true},
-			expectedFiles:    []string{},
-			expectedErr:      "git log error",
+			name:          		"Error getting changes",
+			gitStatusErr:  		errors.New("git status error"),
+			options:       		&pr.Options{TestRun: true},
+			expectedFiles: 		[]string{},
+			expectedErr:   		"git status error",
 		},
 		{
-			name:             "TestRun with untracked changes",
-			untrackedChanges: "?? file3.go\n",
-			trackedChanges:   "M  file1.go\n",
-			gitLog:           "abc123 commit",
-			options:          &pr.Options{TestRun: true},
-			expectedFiles:    []string{"M  file1.go"},
-			expectedErr:      "",
+			name:            	"Error getting committed changes",
+			untrackedChanges: 	"",
+			trackedChanges:   	"",
+			gitLogErr:        	errors.New("git log error"),
+			options:          	&pr.Options{TestRun: true},
+			expectedFiles:    	[]string{},
+			expectedErr:     	"git log error",
 		},
+
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockExe := new(testutils.MockExecutor)
-			mockExe.On("Command", "git", []string{"status", "--porcelain"}).
-				Return(tt.untrackedChanges+tt.trackedChanges, tt.untrackedErr)
 
-			if tt.untrackedErr == nil {
-				mockExe.On("Command", "git", []string{"diff", "--name-status"}).
-					Return(tt.trackedChanges, tt.trackedErr)
+			if tt.gitStatusErr != nil {
+				mockExe.On("Command", "git", []string{"status", "--porcelain"}).
+					Return("", tt.gitStatusErr)
+			} else {
+				mockExe.On("Command", "git", []string{"status", "--porcelain"}).
+					Return(tt.untrackedChanges+tt.trackedChanges, nil)
 
-				if tt.trackedErr == nil {
+				if tt.gitLogErr != nil {
 					mockExe.On("Command", "git", []string{"log", "--oneline", "origin/main.."}).
-						Return(tt.gitLog, tt.gitLogErr)
+						Return("", tt.gitLogErr)
+				} else {
+					mockExe.On("Command", "git", []string{"log", "--oneline", "origin/main.."}).
+						Return(tt.branchOnlyCommits, nil)
 				}
 			}
 
-			// Note: handleUncommittedChanges is not exported, so we cannot test it directly
-			// This test would need the function to be exported or tested through a public function
-			// For now, this is a placeholder structure showing how the test would be written
+			uncommittedChanges, err := pr.ValidateLocalChanges(mockExe, tt.options)
+			if tt.expectedErr != "" {
+				require.Error(t, err)
+				assert.Equal(t, tt.expectedErr, err.Error())
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expectedFiles, uncommittedChanges)
+			}
 
-			// Skipping actual test execution since the function is not exported
-			t.Skip("handleUncommittedChanges is not exported")
+			mockExe.AssertExpectations(t)
 		})
 	}
 }

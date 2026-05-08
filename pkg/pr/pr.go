@@ -2,6 +2,7 @@
 package pr
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -50,17 +51,28 @@ func getPRField(exe ghutil.Executor, field string) (string, error) {
 	return value, nil
 }
 
-func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, error) {
+// ValidateLocalChanges checks for untracked, uncommitted, and committed changes in the local repository.
+// It returns a list of uncommitted tracked changes that should be included in the PR.
+func validateLocalChanges(exe ghutil.Executor, options *Options) ([]string, error) {
 	if err := handleUntrackedChanges(exe, options); err != nil {
 		return []string{}, err
 	}
 
-	trackedChanges, err := handleTrackedChanges(exe, options)
+	uncommittedChanges, err := handleUncommittedChanges(exe, options)
 	if err != nil {
 		return []string{}, err
 	}
 
-	return trackedChanges, nil
+	committedChanges, err := handleCommittedChanges(exe)
+	if err != nil {
+		return []string{}, err
+	}
+
+	if len(uncommittedChanges) == 0 && len(committedChanges) == 0 {
+		return []string{}, errors.New("No changes found, aborting PR operation")
+	}
+
+	return uncommittedChanges, nil
 }
 
 func handleUntrackedChanges(exe ghutil.Executor, options *Options) error {
@@ -86,36 +98,54 @@ func handleUntrackedChanges(exe ghutil.Executor, options *Options) error {
 	return nil
 }
 
-func handleTrackedChanges(exe ghutil.Executor, options *Options) ([]string, error) {
-	trackedChanges, err := ghutil.GetTrackedChanges(exe)
-	if err != nil {
-		return []string{}, err
-	}
-
+func handleCommittedChanges(exe ghutil.Executor) ([]string, error) {
 	commits, err := exe.Command("git", "log", "--oneline", "origin/main..")
 	if err != nil {
 		return []string{}, err
 	}
-
-	if len(trackedChanges) == 0 && commits == "" {
-		return []string{}, errors.New("No tracked changes found, skipping commit")
+	commitsList := []string{}
+	if commits != "" {
+		commits = strings.TrimSpace(commits)
+		commitsList = strings.Split(commits, "\n")
+		logger.Info("Using already committed changes for PR:")
+		for _, commit := range commitsList {
+			if len(commit) > 0 {
+				logger.Info(fmt.Sprintf("\t- %s", commit))
+			}
+		}
+		logger.Info("")
+	} else {
+		logger.Debug("No committed changes found")
 	}
+	return commitsList, nil
+}
 
-	// Skip confirmation if test run or commit message already provided
-	if options.TestRun || options.CommitMessage != "" {
-		return trackedChanges, nil
-	}
-
-	confirmed, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(trackedChanges))
+func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, error) {
+	uncommittedTrackedChanges, err := ghutil.GetTrackedChanges(exe)
 	if err != nil {
 		return []string{}, err
 	}
 
+	if len(uncommittedTrackedChanges) == 0 {
+		logger.Debug("No uncommitted tracked changes found")
+		return []string{}, nil
+	}
+
+	// Skip confirmation if test run or commit message already provided
+	if options.TestRun || options.CommitMessage != "" {
+		return uncommittedTrackedChanges, nil
+	}
+
+	confirmed, err := ghutil.AskToConfirm(formatTrackedFileChangesQuestion(uncommittedTrackedChanges))
+	if err != nil {
+		return []string{}, err
+	}
 	if !confirmed {
 		return []string{}, errors.New("User aborted workflow")
 	}
 
-	return trackedChanges, nil
+
+	return uncommittedTrackedChanges, nil
 }
 
 func addAndCommitFiles(exe ghutil.Executor, options *Options) error {
@@ -151,9 +181,9 @@ func addAndCommitFiles(exe ghutil.Executor, options *Options) error {
 	return nil
 }
 
-func performPreCommitOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+func performPreCreateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
 	// Handle uncommitted changes
-	filesToCommit, err := handleUncommittedChanges(exe, options)
+	filesToCommit, err := validateLocalChanges(exe, options)
 	if err != nil {
 		return pr, err
 	}

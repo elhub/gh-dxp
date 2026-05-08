@@ -70,7 +70,7 @@ func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *Crea
 		CommitMessage: options.CommitMessage,
 	}
 
-	pr, err = performPreCommitOperations(exe, settings, pr, prOpts)
+	pr, err = performPreCreateOperations(exe, settings, pr, prOpts)
 	if err != nil {
 		return err
 	}
