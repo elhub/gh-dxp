@@ -53,7 +53,7 @@ func getPRField(exe ghutil.Executor, field string) (string, error) {
 
 // ValidateLocalChanges checks for untracked, uncommitted, and committed changes in the local repository.
 // It returns a list of uncommitted tracked changes that should be included in the PR.
-func validateLocalChanges(exe ghutil.Executor, options *Options) ([]string, error) {
+func validateLocalChanges(exe ghutil.Executor, options *Options, targetBranch string) ([]string, error) {
 	if err := handleUntrackedChanges(exe, options); err != nil {
 		return []string{}, err
 	}
@@ -63,7 +63,7 @@ func validateLocalChanges(exe ghutil.Executor, options *Options) ([]string, erro
 		return []string{}, err
 	}
 
-	committedChanges, err := handleCommittedChanges(exe)
+	committedChanges, err := handleCommittedChanges(exe, targetBranch)
 	if err != nil {
 		return []string{}, err
 	}
@@ -98,8 +98,8 @@ func handleUntrackedChanges(exe ghutil.Executor, options *Options) error {
 	return nil
 }
 
-func handleCommittedChanges(exe ghutil.Executor) ([]string, error) {
-	commits, err := exe.Command("git", "log", "--oneline", "origin/main..")
+func handleCommittedChanges(exe ghutil.Executor, baseBranch string) ([]string, error) {
+	commits, err := exe.Command("git", "log", "--oneline", "origin/"+baseBranch+"..")
 	if err != nil {
 		return []string{}, err
 	}
@@ -181,9 +181,9 @@ func addAndCommitFiles(exe ghutil.Executor, options *Options) error {
 	return nil
 }
 
-func performPreCreateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
 	// Handle uncommitted changes
-	filesToCommit, err := validateLocalChanges(exe, options)
+	filesToCommit, err := validateLocalChanges(exe, options, pr.targetBranch)
 	if err != nil {
 		return pr, err
 	}

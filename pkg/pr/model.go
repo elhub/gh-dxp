@@ -55,6 +55,7 @@ type UpdateOptions struct {
 // PullRequest represents a pull request.
 type PullRequest struct {
 	branchID string
+	targetBranch string
 	Title    string
 	Body     string
 	isLinted bool

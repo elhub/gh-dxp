@@ -40,6 +40,7 @@ func TestExecuteUpdate(t *testing.T) {
 			name:             "Test successful PR update",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
+			repoBranchName:   "main",
 			prListNumber:     "3",
 			expectedErr:      nil,
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
@@ -68,6 +69,7 @@ func TestExecuteUpdate(t *testing.T) {
 			name:             "Test error in update flow - git push",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
+			repoBranchName:   "main",
 			pushBranchErr:    errors.New("error pushing branch"),
 			prListNumber:     "1",
 			prListURL:        "https://github.com/elhub/demo/pull/3",
@@ -80,6 +82,7 @@ func TestExecuteUpdate(t *testing.T) {
 			name:             "Test error in update flow - list URL",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
+			repoBranchName:   "main",
 			prListNumber:     "1",
 			prListNErr:       nil,
 			prListURL:        "",
@@ -140,6 +143,7 @@ func TestExecuteUpdate(t *testing.T) {
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
 			currentBranch:    "branch1",
+			repoBranchName:   "main",
 			prListNumber:     "1",
 			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
@@ -189,6 +193,8 @@ func TestExecuteUpdate(t *testing.T) {
 				"- [ ] Integration Tests\n\n\nDocumentation:\n- No updates\n", "--base", "main"}).
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
+				Return(tt.repoBranchName, tt.repoBranchErr)
+			mockExe.On("GH", []string{"pr", "view", "--json", "baseRefName", "--jq", ".baseRefName"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
 
 			err := pr.ExecuteUpdate(mockExe,
