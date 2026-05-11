@@ -320,7 +320,7 @@ func TestAddAndCommitFiles(t *testing.T) {
 			},
 			gitAddOutput: "",
 			gitAddErr:    nil,
-			gitCommitOut: "",
+			gitCommitOut: "[branchName 21e44e1] Fix something\n2 files changed, 16 insertions(+), 5 deletions(-)",
 			gitCommitErr: nil,
 			expectedErr:  "",
 		},
@@ -357,12 +357,26 @@ func TestAddAndCommitFiles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Note: addAndCommitFiles is not exported, so we cannot test it directly
-			// This test would need the function to be exported or tested through a public function
-			// For now, this is a placeholder structure showing how the test would be written
+			mockExe := new(testutils.MockExecutor)
 
-			// Skipping actual test execution since the function is not exported
-			t.Skip("addAndCommitFiles is not exported")
+			mockExe.On("Command", "git", []string{"add", "-u"}).Return(tt.gitAddOutput, tt.gitAddErr)
+
+			if tt.gitAddErr == nil && tt.options.CommitMessage != "" {
+				mockExe.On("Command", "git", []string{"commit", "-m", tt.options.CommitMessage}).
+					Return(tt.gitCommitOut, tt.gitCommitErr)
+			} else if tt.gitAddErr == nil {
+				mockExe.On("Command", "git", []string{"commit", "-m", "default commit message"}).
+					Return(tt.gitCommitOut, tt.gitCommitErr)
+			}
+
+			err := pr.AddAndCommitFiles(mockExe, tt.options)
+			if tt.expectedErr != "" {
+				require.Error(t, err)
+				assert.Equal(t, tt.expectedErr, err.Error())
+			} else {
+				require.NoError(t, err)
+			}
+			mockExe.AssertExpectations(t)
 		})
 	}
 }
