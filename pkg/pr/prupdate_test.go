@@ -24,6 +24,7 @@ func TestExecuteUpdate(t *testing.T) {
 		prListNErr       error
 		prListURL        string
 		prListUErr       error
+		prViewErr        error
 		gitLog           string
 		gitLogErr        error
 		repoBranchName   string
@@ -61,6 +62,19 @@ func TestExecuteUpdate(t *testing.T) {
 			prListNumber:     "",
 			prListNErr:       errors.New("error checking for existing PR"),
 			expectedErr:      errors.New("Failed to find existing PR"),
+			existingBranches: "main\ndifferentBranch\n",
+			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
+		},
+		{
+			name:             "Test error in checking for PR target branch",
+			currentBranch:    "branch1",
+			pushBranch:       "branch1",
+			repoBranchName:	  "main",
+			prListNumber:     "3",
+			prListNErr:       nil,
+			prViewErr:        errors.New("Test error"),
+			expectedErr:      errors.New("Failed to fetch target branch: Test error"),
 			existingBranches: "main\ndifferentBranch\n",
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
@@ -195,7 +209,7 @@ func TestExecuteUpdate(t *testing.T) {
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
 			mockExe.On("GH", []string{"pr", "view", "--json", "baseRefName", "--jq", ".baseRefName"}).
-				Return(tt.repoBranchName, tt.repoBranchErr)
+				Return(tt.repoBranchName, tt.prViewErr)
 
 			err := pr.ExecuteUpdate(mockExe,
 				&config.Settings{},
