@@ -218,5 +218,23 @@ func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Sett
 		}
 	}
 
+	if options.TestRun {
+		pr.label = "Test"
+		return pr, err
+	}
+	label, err := ghutil.AskForMultipleChoice("Please provide a PR type Label: ", func() []string {
+		labels := make([]string, 0, len(PullRequestLabels))
+		for _, l := range PullRequestLabels {
+			labels = append(labels, l.Name)
+		}
+		return labels
+	}())
+	if err != nil {
+		return pr, err
+	}
+	logger.Info("Setting PR Label to \"" + label + "\"")
+	pr.label = label
+
+
 	return pr, nil
 }

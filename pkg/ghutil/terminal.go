@@ -52,3 +52,16 @@ func AskForMultiline(question string) (string, error) {
 	}
 	return lines, nil
 }
+
+// AskForMultipleChoice prompts the user with a list of options and returns their selection.
+func AskForMultipleChoice(question string, options []string) (string, error) {
+	choice := ""
+	err := survey.AskOne(&survey.Select{
+		Message: question,
+		Options: options,
+	}, &choice, survey.WithValidator(survey.Required))
+	if err != nil {
+		return "", err
+	}
+	return choice, nil
+}

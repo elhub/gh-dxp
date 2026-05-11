@@ -83,6 +83,7 @@ func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *Crea
 		// If the PR exists, update it by pushing to the remote
 		return update(exe, pr.branchID, prID)
 	}
+
 	// If it doesn't exist, create a new PR
 	return create(exe, options, settings, pr)
 }
@@ -102,8 +103,13 @@ func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settin
 		return err
 	}
 
+	err = ensureLabelExistsInRepository(exe, pr.label)
+	if err != nil {
+		return err
+	}
+
 	s = ghutil.StartSpinner("Processing pull request...", "Pull request "+newPR.Title+" created.")
-	args := []string{"pr", "create", "--title", newPR.Title, "--body", newPR.Body, "--base", options.baseBranch}
+	args := []string{"pr", "create", "--title", newPR.Title, "--body", newPR.Body, "--base", options.baseBranch, "--label", pr.label}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
 	if err != nil {
@@ -113,6 +119,30 @@ func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settin
 	s.Stop()
 	logger.Info(strings.Trim(stdOut, "\n"))
 
+	return nil
+}
+
+func ensureLabelExistsInRepository(exe ghutil.Executor, labelName string) error {
+	stdOut, err := exe.GH("label", "list")
+	if err != nil {
+		return err
+	}
+	if strings.Contains(stdOut, labelName) {
+		return nil
+	}
+	label := func () PullRequestLabel {
+		for _, l := range PullRequestLabels {
+			if l.Name == labelName {
+				return l
+			}
+		}
+		return PullRequestLabel{}
+	}()
+	logger.Info("Label " + labelName + " does not exist in repository. Creating label \"" + label.Name + "\"...")
+	_, err = exe.GH("label", "create", label.Name, "--color", label.Color, "--description", label.Description)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
