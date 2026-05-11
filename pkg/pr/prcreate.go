@@ -48,9 +48,13 @@ func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *Crea
 	if err != nil {
 		return err
 	}
+	if baseBranch == "" {
+		return errors.New("Base branch cannot be empty")
+	}
+	pr.targetBranch = baseBranch
 
 	// If we're currently in the base branch, we need to make a new temporary branch to contain the diff
-	if pr.branchID == baseBranch {
+	if pr.branchID == pr.targetBranch {
 		err := CreateTemporaryBranch(exe, options, &pr)
 		if err != nil {
 			return err
@@ -70,7 +74,7 @@ func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *Crea
 		CommitMessage: options.CommitMessage,
 	}
 
-	pr, err = performPreCreateOperations(exe, settings, pr, prOpts)
+	pr, err = performPreCreateUpdateOperations(exe, settings, pr, prOpts)
 	if err != nil {
 		return err
 	}

@@ -24,6 +24,7 @@ func TestExecuteUpdate(t *testing.T) {
 		prListNErr       error
 		prListURL        string
 		prListUErr       error
+		prViewErr        error
 		gitLog           string
 		gitLogErr        error
 		repoBranchName   string
@@ -40,6 +41,7 @@ func TestExecuteUpdate(t *testing.T) {
 			name:             "Test successful PR update",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
+			repoBranchName:   "main",
 			prListNumber:     "3",
 			expectedErr:      nil,
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
@@ -65,9 +67,23 @@ func TestExecuteUpdate(t *testing.T) {
 			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
 		{
+			name:             "Test error in checking for PR target branch",
+			currentBranch:    "branch1",
+			pushBranch:       "branch1",
+			repoBranchName:	  "main",
+			prListNumber:     "3",
+			prListNErr:       nil,
+			prViewErr:        errors.New("Test error"),
+			expectedErr:      errors.New("Failed to fetch target branch: Test error"),
+			existingBranches: "main\ndifferentBranch\n",
+			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
+			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
+		},
+		{
 			name:             "Test error in update flow - git push",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
+			repoBranchName:   "main",
 			pushBranchErr:    errors.New("error pushing branch"),
 			prListNumber:     "1",
 			prListURL:        "https://github.com/elhub/demo/pull/3",
@@ -80,6 +96,7 @@ func TestExecuteUpdate(t *testing.T) {
 			name:             "Test error in update flow - list URL",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
+			repoBranchName:   "main",
 			prListNumber:     "1",
 			prListNErr:       nil,
 			prListURL:        "",
@@ -140,6 +157,7 @@ func TestExecuteUpdate(t *testing.T) {
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			existingBranches: "main\ndifferentBranch\n",
 			currentBranch:    "branch1",
+			repoBranchName:   "main",
 			prListNumber:     "1",
 			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
@@ -190,6 +208,8 @@ func TestExecuteUpdate(t *testing.T) {
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
+			mockExe.On("GH", []string{"pr", "view", "--json", "baseRefName", "--jq", ".baseRefName"}).
+				Return(tt.repoBranchName, tt.prViewErr)
 
 			err := pr.ExecuteUpdate(mockExe,
 				&config.Settings{},

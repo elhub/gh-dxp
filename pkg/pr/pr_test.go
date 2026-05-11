@@ -288,7 +288,7 @@ func TestValidateLocalChanges(t *testing.T) {
 				}
 			}
 
-			uncommittedChanges, err := pr.ValidateLocalChanges(mockExe, tt.options)
+			uncommittedChanges, err := pr.ValidateLocalChanges(mockExe, tt.options, "main")
 			if tt.expectedErr != "" {
 				require.Error(t, err)
 				assert.Equal(t, tt.expectedErr, err.Error())
