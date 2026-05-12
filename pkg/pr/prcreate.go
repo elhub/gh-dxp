@@ -130,14 +130,18 @@ func ensureLabelExistsInRepository(exe ghutil.Executor, labelName string) error 
 	if strings.Contains(stdOut, labelName) {
 		return nil
 	}
-	label := func() PullRequestLabel {
-		for _, l := range PullRequestLabels {
-			if l.Name == labelName {
-				return l
-			}
+	var label PullRequestLabel
+	found := false
+	for _, l := range PullRequestLabels {
+		if l.Name == labelName {
+			label = l
+			found = true
+			break
 		}
-		return PullRequestLabel{}
-	}()
+	}
+	if !found {
+		return errors.Errorf("unrecognized pull request label: %s", labelName)
+	}
 	logger.Info("Label " + labelName + " does not exist in repository. Creating label \"" + label.Name + "\"...")
 	_, err = exe.GH("label", "create", label.Name, "--color", label.Color, "--description", label.Description)
 	if err != nil {
