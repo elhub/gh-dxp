@@ -285,7 +285,7 @@ func TestExecuteCreate(t *testing.T) {
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
-			mockExe.On("GH", []string{"label", "list"}).
+			mockExe.On("GH", []string{"label", "list", "--json", "name", "--jq", ".[].name"}).
 				Return("", tt.labelCheckErr)
 			mockExe.On("GH", []string{"label", "create", "Test", "--color", "#fbca04", "--description", "A test PR is a pull request that adds or updates tests."}).
 				Return("", tt.labelCreateErr)

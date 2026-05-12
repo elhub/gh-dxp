@@ -123,7 +123,7 @@ func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settin
 }
 
 func ensureLabelExistsInRepository(exe ghutil.Executor, labelName string) error {
-	stdOut, err := exe.GH("label", "list")
+	stdOut, err := exe.GH("label", "list", "--json", "name", "--jq", ".[].name")
 	if err != nil {
 		return err
 	}
