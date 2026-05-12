@@ -37,6 +37,8 @@ func TestExecuteCreate(t *testing.T) {
 		existingBranches string
 		issues           string
 		issueBodySection string
+		labelCheckErr    error
+		labelCreateErr   error
 	}{
 		{
 			name:             "Test successful PR creation",
@@ -279,10 +281,14 @@ func TestExecuteCreate(t *testing.T) {
 				"## 📋 Checklist\n\n" +
 				"* ✅ Lint checks passed on local machine.\n" +
 				"* ⚠️ **No tests could be run for this PR.**\n",
-				"--base", "main"}).
+				"--base", "main", "--label", "Test"}).
 				Return(tt.prCreate, tt.prCreateErr)
 			mockExe.On("GH", []string{"repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name"}).
 				Return(tt.repoBranchName, tt.repoBranchErr)
+			mockExe.On("GH", []string{"label", "list", "--json", "name", "--jq", ".[].name"}).
+				Return("", tt.labelCheckErr)
+			mockExe.On("GH", []string{"label", "create", "Test", "--color", "#fbca04", "--description", "A test PR is a pull request that adds or updates tests."}).
+				Return("", tt.labelCreateErr)
 
 			err := pr.ExecuteCreate(mockExe,
 				&config.Settings{

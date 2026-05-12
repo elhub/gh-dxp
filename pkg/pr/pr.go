@@ -144,7 +144,6 @@ func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, 
 		return []string{}, errors.New("User aborted workflow")
 	}
 
-
 	return uncommittedTrackedChanges, nil
 }
 
@@ -179,6 +178,25 @@ func addAndCommitFiles(exe ghutil.Executor, options *Options) error {
 	}
 
 	return nil
+}
+
+func performPreCreateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+	pr, err := performPreCreateUpdateOperations(exe, settings, pr, options)
+	if err != nil {
+		return pr, err
+	}
+
+	if options.TestRun {
+		pr.label = "Test"
+		return pr, err
+	}
+
+	return promptForLabel(pr)
+
+}
+
+func performPreUpdateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+	return performPreCreateUpdateOperations(exe, settings, pr, options)
 }
 
 func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
@@ -218,5 +236,21 @@ func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Sett
 		}
 	}
 
+	return pr, nil
+}
+
+func promptForLabel(pr PullRequest) (PullRequest, error) {
+		label, err := ghutil.AskForMultipleChoice("Please provide a PR type Label: ", func() []string {
+		labels := make([]string, 0, len(PullRequestLabels))
+		for _, l := range PullRequestLabels {
+			labels = append(labels, l.Name)
+		}
+		return labels
+	}())
+	if err != nil {
+		return pr, err
+	}
+	logger.Info("Setting PR Label to \"" + label + "\"")
+	pr.label = label
 	return pr, nil
 }

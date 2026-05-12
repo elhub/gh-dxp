@@ -47,7 +47,7 @@ func ExecuteUpdate(exe ghutil.Executor, settings *config.Settings, options *Upda
 		CommitMessage: options.CommitMessage,
 	}
 
-	pr, err := performPreCreateUpdateOperations(exe, settings, pr, prOpts)
+	pr, err := performPreUpdateOperations(exe, settings, pr, prOpts)
 	if err != nil {
 		return err
 	}
