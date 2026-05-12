@@ -180,6 +180,25 @@ func addAndCommitFiles(exe ghutil.Executor, options *Options) error {
 	return nil
 }
 
+func performPreCreateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+	pr, err := performPreCreateUpdateOperations(exe, settings, pr, options)
+	if err != nil {
+		return pr, err
+	}
+
+	if options.TestRun {
+		pr.label = "Test"
+		return pr, err
+	}
+
+	return promptForLabel(pr)
+
+}
+
+func performPreUpdateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
+	return performPreCreateUpdateOperations(exe, settings, pr, options)
+}
+
 func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Settings, pr PullRequest, options *Options) (PullRequest, error) {
 	// Handle uncommitted changes
 	filesToCommit, err := validateLocalChanges(exe, options, pr.targetBranch)
@@ -217,11 +236,11 @@ func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Sett
 		}
 	}
 
-	if options.TestRun {
-		pr.label = "Test"
-		return pr, err
-	}
-	label, err := ghutil.AskForMultipleChoice("Please provide a PR type Label: ", func() []string {
+	return pr, nil
+}
+
+func promptForLabel(pr PullRequest) (PullRequest, error) {
+		label, err := ghutil.AskForMultipleChoice("Please provide a PR type Label: ", func() []string {
 		labels := make([]string, 0, len(PullRequestLabels))
 		for _, l := range PullRequestLabels {
 			labels = append(labels, l.Name)
@@ -233,6 +252,5 @@ func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Sett
 	}
 	logger.Info("Setting PR Label to \"" + label + "\"")
 	pr.label = label
-
 	return pr, nil
 }
