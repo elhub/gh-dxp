@@ -37,8 +37,8 @@ func TestExecuteCreate(t *testing.T) {
 		existingBranches string
 		issues           string
 		issueBodySection string
-		labelCheckErr  	 error
-		labelCreateErr 	 error
+		labelCheckErr    error
+		labelCreateErr   error
 	}{
 		{
 			name:             "Test successful PR creation",

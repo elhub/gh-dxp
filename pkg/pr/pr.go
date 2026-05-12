@@ -144,7 +144,6 @@ func handleUncommittedChanges(exe ghutil.Executor, options *Options) ([]string, 
 		return []string{}, errors.New("User aborted workflow")
 	}
 
-
 	return uncommittedTrackedChanges, nil
 }
 
@@ -234,7 +233,6 @@ func performPreCreateUpdateOperations(exe ghutil.Executor, settings *config.Sett
 	}
 	logger.Info("Setting PR Label to \"" + label + "\"")
 	pr.label = label
-
 
 	return pr, nil
 }

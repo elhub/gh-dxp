@@ -130,7 +130,7 @@ func ensureLabelExistsInRepository(exe ghutil.Executor, labelName string) error 
 	if strings.Contains(stdOut, labelName) {
 		return nil
 	}
-	label := func () PullRequestLabel {
+	label := func() PullRequestLabel {
 		for _, l := range PullRequestLabels {
 			if l.Name == labelName {
 				return l

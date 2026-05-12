@@ -54,13 +54,13 @@ type UpdateOptions struct {
 
 // PullRequest represents a pull request.
 type PullRequest struct {
-	branchID 		string
-	targetBranch    string
-	Title    		string
-	Body     		string
-	isLinted 		bool
-	isTested 		bool
-	label 			string
+	branchID     string
+	targetBranch string
+	Title        string
+	Body         string
+	isLinted     bool
+	isTested     bool
+	label        string
 }
 
 // The following structs are used to unmarshal the JSON responses from the GitHub API.
@@ -105,51 +105,51 @@ type PullRequestUI struct {
 
 // PullRequestLabel represents the model for the pull request label.
 type PullRequestLabel struct {
-	Name  		string
-	Color 		string
+	Name        string
+	Color       string
 	Description string
 }
 
 // PullRequestLabels defines the labels that can be applied to pull requests.
-var PullRequestLabels = []PullRequestLabel {
+var PullRequestLabels = []PullRequestLabel{
 	{
-		Name: "Bugfix",
-		Color: "#d93f0b",
+		Name:        "Bugfix",
+		Color:       "#d93f0b",
 		Description: "A bugfix PR is a pull request that fixes a bug in the codebase.",
 	},
 	{
-		Name: "Build",
-		Color: "#196020",
+		Name:        "Build",
+		Color:       "#196020",
 		Description: "A build PR is a pull request that updates the build system or dependencies.",
 	},
 	{
-		Name: "Chore",
-		Color: "#5319e7",
+		Name:        "Chore",
+		Color:       "#5319e7",
 		Description: "A chore PR is a pull request that performs routine tasks or maintenance.",
 	},
 	{
-		Name: "Documentation",
-		Color: "#dda5fc",
+		Name:        "Documentation",
+		Color:       "#dda5fc",
 		Description: "A documentation PR is a pull request that updates the documentation.",
 	},
 	{
-		Name: "Feature",
-		Color: "#0075ca",
+		Name:        "Feature",
+		Color:       "#0075ca",
 		Description: "A feature PR is a pull request that adds a new feature to the codebase.",
 	},
 	{
-		Name: "Refactor",
-		Color: "#e99695",
+		Name:        "Refactor",
+		Color:       "#e99695",
 		Description: "A refactor PR is a pull request that restructures existing code without changing its behavior.",
 	},
 	{
-		Name: "Style",
-		Color: "#17f7e9",
+		Name:        "Style",
+		Color:       "#17f7e9",
 		Description: "A style PR is a pull request that changes the code style or formatting.",
 	},
 	{
-		Name: "Test",
-		Color: "#fbca04",
+		Name:        "Test",
+		Color:       "#fbca04",
 		Description: "A test PR is a pull request that adds or updates tests.",
 	},
 }
