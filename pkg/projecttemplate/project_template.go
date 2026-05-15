@@ -11,10 +11,24 @@ import (
 	"path/filepath"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 )
 
 // DefaultClient is the HTTP client used by Execute when none is provided.
 var DefaultClient = http.DefaultClient
+
+// fileDeleteCandidate represents a file that may need to be deleted with a confirmation prompt.
+type fileDeleteCandidate struct {
+	path   string
+	prompt string
+}
+
+// fileToDownload represents a template file to be downloaded and written to disk.
+type fileToDownload struct {
+	fileName  string
+	path      string
+	overwrite bool
+}
 
 // Execute downloads the project template files and writes them to the working directory.
 // If client is nil, DefaultClient (http.DefaultClient) is used.
@@ -35,11 +49,7 @@ func Execute(workingDir string, settings *config.Settings, options *Options, cli
 	}
 
 	// Download files
-	files := []struct {
-		fileName  string
-		path      string
-		overwrite bool
-	}{
+	files := []fileToDownload{
 		{
 			fileName:  ".editorconfig-template",
 			path:      filepath.Join(workingDir, ".editorconfig"),
@@ -94,11 +104,7 @@ func Execute(workingDir string, settings *config.Settings, options *Options, cli
 			return err
 		}
 
-		gradleFiles := []struct {
-			fileName  string
-			path      string
-			overwrite bool
-		}{
+		gradleFiles := []fileToDownload{
 			{
 				fileName:  "gradleFiles/gradle/wrapper/gradle-wrapper.jar",
 				path:      filepath.Join(gradleWrapperDir, "gradle-wrapper.jar"),
@@ -152,6 +158,57 @@ func Execute(workingDir string, settings *config.Settings, options *Options, cli
 		}
 	}
 
+	filesToDelete := []fileDeleteCandidate{
+		{
+			path:   filepath.Join(workingDir, "CODEOWNERS"),
+			prompt: "Existing CODEOWNERS file should be deleted to avoid confusion with the template .github/CODEOWNERS file. Delete?",
+		},
+		{
+			path:   filepath.Join(workingDir, "CONTRIBUTING.md"),
+			prompt: "Existing CONTRIBUTING.md file should be deleted to avoid confusion with the template .github/CONTRIBUTING.md file. Delete?",
+		},
+	}
+
+	return deleteExistingFiles(filesToDelete, options)
+}
+
+// deleteExistingFiles checks if files that should be deleted exist and prompts the user to delete them if they do.
+func deleteExistingFiles(filesToDelete []fileDeleteCandidate, options *Options) error {
+	for _, file := range filesToDelete {
+		if _, err := os.Stat(file.path); err == nil {
+			if err := handleFileDelete(file.path, file.prompt, options); err != nil {
+				return err
+			}
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("could not stat %s: %w", file.path, err)
+		}
+	}
+	return nil
+}
+
+// handleFileDelete prompts the user to delete a file and removes it if confirmed.
+func handleFileDelete(path string, prompt string, options *Options) error {
+	if options.TestRun {
+		return nil
+	}
+
+	var doDelete bool
+	var err error
+
+	// Use custom confirm function if provided, otherwise use ghutil.AskToConfirm
+	if options.CustomAskToConfirmFunc != nil {
+		doDelete, err = options.CustomAskToConfirmFunc(prompt)
+	} else {
+		doDelete, err = ghutil.AskToConfirm(prompt)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	if doDelete {
+		return os.Remove(path)
+	}
 	return nil
 }
 
