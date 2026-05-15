@@ -160,12 +160,12 @@ func Execute(workingDir string, settings *config.Settings, options *Options, cli
 
 	filesToDelete := []fileDeleteCandidate{
 		{
-			path:    filepath.Join(workingDir, "CODEOWNERS"),
-			prompt:  "Existing CODEOWNERS file should be deleted to avoid confusion with the template .github/CODEOWNERS file. Delete?",
+			path:   filepath.Join(workingDir, "CODEOWNERS"),
+			prompt: "Existing CODEOWNERS file should be deleted to avoid confusion with the template .github/CODEOWNERS file. Delete?",
 		},
 		{
-			path:    filepath.Join(workingDir, "CONTRIBUTING.md"),
-			prompt:  "Existing CONTRIBUTING.md file should be deleted to avoid confusion with the template .github/CONTRIBUTING.md file. Delete?",
+			path:   filepath.Join(workingDir, "CONTRIBUTING.md"),
+			prompt: "Existing CONTRIBUTING.md file should be deleted to avoid confusion with the template .github/CONTRIBUTING.md file. Delete?",
 		},
 	}
 
@@ -192,7 +192,16 @@ func handleFileDelete(path string, prompt string, options *Options) error {
 		return nil
 	}
 
-	doDelete, err := ghutil.AskToConfirm(prompt)
+	var doDelete bool
+	var err error
+
+	// Use custom confirm function if provided, otherwise use ghutil.AskToConfirm
+	if options.CustomAskToConfirmFunc != nil {
+		doDelete, err = options.CustomAskToConfirmFunc(prompt)
+	} else {
+		doDelete, err = ghutil.AskToConfirm(prompt)
+	}
+
 	if err != nil {
 		return err
 	}
