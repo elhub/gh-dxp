@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/elhub/gh-dxp/pkg/config"
+	"github.com/elhub/gh-dxp/pkg/ghutil"
 )
 
 // DefaultClient is the HTTP client used by Execute when none is provided.
@@ -152,6 +153,52 @@ func Execute(workingDir string, settings *config.Settings, options *Options, cli
 		}
 	}
 
+	filesToDelete := []struct {
+		path      string
+		prompt    string
+	}{
+		{
+			path:    filepath.Join(workingDir, "CODEOWNERS"),
+			prompt:  "Existing CODEOWNERS file should be deleted to avoid confusion with the template .github/CODEOWNERS file. Delete?",
+		},
+		{
+			path:    filepath.Join(workingDir, "CONTRIBUTING.md"),
+			prompt:  "Existing CONTRIBUTING.md file should be deleted to avoid confusion with the template .github/CONTRIBUTING.md file. Delete?",
+		},
+	}
+
+	return deleteExistingFiles(filesToDelete, options)
+}
+
+// deleteExistingFiles checks if files that should be deleted exist and prompts the user to delete them if they do.
+func deleteExistingFiles(filesToDelete []struct {
+	path    string
+	prompt  string
+}, options *Options) error {
+	for _, file := range filesToDelete {
+		if _, err := os.Stat(file.path); err == nil {
+			if err := handleFileDelete(file.path, file.prompt, options); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// handleFileDelete prompts the user to delete a file and removes it if confirmed.
+func handleFileDelete(path string, prompt string, options *Options) error {
+	if options.TestRun {
+		return nil
+	}
+
+	doDelete, err := ghutil.AskToConfirm(prompt)
+	if err != nil {
+		return err
+	}
+
+	if doDelete {
+		return os.Remove(path)
+	}
 	return nil
 }
 

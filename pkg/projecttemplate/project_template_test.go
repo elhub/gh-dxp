@@ -80,7 +80,8 @@ func TestExecuteGradle(t *testing.T) {
 	}
 
 	options := &projecttemplate.Options{
-		true,
+		IsGradleProject: true,
+		TestRun:         true,
 	}
 
 	// Set up the expected file paths
