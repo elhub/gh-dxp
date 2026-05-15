@@ -180,6 +180,8 @@ func deleteExistingFiles(filesToDelete []struct {
 			if err := handleFileDelete(file.path, file.prompt, options); err != nil {
 				return err
 			}
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("could not stat %s: %w", file.path, err)
 		}
 	}
 	return nil
