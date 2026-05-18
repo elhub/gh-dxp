@@ -15,7 +15,7 @@ import (
 
 // Run runs the linting process using megalinter (https://github.com/oxsecurity/megalinter).
 // Megalinter is an open-source linter aggregator that runs multiple linters in parallel. It requires NodeJS (npx) to be installed.
-func Run(exe ghutil.Executor, _ *config.Settings, opts *Options) error {
+func Run(exe ghutil.Executor, settings *config.Settings, opts *Options) error {
 	// Create a context that listens for interrupt signals
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -38,7 +38,7 @@ func Run(exe ghutil.Executor, _ *config.Settings, opts *Options) error {
 	args := []string{"npx", "mega-linter-runner"}
 
 	if opts.LinterImage == "" {
-		args = append(args, "--flavor", "cupcake")
+		args = append(args, "--image", settings.MegalinterImageVersion)
 	} else {
 		args = append(args, "--image", opts.LinterImage)
 	}
