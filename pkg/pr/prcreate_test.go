@@ -246,7 +246,11 @@ func TestExecuteCreate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake",
+			testConfig := &config.Settings{
+				JiraURL:                "https://jira-mock/browse",
+				MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+			}
+			linterArgs := []string{"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 				"-e", "LINTER_RULES_PATH=/tmp",
 				"-e", "GOTOOLCHAIN=auto",
 				"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
@@ -291,9 +295,7 @@ func TestExecuteCreate(t *testing.T) {
 				Return("", tt.labelCreateErr)
 
 			err := pr.ExecuteCreate(mockExe,
-				&config.Settings{
-					JiraURL: "https://jira-mock/browse",
-				},
+				testConfig,
 				&pr.CreateOptions{
 					TestRun: true,
 					Issues:  tt.issues,
