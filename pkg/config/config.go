@@ -25,9 +25,10 @@ func ReadConfig(filepath string) (*Settings, error) {
 // DefaultSettings loads the default .devxp settings.
 func DefaultSettings() *Settings {
 	return &Settings{
-		ProjectTemplateURI: "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
-		JiraURL:            "https://elhub.atlassian.net/browse",
-		ProjectType:        "",
+		ProjectTemplateURI:     "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
+		JiraURL:                "https://elhub.atlassian.net/browse",
+		ProjectType:            "",
+		MegalinterImageVersion: "docker.jfrog.elhub.cloud/oxsecurity/megalinter-cupcake:v9.4.0",
 	}
 }
 

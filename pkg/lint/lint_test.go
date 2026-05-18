@@ -12,6 +12,9 @@ import (
 )
 
 func TestRun_LintNoErrors(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
 	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
@@ -20,7 +23,7 @@ func TestRun_LintNoErrors(t *testing.T) {
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "origin/main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -29,12 +32,15 @@ func TestRun_LintNoErrors(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{})
+	err := lint.Run(mockExe, testConfig, &lint.Options{})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }
 
 func TestRun_LintHasErrors(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
 	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
@@ -43,7 +49,7 @@ func TestRun_LintHasErrors(t *testing.T) {
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "origin/main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -52,16 +58,19 @@ func TestRun_LintHasErrors(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, errors.New("command error"))
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{})
+	err := lint.Run(mockExe, testConfig, &lint.Options{})
 	require.Error(t, err)
 	mockExe.AssertExpectations(t)
 }
 
 func TestRun_LintAllFiles(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -69,12 +78,15 @@ func TestRun_LintAllFiles(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{LintAll: true})
+	err := lint.Run(mockExe, testConfig, &lint.Options{LintAll: true})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }
 
 func TestRun_LintWithFix(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("main\ndifferentBranch\n", nil)
 	mockExe.On("Command", "git", []string{"fetch", "origin", "main"}).Return("", nil)
@@ -83,7 +95,7 @@ func TestRun_LintWithFix(t *testing.T) {
 	mockExe.On("Command", "git", []string{"diff", "--name-only", "origin/main", "--relative"}).Return("/pkg/source.go\n/pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -92,18 +104,21 @@ func TestRun_LintWithFix(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{Fix: true})
+	err := lint.Run(mockExe, testConfig, &lint.Options{Fix: true})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }
 
 func TestRun_LintWithNoExistingBranches(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 	mockExe.On("Command", "git", []string{"branch"}).Return("", nil)
 	mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return(" M /pkg/source.go\n M /pkg/source2.go", nil)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -112,16 +127,19 @@ func TestRun_LintWithNoExistingBranches(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{})
+	err := lint.Run(mockExe, testConfig, &lint.Options{})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }
 
 func TestRun_LintSpecificDirectory(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -130,16 +148,19 @@ func TestRun_LintSpecificDirectory(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{Directory: "pkg"})
+	err := lint.Run(mockExe, testConfig, &lint.Options{Directory: "pkg"})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }
 
 func TestRun_UseProxy(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
 	mockExe := new(testutils.MockExecutor)
 
 	linterArgs := []string{
-		"mega-linter-runner", "--flavor", "cupcake",
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
 		"-e", "GOTOOLCHAIN=auto",
 		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
@@ -148,7 +169,7 @@ func TestRun_UseProxy(t *testing.T) {
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, &config.Settings{}, &lint.Options{Directory: "pkg", Proxy: "https://myproxy.no:8080"})
+	err := lint.Run(mockExe, testConfig, &lint.Options{Directory: "pkg", Proxy: "https://myproxy.no:8080"})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }

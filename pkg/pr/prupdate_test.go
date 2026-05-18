@@ -70,7 +70,7 @@ func TestExecuteUpdate(t *testing.T) {
 			name:             "Test error in checking for PR target branch",
 			currentBranch:    "branch1",
 			pushBranch:       "branch1",
-			repoBranchName:	  "main",
+			repoBranchName:   "main",
 			prListNumber:     "3",
 			prListNErr:       nil,
 			prViewErr:        errors.New("Test error"),
@@ -172,7 +172,10 @@ func TestExecuteUpdate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			linterArgs := []string{"mega-linter-runner", "--flavor", "cupcake",
+			testConfig := &config.Settings{
+				MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+			}
+			linterArgs := []string{"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 				"-e", "LINTER_RULES_PATH=/tmp",
 				"-e", "GOTOOLCHAIN=auto",
 				"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml"}
@@ -212,7 +215,7 @@ func TestExecuteUpdate(t *testing.T) {
 				Return(tt.repoBranchName, tt.prViewErr)
 
 			err := pr.ExecuteUpdate(mockExe,
-				&config.Settings{},
+				testConfig,
 				&pr.UpdateOptions{
 					TestRun: true,
 				})
