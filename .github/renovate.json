@@ -1,4 +1,20 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>elhub/devxp-renovate"]
+  "extends": ["github>elhub/devxp-renovate"],
+  "customManagers": [
+    {
+      "description": "Megalinter image version in config.go",
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^pkg/config/config\\.go$/"
+      ],
+      "matchStrings": [
+        "MegalinterImageVersion\\s*:\\s*\"docker.jfrog.elhub.cloud/oxsecurity/(?<image>megalinter-cupcake):(?<currentValue>.*?)\""
+      ],
+      "depNameTemplate": "docker.jfrog.elhub.cloud/oxsecurity/{{image}}",
+      "packageNameTemplate": "docker.jfrog.elhub.cloud/oxsecurity/{{image}}",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "loose"
+    }
+  ]
 }
