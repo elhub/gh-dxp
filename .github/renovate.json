@@ -9,7 +9,7 @@
         "/^pkg/config/config\\.go$/"
       ],
       "matchStrings": [
-        "MegalinterImageVersion\\s*:\\s*\"docker.jfrog.elhub.cloud/oxsecurity/megalinter-cupcake:(?<currentValue>.*?)\""
+        "MegalinterImageVersion\\s*:\\s*\"docker\\.jfrog\\.elhub\\.cloud/oxsecurity/megalinter-cupcake:(?<currentValue>[^\"]+)\""
       ],
       "packageNameTemplate": "oxsecurity/megalinter",
       "datasourceTemplate": "github-releases",
