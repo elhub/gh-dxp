@@ -28,7 +28,7 @@ func DefaultSettings() *Settings {
 		ProjectTemplateURI:     "https://raw.githubusercontent.com/elhub/devxp-project-template/main/resources/",
 		JiraURL:                "https://elhub.atlassian.net/browse",
 		ProjectType:            "",
-		MegalinterImageVersion: "docker.jfrog.elhub.cloud/oxsecurity/megalinter-cupcake:v9.4.0",
+		MegalinterImageVersion: "docker.jfrog.elhub.cloud/oxsecurity/megalinter-cupcake:v9.5.0",
 	}
 }
 
