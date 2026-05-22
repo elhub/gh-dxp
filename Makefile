@@ -52,7 +52,7 @@ vet:
 
 # Target: Build release binaries for all platforms
 release:
-	@test -n "${VERSION}" || (echo "No git tags found. Create a tag before running make release."; exit 1)
+	@test -n "${VERSION}" || (echo "No git tags found for the latest commit. Create a tag before running make release."; exit 1)
 	@echo "Preparing release for ${VERSION}"
 	@if ! gh release view "${VERSION}" --repo "${REPO}" >/dev/null 2>&1; then \
 		rm -rf dist; mkdir -p dist; \
