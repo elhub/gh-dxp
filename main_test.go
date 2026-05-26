@@ -6,9 +6,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestMain(t *testing.T) {
-	tests := []struct {
-		name        string
+func TestMain(t                             *testing.T) {
+	tests := []struct {		name        string
 		expectPanic bool
 	}{
 		{
