@@ -41,14 +41,26 @@ Import recommended aliases from this repository:
 gh alias import alias.yml
 ```
 
-Common first commands:
+## Development workflow
 
-```sh
-gh dxp status
-gh dxp test
-gh dxp lint
-gh dxp pr create
-```
+Here's the typical workflow when using `gh-dxp`:
+
+1. **Make edits to your repository**
+
+2. **Run `gh prc`** (which is an alias for `gh dxp pr create`)
+   - Automatically creates a feature branch
+   - Prompts for your commit message(s)
+   - Runs tests to validate your changes
+   - Runs the linter on changed files
+   - Validates renovate config if applicable
+   - Asks for PR title, description, and pr-type tag
+   - Creates the pull request
+
+3. **Fix linting issues** (if needed)
+   ```sh
+   gh dxp lint --fix
+   ```
+   This automatically fixes many common linting issues
 
 ## Command overview
 
