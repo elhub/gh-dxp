@@ -76,7 +76,8 @@ For complete command docs, see:
   2. `./gradlew test`
   3. `mvn test`
   4. `npm test`
-- `gh dxp lint` uses local `.mega-linter.yml` when present; otherwise it falls back to [devxp-lint-configuration](https://github.com/elhub/devxp-lint-configuration).
+- `gh dxp lint` uses local `.mega-linter.yml` when present; otherwise it falls back to
+-  [devxp-lint-configuration](https://github.com/elhub/devxp-lint-configuration).
 
 ## Development
 
