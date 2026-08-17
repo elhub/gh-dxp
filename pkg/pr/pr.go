@@ -27,7 +27,7 @@ var conventionalCommitToLabel = map[string]string{
 	"build":    "Build",
 }
 
-// inferLabelFromCommits returns a label inferred from the first commit's conventional prefix.
+// inferLabelFromCommits returns a label inferred from the most recent commit's conventional prefix.
 func inferLabelFromCommits(exe ghutil.Executor, pr PullRequest) string {
 	commits, err := branch.GetCommitMessages(exe, pr.targetBranch, pr.branchID)
 	if err != nil || commits == "" {
@@ -40,12 +40,12 @@ func inferLabelFromCommits(exe ghutil.Executor, pr PullRequest) string {
 		return ""
 	}
 
-	commitType := parts[0]
+	commitType := strings.TrimSpace(parts[0])
 	if idx := strings.Index(commitType, "("); idx != -1 {
 		commitType = commitType[:idx]
 	}
 
-	commitType = strings.ToLower(strings.TrimSpace(commitType))
+	commitType = strings.ToLower(strings.TrimSuffix(strings.TrimSpace(commitType), "!"))
 	return conventionalCommitToLabel[commitType]
 }
 

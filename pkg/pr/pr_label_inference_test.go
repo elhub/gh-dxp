@@ -3,6 +3,7 @@ package pr
 import (
 	"testing"
 
+	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/testutils"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -34,6 +35,11 @@ func TestInferLabelFromCommits(t *testing.T) {
 			name:         "maps docs to Documentation",
 			commitOutput: "docs: update guide",
 			expected:     "Documentation",
+		},
+		{
+			name:         "maps feat bang to Feature",
+			commitOutput: "feat!: remove deprecated flow",
+			expected:     "Feature",
 		},
 		{
 			name:         "maps refactor to Refactor",
@@ -93,4 +99,24 @@ func TestInferLabelFromCommits(t *testing.T) {
 			mockExe.AssertExpectations(t)
 		})
 	}
+}
+
+func TestPerformPreCreateOperationsAutoSetsLabelFromConventionalCommit(t *testing.T) {
+	mockExe := new(testutils.MockExecutor)
+	mockExe.On("Command", "git", []string{"status", "--porcelain"}).Return("", nil)
+	mockExe.On("Command", "git", []string{"log", "--oneline", "origin/main.."}).Return("abc123 feat: add inference", nil)
+	mockExe.On("Command", "git", []string{"log", "main..feature-branch", "--oneline", "--pretty=format:%s"}).Return("feat: add inference", nil)
+
+	prIn := PullRequest{
+		branchID:     "feature-branch",
+		targetBranch: "main",
+	}
+
+	prOut, err := performPreCreateOperations(mockExe, &config.Settings{}, prIn, &Options{
+		NoLint: true,
+		NoUnit: true,
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, "Feature", prOut.label)
+	mockExe.AssertExpectations(t)
 }
