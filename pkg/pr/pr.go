@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
 	"github.com/elhub/gh-dxp/pkg/lint"
@@ -13,6 +14,40 @@ import (
 	"github.com/elhub/gh-dxp/pkg/test"
 	"github.com/pkg/errors"
 )
+
+// conventionalCommitToLabel maps conventional commit type prefixes to PullRequestLabel names.
+var conventionalCommitToLabel = map[string]string{
+	"feat":     "Feature",
+	"fix":      "Bugfix",
+	"chore":    "Chore",
+	"docs":     "Documentation",
+	"refactor": "Refactor",
+	"style":    "Style",
+	"test":     "Test",
+	"build":    "Build",
+}
+
+// inferLabelFromCommits returns a label inferred from the first commit's conventional prefix.
+func inferLabelFromCommits(exe ghutil.Executor, pr PullRequest) string {
+	commits, err := branch.GetCommitMessages(exe, pr.targetBranch, pr.branchID)
+	if err != nil || commits == "" {
+		return ""
+	}
+
+	firstLine := strings.SplitN(commits, "\n", 2)[0]
+	parts := strings.SplitN(firstLine, ":", 2)
+	if len(parts) < 2 {
+		return ""
+	}
+
+	commitType := parts[0]
+	if idx := strings.Index(commitType, "("); idx != -1 {
+		commitType = commitType[:idx]
+	}
+
+	commitType = strings.ToLower(strings.TrimSpace(commitType))
+	return conventionalCommitToLabel[commitType]
+}
 
 // CheckForExistingPR checks if a PR already exists for the current branch.
 func CheckForExistingPR(exe ghutil.Executor, branchID string) (string, error) {
@@ -189,6 +224,12 @@ func performPreCreateOperations(exe ghutil.Executor, settings *config.Settings, 
 	if options.TestRun {
 		pr.label = "Test"
 		return pr, err
+	}
+
+	if label := inferLabelFromCommits(exe, pr); label != "" {
+		logger.Info("Auto-setting PR Label to \"" + label + "\" based on conventional commit prefix")
+		pr.label = label
+		return pr, nil
 	}
 
 	return promptForLabel(pr)
