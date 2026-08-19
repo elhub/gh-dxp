@@ -36,7 +36,6 @@ ij_continuation_indent_size = 4
 
 # Makefile
 [{Makefile,**.mk}]
-# Use tabs for indentation (Makefiles require tabs)
 indent_style = tab
 max_line_length = 160
 
@@ -56,7 +55,6 @@ max_line_length = 160
 # Rego
 [*.rego]
 indent_size = 2
-max_line_length = 160
 
 # Shell
 [*.sh]
