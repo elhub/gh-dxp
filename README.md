@@ -16,7 +16,7 @@ To avoid having to type `gh dxp` constantly, we recommend running:
    gh alias import alias.yml
    ```
 
-The `alias.yml` file included in this project installs a number of useful aliases for the commands in this extension.
+The `alias.yml` file included in this project installs a number of useful aliases for the commands in extension.
 
 ## Installation
 
