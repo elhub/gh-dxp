@@ -29,7 +29,7 @@ The `alias.yml` file included in this project installs a number of useful aliase
 <details>
    <summary><strong>Install from source</strong></summary>
 
-If you want to install this extension **from source**, such as for development, follow these two steps:
+If you want to install this extension **from source** for development, follow these two steps:
 
 1. Clone the repo
 
