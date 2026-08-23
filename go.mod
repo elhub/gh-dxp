@@ -1,6 +1,6 @@
 module github.com/elhub/gh-dxp
 
-go 1.26.6
+go 1.27.0
 
 require (
 	charm.land/bubbles/v2 v2.1.1
