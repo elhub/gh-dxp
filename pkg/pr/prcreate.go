@@ -3,6 +3,7 @@ package pr
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/elhub/gh-dxp/pkg/branch"
@@ -11,6 +12,14 @@ import (
 	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/pkg/errors"
 )
+
+// jiraKeyPattern matches Jira issue keys like TDX-123 and EDIEL-456.
+var jiraKeyPattern = regexp.MustCompile(`\b[A-Z][A-Z0-9]+-\d+\b`)
+
+// ExtractJiraIDs parses a branch name and returns any Jira issue keys found.
+func ExtractJiraIDs(branchName string) []string {
+	return jiraKeyPattern.FindAllString(branchName, -1)
+}
 
 // CreateTemporaryBranch creates a new temporary branch from the current base branch and checks it out. It updates the pr struct with the new branch name.
 func CreateTemporaryBranch(exe ghutil.Executor, options *CreateOptions, pr *PullRequest) error {
@@ -247,7 +256,7 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 		}
 	}
 
-	issueSection, err := issuesChanges(options, settings)
+	issueSection, err := issuesChanges(options, settings, pr.branchID)
 	if err != nil {
 		return "", err
 	}
@@ -322,17 +331,25 @@ func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
 	}
 }
 
-func issuesChanges(options *CreateOptions, settings *config.Settings) (string, error) {
+func issuesChanges(options *CreateOptions, settings *config.Settings, branchName string) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
 	var issueIDString string
+	autoDetected := false
 	if !options.TestRun && options.Issues == "" {
-		userIssueString, errI := ghutil.AskForString("Issue IDs (separate with commas):", "")
+		detectedIDs := ExtractJiraIDs(branchName)
+		userIssueString, errI := ghutil.AskForString(
+			"Issue IDs (separate with commas):",
+			strings.Join(detectedIDs, ", "),
+		)
 		if errI != nil {
 			return "", errI
 		}
 		issueIDString = userIssueString
+	} else if options.Issues == "" {
+		autoDetected = true
+		issueIDString = strings.Join(ExtractJiraIDs(branchName), ", ")
 	} else {
 		issueIDString = options.Issues
 	}
@@ -342,9 +359,11 @@ func issuesChanges(options *CreateOptions, settings *config.Settings) (string, e
 		}
 
 		issueIDs := strings.Split(issueIDString, ",")
-		for i, id := range issueIDs {
-			id = strings.TrimSpace(id)
-			issueIDs[i] = fmt.Sprintf("[%s](%s/%s)", id, settings.JiraURL, id)
+		for i := range issueIDs {
+			issueIDs[i] = strings.TrimSpace(issueIDs[i])
+			if !autoDetected {
+				issueIDs[i] = fmt.Sprintf("[%s](%s/%s)", issueIDs[i], settings.JiraURL, issueIDs[i])
+			}
 		}
 		body += "## 🔗 Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
 	}
