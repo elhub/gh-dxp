@@ -2,6 +2,7 @@
 package pr
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/jira"
 	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/pkg/errors"
 )
@@ -256,7 +258,7 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 		}
 	}
 
-	issueSection, err := issuesChanges(options, settings, pr.branchID)
+	issueSection, err := issuesChanges(options, settings, pr.branchID, strings.Join([]string{pr.Title, commits, body}, "\n"))
 	if err != nil {
 		return "", err
 	}
@@ -331,13 +333,19 @@ func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
 	}
 }
 
-func issuesChanges(options *CreateOptions, settings *config.Settings, branchName string) (string, error) {
+func issuesChanges(options *CreateOptions, settings *config.Settings, branchName, suggestionText string) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
 	var issueIDString string
 	autoDetected := false
 	if !options.TestRun && options.Issues == "" {
+		if suggestions, err := jira.SearchIssues(context.Background(), suggestionText); err != nil {
+			logger.Warn("Unable to fetch Jira suggestions: " + err.Error())
+		} else if len(suggestions) > 0 {
+			logger.Info(formatJiraSuggestions(suggestions))
+		}
+
 		detectedIDs := ExtractJiraIDs(branchName)
 		userIssueString, errI := ghutil.AskForString(
 			"Issue IDs (separate with commas):",
@@ -369,6 +377,20 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 	}
 
 	return body, nil
+}
+
+func formatJiraSuggestions(issues []jira.SearchIssue) string {
+	var suggestionLines []string
+	for i, issue := range issues {
+		if i == 5 {
+			break
+		}
+		suggestionLines = append(suggestionLines, fmt.Sprintf("%d. %s - %s", i+1, issue.Key, issue.Fields.Summary))
+	}
+	if len(suggestionLines) == 0 {
+		return ""
+	}
+	return "Suggested issues:\n" + strings.Join(suggestionLines, "\n")
 }
 
 func testingChanges(options *CreateOptions) (string, error) {
