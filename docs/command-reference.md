@@ -137,4 +137,3 @@ The `test` command will attempt to autodetect tests in your current repository a
 💡 tip:
 If your setup doesn't neatly fit into any of the options outlined above, you can add a Makefile to your repo and
 define the `make check` command however you want.
-

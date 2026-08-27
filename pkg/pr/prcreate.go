@@ -258,7 +258,7 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 		}
 	}
 
-	issueSection, err := issuesChanges(options, settings, pr.branchID, strings.Join([]string{pr.Title, commits, body}, "\n"))
+	issueSection, err := issuesChanges(options, settings, pr.branchID, commits, pr.Title, body)
 	if err != nil {
 		return "", err
 	}
@@ -333,20 +333,29 @@ func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
 	}
 }
 
-func issuesChanges(options *CreateOptions, settings *config.Settings, branchName, suggestionText string) (string, error) {
+func issuesChanges(options *CreateOptions, settings *config.Settings, branchName, commits, title, description string) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
 	var issueIDString string
 	autoDetected := false
+	detectedIDs := ExtractJiraIDs(branchName)
 	if !options.TestRun && options.Issues == "" {
-		if suggestions, err := jira.SearchIssues(context.Background(), suggestionText); err != nil {
-			logger.Warn("Unable to fetch Jira suggestions: " + err.Error())
+		if suggestions, err := jira.SearchIssues(context.Background(), settings.JiraURL, settings.JiraEmail, jira.SearchText{
+			CommitMessage: commits,
+			Title:         title,
+			Description:   description,
+		}); err != nil {
+			if err.Error() == "jira token not configured" {
+				logger.Info("💡 Tip: Set JIRA_API_TOKEN env var to get automatic Jira ticket suggestions.")
+			} else {
+				logger.Warn("Unable to fetch Jira suggestions: " + err.Error())
+			}
 		} else if len(suggestions) > 0 {
 			logger.Info(formatJiraSuggestions(suggestions))
+			detectedIDs = mergeIssueIDs(detectedIDs, extractJiraIDsFromSuggestions(suggestions, 3))
 		}
 
-		detectedIDs := ExtractJiraIDs(branchName)
 		userIssueString, errI := ghutil.AskForString(
 			"Issue IDs (separate with commas):",
 			strings.Join(detectedIDs, ", "),
@@ -357,7 +366,7 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 		issueIDString = userIssueString
 	} else if options.Issues == "" {
 		autoDetected = true
-		issueIDString = strings.Join(ExtractJiraIDs(branchName), ", ")
+		issueIDString = strings.Join(detectedIDs, ", ")
 	} else {
 		issueIDString = options.Issues
 	}
@@ -391,6 +400,39 @@ func formatJiraSuggestions(issues []jira.SearchIssue) string {
 		return ""
 	}
 	return "Suggested issues:\n" + strings.Join(suggestionLines, "\n")
+}
+
+func extractJiraIDsFromSuggestions(issues []jira.SearchIssue, limit int) []string {
+	if limit <= 0 {
+		return nil
+	}
+
+	ids := make([]string, 0, limit)
+	for _, issue := range issues {
+		if len(ids) == limit {
+			break
+		}
+		ids = append(ids, issue.Key)
+	}
+	return ids
+}
+
+func mergeIssueIDs(primary, secondary []string) []string {
+	if len(primary) == 0 && len(secondary) == 0 {
+		return nil
+	}
+
+	seen := map[string]bool{}
+	merged := make([]string, 0, len(primary)+len(secondary))
+	for _, issueID := range append(primary, secondary...) {
+		trimmed := strings.TrimSpace(issueID)
+		if trimmed == "" || seen[trimmed] {
+			continue
+		}
+		seen[trimmed] = true
+		merged = append(merged, trimmed)
+	}
+	return merged
 }
 
 func testingChanges(options *CreateOptions) (string, error) {
