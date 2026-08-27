@@ -346,14 +346,28 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 			Title:         title,
 			Description:   description,
 		}); err != nil {
-			if err.Error() == "jira token not configured" {
-				logger.Info("💡 Tip: Set JIRA_API_TOKEN env var to get automatic Jira ticket suggestions.")
-			} else {
+			switch err {
+			case jira.ErrJiraNotConfigured:
+				logger.Info("💡 Tip: Add your Jira API token to ~/.jira_token to get automatic ticket suggestions.\n   Create an empty ~/.jira_token to hide this message.")
+			case jira.ErrJiraDisabled:
+				// user opted out — stay silent
+			default:
 				logger.Warn("Unable to fetch Jira suggestions: " + err.Error())
 			}
 		} else if len(suggestions) > 0 {
 			logger.Info(formatJiraSuggestions(suggestions))
-			detectedIDs = mergeIssueIDs(detectedIDs, extractJiraIDsFromSuggestions(suggestions, 3))
+			seen := map[string]bool{}
+			for _, id := range detectedIDs {
+				seen[id] = true
+			}
+			for i, s := range suggestions {
+				if i == 3 {
+					break
+				}
+				if !seen[s.Key] {
+					detectedIDs = append(detectedIDs, s.Key)
+				}
+			}
 		}
 
 		userIssueString, errI := ghutil.AskForString(
@@ -400,39 +414,6 @@ func formatJiraSuggestions(issues []jira.SearchIssue) string {
 		return ""
 	}
 	return "Suggested issues:\n" + strings.Join(suggestionLines, "\n")
-}
-
-func extractJiraIDsFromSuggestions(issues []jira.SearchIssue, limit int) []string {
-	if limit <= 0 {
-		return nil
-	}
-
-	ids := make([]string, 0, limit)
-	for _, issue := range issues {
-		if len(ids) == limit {
-			break
-		}
-		ids = append(ids, issue.Key)
-	}
-	return ids
-}
-
-func mergeIssueIDs(primary, secondary []string) []string {
-	if len(primary) == 0 && len(secondary) == 0 {
-		return nil
-	}
-
-	seen := map[string]bool{}
-	merged := make([]string, 0, len(primary)+len(secondary))
-	for _, issueID := range append(primary, secondary...) {
-		trimmed := strings.TrimSpace(issueID)
-		if trimmed == "" || seen[trimmed] {
-			continue
-		}
-		seen[trimmed] = true
-		merged = append(merged, trimmed)
-	}
-	return merged
 }
 
 func testingChanges(options *CreateOptions) (string, error) {
