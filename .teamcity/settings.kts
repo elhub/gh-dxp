@@ -25,7 +25,6 @@ elhubProject(DEVXP, "gh-dxp") {
                 additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
             }
             enablePublishMetrics = true
-            uploadSbom = true
         }
         val publishBuildType = publishTag()
         customJob(LinuxAgentContext) {
