@@ -1,3 +1,4 @@
+// Package config defines configuration models for the gh-dxp extension.
 package config
 
 // Settings represents the configuration settings for the gh-dxp extension.

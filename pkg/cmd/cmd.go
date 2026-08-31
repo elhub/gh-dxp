@@ -70,6 +70,7 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 	return retCmd, nil
 }
 
+// JiraCmd suggests Jira issues based on the provided commit message text.
 func JiraCmd(settings *config.Settings) *cobra.Command {
 	return &cobra.Command{
 		Use:   "jira [commit message]",

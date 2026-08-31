@@ -347,27 +347,13 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 			Description:   description,
 		}); err != nil {
 			switch err {
-			case jira.ErrJiraNotConfigured:
-				logger.Info("💡 Tip: Add your Jira API token to ~/.jira_token to get automatic ticket suggestions.\n   Create an empty ~/.jira_token to hide this message.")
-			case jira.ErrJiraDisabled:
-				// user opted out — stay silent
+			case jira.ErrJiraDisabled, jira.ErrJiraNotConfigured:
+				// no credentials — skip silently
 			default:
 				logger.Warn("Unable to fetch Jira suggestions: " + err.Error())
 			}
 		} else if len(suggestions) > 0 {
 			logger.Info(formatJiraSuggestions(suggestions))
-			seen := map[string]bool{}
-			for _, id := range detectedIDs {
-				seen[id] = true
-			}
-			for i, s := range suggestions {
-				if i == 3 {
-					break
-				}
-				if !seen[s.Key] {
-					detectedIDs = append(detectedIDs, s.Key)
-				}
-			}
 		}
 
 		userIssueString, errI := ghutil.AskForString(
