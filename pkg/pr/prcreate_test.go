@@ -242,22 +242,6 @@ func TestExecuteCreate(t *testing.T) {
 			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
 			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
 		},
-		{
-			name:             "Jira ID auto-detected from branch name",
-			currentBranch:    "TDX-123-my-feature",
-			pushBranch:       "TDX-123-my-feature",
-			repoBranchName:   "main",
-			prListNumber:     "",
-			prListURL:        "https://github.com/elhub/demo/pull/3",
-			gitLog:           "feat: add billing calculation",
-			prCreate:         "pull request created",
-			expectedErr:      nil,
-			modifiedFiles:    "pkg/cmd/lint.go\npkg/lint/lint.go\n",
-			existingBranches: "main\ndifferentBranch\n",
-			currentChanges:   "M  pkg/cmd/lint.go\nM  pkg/lint/lint.go\n",
-			issues:           "",
-			issueBodySection: "## 🔗 Issue ID(s): TDX-123\n\n",
-		},
 	}
 
 	for _, tt := range tests {

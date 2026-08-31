@@ -341,7 +341,7 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 	autoDetected := false
 	detectedIDs := ExtractJiraIDs(branchName)
 	if !options.TestRun && options.Issues == "" {
-		if suggestions, err := jira.SearchIssues(context.Background(), settings.JiraURL, settings.JiraEmail, jira.SearchText{
+		if suggestions, err := jira.SearchIssues(context.Background(), settings.JiraURL, "", jira.SearchText{
 			CommitMessage: commits,
 			Title:         title,
 			Description:   description,
