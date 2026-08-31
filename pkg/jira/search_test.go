@@ -16,15 +16,15 @@ func writeTokenFile(t *testing.T, dir, content string) {
 
 func TestResolveCredentials(t *testing.T) {
 	tests := []struct {
-		name          string
-		configEmail   string
-		envUsername   string
-		envToken      string
-		fileContent   string
-		fileExists    bool
-		wantEmail     string
-		wantToken     string
-		wantErr       error
+		name        string
+		configEmail string
+		envUsername string
+		envToken    string
+		fileContent string
+		fileExists  bool
+		wantEmail   string
+		wantToken   string
+		wantErr     error
 	}{
 		{
 			name:       "no file, no env vars → not configured",
@@ -59,12 +59,12 @@ func TestResolveCredentials(t *testing.T) {
 			wantToken:   "tokenonly",
 		},
 		{
-			name:      "JIRA_API_TOKEN env var overrides file",
-			envToken:  "envtoken",
-			fileExists: true,
+			name:        "JIRA_API_TOKEN env var overrides file",
+			envToken:    "envtoken",
+			fileExists:  true,
 			fileContent: "file@elhub.no:filetoken",
-			wantEmail: "",
-			wantToken: "envtoken",
+			wantEmail:   "",
+			wantToken:   "envtoken",
 		},
 		{
 			name:        "JIRA_USERNAME env var overrides file email",

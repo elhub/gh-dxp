@@ -1,3 +1,4 @@
+// Package jira provides Jira issue search helpers used by gh-dxp commands.
 package jira
 
 import (
@@ -61,12 +62,14 @@ func resolveCredentials(email string) (resolvedEmail, token string, err error) {
 	return resolvedEmail, token, nil
 }
 
+// SearchText contains text used to rank Jira issue search results.
 type SearchText struct {
 	CommitMessage string
 	Title         string
 	Description   string
 }
 
+// SearchIssue represents a Jira issue returned by the search API.
 type SearchIssue struct {
 	Key    string `json:"key"`
 	Fields struct {
@@ -75,6 +78,7 @@ type SearchIssue struct {
 	} `json:"fields"`
 }
 
+// SearchIssues searches Jira issues and returns results ranked by relevance.
 func SearchIssues(ctx context.Context, baseURL, email string, text SearchText) ([]SearchIssue, error) {
 	baseURL = strings.TrimRight(strings.TrimSuffix(baseURL, "/browse"), "/")
 
