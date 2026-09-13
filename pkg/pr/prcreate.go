@@ -2,15 +2,27 @@
 package pr
 
 import (
+	"context"
 	"fmt"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/config"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/jira"
 	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/pkg/errors"
 )
+
+// jiraKeyPattern matches Jira issue keys like TDX-123 and EDIEL-456.
+var jiraKeyPattern = regexp.MustCompile(`\b[A-Z][A-Z0-9]+-\d+\b`)
+
+// ExtractJiraIDs parses a branch name and returns any Jira issue keys found.
+func ExtractJiraIDs(branchName string) []string {
+	return jiraKeyPattern.FindAllString(branchName, -1)
+}
 
 // CreateTemporaryBranch creates a new temporary branch from the current base branch and checks it out. It updates the pr struct with the new branch name.
 func CreateTemporaryBranch(exe ghutil.Executor, options *CreateOptions, pr *PullRequest) error {
@@ -247,7 +259,7 @@ func createBody(exe ghutil.Executor, pr PullRequest, options *CreateOptions, set
 		}
 	}
 
-	issueSection, err := issuesChanges(options, settings)
+	issueSection, err := issuesChanges(options, settings, pr.branchID, commits, pr.Title, body)
 	if err != nil {
 		return "", err
 	}
@@ -322,17 +334,45 @@ func docIsLintedLine(pr PullRequest, options *CreateOptions) string {
 	}
 }
 
-func issuesChanges(options *CreateOptions, settings *config.Settings) (string, error) {
+func issuesChanges(options *CreateOptions, settings *config.Settings, branchName, commits, title, description string) (string, error) {
 	// Issue ID(s)
 	// Optionally add the issue ID(s) to the PR body.
 	body := ""
 	var issueIDString string
+	autoDetected := false
+	detectedIDs := ExtractJiraIDs(branchName)
 	if !options.TestRun && options.Issues == "" {
-		userIssueString, errI := ghutil.AskForString("Issue IDs (separate with commas):", "")
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if suggestions, err := jira.SearchIssues(ctx, settings.JiraURL, "", jira.SearchText{
+			CommitMessage: commits,
+			Title:         title,
+			Description:   description,
+		}); err != nil {
+			switch err {
+			case jira.ErrJiraDisabled:
+				// user opted out — skip interactive prompt entirely
+				return body, nil
+			case jira.ErrJiraNotConfigured:
+				// no credentials — skip silently
+			default:
+				logger.Warn("Unable to fetch Jira suggestions: " + err.Error())
+			}
+		} else if len(suggestions) > 0 {
+			logger.Info(formatJiraSuggestions(suggestions))
+		}
+
+		userIssueString, errI := ghutil.AskForString(
+			"Issue IDs (separate with commas):",
+			strings.Join(detectedIDs, ", "),
+		)
 		if errI != nil {
 			return "", errI
 		}
 		issueIDString = userIssueString
+	} else if options.Issues == "" {
+		autoDetected = true
+		issueIDString = strings.Join(detectedIDs, ", ")
 	} else {
 		issueIDString = options.Issues
 	}
@@ -342,14 +382,30 @@ func issuesChanges(options *CreateOptions, settings *config.Settings) (string, e
 		}
 
 		issueIDs := strings.Split(issueIDString, ",")
-		for i, id := range issueIDs {
-			id = strings.TrimSpace(id)
-			issueIDs[i] = fmt.Sprintf("[%s](%s/%s)", id, settings.JiraURL, id)
+		for i := range issueIDs {
+			issueIDs[i] = strings.TrimSpace(issueIDs[i])
+			if !autoDetected {
+				issueIDs[i] = fmt.Sprintf("[%s](%s/%s)", issueIDs[i], settings.JiraURL, issueIDs[i])
+			}
 		}
 		body += "## 🔗 Issue ID(s): " + strings.Join(issueIDs, ", ") + "\n"
 	}
 
 	return body, nil
+}
+
+func formatJiraSuggestions(issues []jira.SearchIssue) string {
+	var suggestionLines []string
+	for i, issue := range issues {
+		if i == 5 {
+			break
+		}
+		suggestionLines = append(suggestionLines, fmt.Sprintf("%d. %s - %s", i+1, issue.Key, issue.Fields.Summary))
+	}
+	if len(suggestionLines) == 0 {
+		return ""
+	}
+	return "Suggested issues:\n" + strings.Join(suggestionLines, "\n")
 }
 
 func testingChanges(options *CreateOptions) (string, error) {
