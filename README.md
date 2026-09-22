@@ -8,6 +8,20 @@ in docs-support.
 Using the `-h` flag with any command will display relevant documentation.
 In addition to that, a [user guide](https://docs.elhub.cloud/support/applications/gh-dxp/index.html) for `gh dxp` is also available.
 
+## Jira Integration (Optional)
+
+`gh dxp pr create` can suggest relevant Jira tickets based on your commits. To enable:
+
+1. Generate a Jira API token at [id.atlassian.com/manage-api-tokens](https://id.atlassian.com/manage-api-tokens)
+2. Create `~/.jira_token` with your email and token:
+
+```sh
+echo "your-email@company.com:your_api_token" > ~/.jira_token
+chmod 600 ~/.jira_token
+```
+
+> To opt out silently and suppress any future prompts: `echo disabled > ~/.jira_token`
+
 ## Aliases
 
 To avoid having to type `gh dxp` constantly, we recommend running:
