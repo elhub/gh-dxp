@@ -10,7 +10,7 @@ require (
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
 	github.com/briandowns/spinner v1.23.2
 	github.com/caarlos0/log v0.6.2
-	github.com/cli/go-gh/v2 v2.16.0
+	github.com/cli/go-gh/v2 v2.16.1
 	github.com/hmarr/codeowners v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.10.2
