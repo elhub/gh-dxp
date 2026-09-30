@@ -3,6 +3,7 @@ BUILD_DIR=build
 BIN_DIR=${BUILD_DIR}/gh-dxp
 VERSION ?= $(shell git describe --tags --abbrev=0 --exact-match 2>/dev/null)
 REPO ?= $(shell git config --get remote.origin.url | sed -E 's#(git@github.com:|https://github.com/)##; s#\.git$$##')
+GO ?= env -u GOROOT -u GOTOOLDIR go
 
 PLATFORMS=linux/amd64 darwin/arm64
 
@@ -14,14 +15,14 @@ all: clean dep check vet build
 
 # Target: Build the binary
 build:
-	go build -o ${BIN_DIR}/${BINARY_NAME}
+	$(GO) build -o ${BIN_DIR}/${BINARY_NAME}
 
 # Target: Run tests and generate coverage report
 check:
 	mkdir -p ${BUILD_DIR}
-	go test ./... -coverprofile=${BUILD_DIR}/coverage.out
-	go tool cover -html=${BUILD_DIR}/coverage.out -o ${BUILD_DIR}/coverage.html
-	go tool cover -func ${BUILD_DIR}/coverage.out | grep "total"
+	$(GO) test ./... -coverprofile=${BUILD_DIR}/coverage.out
+	$(GO) tool cover -html=${BUILD_DIR}/coverage.out -o ${BUILD_DIR}/coverage.html
+	$(GO) tool cover -func ${BUILD_DIR}/coverage.out | grep "total"
 
 # Target: Clean build artifacts
 clean:
@@ -31,7 +32,7 @@ clean:
 
 # Target: Download dependencies
 dep:
-	go mod download
+	$(GO) mod download
 
 # Target: Install the binary as a GitHub CLI extension
 install: clean build
@@ -40,7 +41,7 @@ install: clean build
 
 # Target: Run OWASP security checks
 owasp:
-	go run github.com/securego/gosec/v2/cmd/gosec ./...
+	$(GO) run github.com/securego/gosec/v2/cmd/gosec ./...
 
 # Target: Run the binary
 run: build
@@ -48,7 +49,7 @@ run: build
 
 # Target: Run Go vet for static analysis
 vet:
-	go vet
+	$(GO) vet
 
 # Target: Build release binaries for all platforms
 release:
@@ -60,7 +61,7 @@ release:
 			GOOS=$$(echo $$platform | cut -d/ -f1); \
 			GOARCH=$$(echo $$platform | cut -d/ -f2); \
 			echo "Building for $$GOOS/$$GOARCH..."; \
-			GOOS=$$GOOS GOARCH=$$GOARCH go build -ldflags="-X 'main.version=$(VERSION)'" -o "dist/$(BINARY_NAME)-$$GOOS-$$GOARCH" . || exit 1; \
+			GOOS=$$GOOS GOARCH=$$GOARCH $(GO) build -ldflags="-X 'main.version=$(VERSION)'" -o "dist/$(BINARY_NAME)-$$GOOS-$$GOARCH" . || exit 1; \
 		done; \
 		gh release create "${VERSION}" dist/$(BINARY_NAME)-* --repo "${REPO}" --verify-tag --generate-notes; \
 		echo "All builds completed successfully."; \

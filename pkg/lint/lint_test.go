@@ -2,6 +2,8 @@ package lint_test
 
 import (
 	"errors"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/elhub/gh-dxp/pkg/config"
@@ -172,4 +174,90 @@ func TestRun_UseProxy(t *testing.T) {
 	err := lint.Run(mockExe, testConfig, &lint.Options{Directory: "pkg", Proxy: "https://myproxy.no:8080"})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
+}
+
+func TestRun_RepoPinnedGoToolchainSkipsAutoFlag(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
+	mockExe := new(testutils.MockExecutor)
+
+	dir := t.TempDir()
+	configContent := "GOTOOLCHAIN: 'go1.27.1'\nGOCACHE: '/tmp/lint/.gocache/build'\n"
+	configPath := filepath.Join(dir, ".mega-linter.yml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configContent), 0o600))
+
+	linterArgs := []string{
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "MEGALINTER_CONFIG=" + configPath,
+	}
+
+	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
+
+	err := lint.Run(mockExe, testConfig, &lint.Options{LintAll: true, BaseDir: dir})
+	require.NoError(t, err)
+	mockExe.AssertExpectations(t)
+}
+
+func TestRun_BaseDirWithoutConfigUsesDefaultMegalinterConfig(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
+	mockExe := new(testutils.MockExecutor)
+
+	dir := t.TempDir()
+
+	linterArgs := []string{
+		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
+		"-e", "LINTER_RULES_PATH=/tmp",
+		"-e", "GOTOOLCHAIN=auto",
+		"-e", "MEGALINTER_CONFIG=https://raw.githubusercontent.com/elhub/devxp-lint-configuration/main/resources/.mega-linter.yml",
+	}
+
+	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
+
+	err := lint.Run(mockExe, testConfig, &lint.Options{LintAll: true, BaseDir: dir})
+	require.NoError(t, err)
+	mockExe.AssertExpectations(t)
+}
+
+func TestRepoSetsGoToolchain_Pinned(t *testing.T) {
+	dir := t.TempDir()
+	configContent := "GOTOOLCHAIN: 'go1.27.1'\nGOCACHE: '/tmp/lint/.gocache/build'\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".mega-linter.yml"), []byte(configContent), 0o600))
+
+	require.True(t, lint.RepoSetsGoToolchain(dir))
+}
+
+func TestRepoSetsGoToolchain_NoConfigFile(t *testing.T) {
+	dir := t.TempDir()
+
+	// No .mega-linter.yml is written in this temp dir.
+	require.False(t, lint.RepoSetsGoToolchain(dir))
+}
+
+func TestRepoSetsGoToolchain_ConfigWithoutGoToolchain(t *testing.T) {
+	dir := t.TempDir()
+	configContent := "ENABLE_LINTERS:\n  - GO_GOLANGCI_LINT\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".mega-linter.yml"), []byte(configContent), 0o600))
+
+	require.False(t, lint.RepoSetsGoToolchain(dir))
+}
+
+func TestRepoSetsGoToolchain_MalformedConfig(t *testing.T) {
+	dir := t.TempDir()
+	configContent := "GOTOOLCHAIN: [unterminated\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".mega-linter.yml"), []byte(configContent), 0o600))
+
+	require.False(t, lint.RepoSetsGoToolchain(dir))
+}
+
+func TestRepoSetsGoToolchain_ReadFileError(t *testing.T) {
+	dir := t.TempDir()
+
+	// Create a directory with the config file name so os.ReadFile fails with a read error.
+	require.NoError(t, os.Mkdir(filepath.Join(dir, ".mega-linter.yml"), 0o700))
+
+	require.False(t, lint.RepoSetsGoToolchain(dir))
 }
