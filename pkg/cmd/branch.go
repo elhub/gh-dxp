@@ -5,6 +5,7 @@ import (
 	"github.com/MakeNowJust/heredoc/v2"
 	"github.com/elhub/gh-dxp/pkg/branch"
 	"github.com/elhub/gh-dxp/pkg/ghutil"
+	"github.com/elhub/gh-dxp/pkg/logger"
 	"github.com/spf13/cobra"
 )
 
@@ -29,10 +30,8 @@ func BranchCmd(exe ghutil.Executor) *cobra.Command {
 			}
 			branchID := args[0]
 
-			s := ghutil.StartSpinner("Creating new work branch...", "Work Branch "+branchID)
-			b := branch.CheckoutBranch(exe, branchID)
-			s.Stop()
-			return b
+			logger.Info("Checking out work branch " + branchID + "...")
+			return branch.CheckoutBranch(exe, branchID)
 		},
 	}
 
