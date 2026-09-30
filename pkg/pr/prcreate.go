@@ -102,13 +102,11 @@ func ExecuteCreate(exe ghutil.Executor, settings *config.Settings, options *Crea
 
 func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settings, pr PullRequest) error {
 	// Push the current branch to git remote
-	s := ghutil.StartSpinner("Pushing current branch to remote...", "Pushed working branch to remote.")
+	logger.Info("Pushing current branch to remote...")
 	currentBranch, err := exe.Command("git", "push", "--set-upstream", "origin", pr.branchID)
 	if err != nil {
-		ghutil.RemoveFinalMsg(s)
 		return err
 	}
-	s.Stop()
 	logger.Info("Current Branch:" + currentBranch + "\n")
 	newPR, err := createPR(exe, options, settings, pr, options.baseBranch)
 	if err != nil {
@@ -120,15 +118,13 @@ func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settin
 		return err
 	}
 
-	s = ghutil.StartSpinner("Processing pull request...", "Pull request "+newPR.Title+" created.")
+	logger.Info("Creating pull request...")
 	args := []string{"pr", "create", "--title", newPR.Title, "--body", newPR.Body, "--base", options.baseBranch, "--label", pr.label}
 	args = append(args, generatePRArgs(options)...)
 	stdOut, err := exe.GH(args...)
 	if err != nil {
-		ghutil.RemoveFinalMsg(s)
 		return errors.Wrap(err, "Failed to create pull request")
 	}
-	s.Stop()
 	logger.Info(strings.Trim(stdOut, "\n"))
 
 	return nil
@@ -180,13 +176,11 @@ func generatePRArgs(options *CreateOptions) []string {
 
 func update(exe ghutil.Executor, branchID string, prID string) error {
 	// Push the current branch to the already existing git remote
-	s := ghutil.StartSpinner("Updating Pull Request #"+prID+"...", "Pull Request #"+prID+" has been updated.")
+	logger.Info("Updating Pull Request #" + prID + "...")
 	_, err := exe.Command("git", "push")
 	if err != nil {
-		ghutil.RemoveFinalMsg(s)
 		return err
 	}
-	s.Stop()
 
 	// Fetching this for info
 	stdOut, err := exe.GH("pr", "list", "-H", branchID, "--json", "url", "--jq", ".[].url")
@@ -486,13 +480,10 @@ func setBaseBranch(exe ghutil.Executor, options *CreateOptions) (string, error) 
 	// Fetch the default branch
 	baseBranch := options.baseBranch
 	if baseBranch == "" {
-		s := ghutil.StartSpinner("Fetching repository default branch...", "Fetched repository default branch")
 		stdOut, errV := exe.GH("repo", "view", "--json", "defaultBranchRef", "--jq", ".defaultBranchRef.name")
 		if errV != nil {
-			ghutil.RemoveFinalMsg(s)
 			return "", errors.Wrap(errV, "Failed to fetch default branch")
 		}
-		s.Stop()
 		baseBranch = strings.Trim(stdOut, "\n")
 		options.baseBranch = baseBranch
 	}

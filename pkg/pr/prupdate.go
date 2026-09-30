@@ -30,14 +30,10 @@ func ExecuteUpdate(exe ghutil.Executor, settings *config.Settings, options *Upda
 		return errors.New("No PR found for branch " + pr.branchID)
 	}
 
-	s := ghutil.StartSpinner("Fetching pull request target branch...", "Fetched pull request target branch")
 	stdOut, errV := exe.GH("pr", "view", "--json", "baseRefName", "--jq", ".baseRefName")
-
 	if errV != nil {
-		ghutil.RemoveFinalMsg(s)
 		return errors.Wrap(errV, "Failed to fetch target branch")
 	}
-	s.Stop()
 	pr.targetBranch = strings.Trim(stdOut, "\n")
 
 	prOpts := &Options{
