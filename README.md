@@ -20,7 +20,7 @@ echo "your-email@company.com:your_api_token" > ~/.jira_token
 chmod 600 ~/.jira_token
 ```
 
-> To opt out silently and suppress any future prompts: `echo disabled > ~/.jira_token`
+> To opt out silently and suppress future prompts: `echo disabled > ~/.jira_token`
 
 ## Aliases
 
