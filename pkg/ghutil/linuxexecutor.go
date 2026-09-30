@@ -32,6 +32,11 @@ func LinuxExecutor() *LinuxExecutorImpl {
 func (e *LinuxExecutorImpl) Command(name string, args ...string) (string, error) {
 	logger.Debug(fmt.Sprintf("Running '%s %s'", name, strings.Join(args, " ")))
 	cmd := e.ExecCommand(name, args...)
+	// Fail on git HTTPS prompts by disabling terminal prompt
+	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0")
+	// Detach from the TTY so prompts don't hang
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
+
 	bytes, err := cmd.CombinedOutput()
 
 	outputString := string(bytes)
