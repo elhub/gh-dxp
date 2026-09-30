@@ -182,20 +182,27 @@ func TestRun_RepoPinnedGoToolchainSkipsAutoFlag(t *testing.T) {
 	}
 	mockExe := new(testutils.MockExecutor)
 
-	dir := t.TempDir()
+	dir, err := os.MkdirTemp(".", "lint-basedir-")
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		require.NoError(t, os.RemoveAll(dir))
+	})
+
 	configContent := "GOTOOLCHAIN: 'go1.27.1'\nGOCACHE: '/tmp/lint/.gocache/build'\n"
 	configPath := filepath.Join(dir, ".mega-linter.yml")
 	require.NoError(t, os.WriteFile(configPath, []byte(configContent), 0o600))
 
+	expectedContainerPath := filepath.ToSlash(filepath.Join("/tmp/lint", filepath.Base(dir), ".mega-linter.yml"))
+
 	linterArgs := []string{
 		"mega-linter-runner", "--image", testConfig.MegalinterImageVersion,
 		"-e", "LINTER_RULES_PATH=/tmp",
-		"-e", "MEGALINTER_CONFIG=" + configPath,
+		"-e", "MEGALINTER_CONFIG=" + expectedContainerPath,
 	}
 
 	mockExe.On("CommandContext", mock.Anything, "npx", linterArgs).Return(nil, nil)
 
-	err := lint.Run(mockExe, testConfig, &lint.Options{LintAll: true, BaseDir: dir})
+	err = lint.Run(mockExe, testConfig, &lint.Options{LintAll: true, BaseDir: dir})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
 }
@@ -220,6 +227,22 @@ func TestRun_BaseDirWithoutConfigUsesDefaultMegalinterConfig(t *testing.T) {
 	err := lint.Run(mockExe, testConfig, &lint.Options{LintAll: true, BaseDir: dir})
 	require.NoError(t, err)
 	mockExe.AssertExpectations(t)
+}
+
+func TestRun_BaseDirOutsideWorkspaceWithLocalConfigReturnsError(t *testing.T) {
+	testConfig := &config.Settings{
+		MegalinterImageVersion: "oxsecurity/megalinter-cupcake:v9",
+	}
+	mockExe := new(testutils.MockExecutor)
+
+	dir := t.TempDir()
+	configContent := "GOTOOLCHAIN: 'go1.27.1'\n"
+	require.NoError(t, os.WriteFile(filepath.Join(dir, ".mega-linter.yml"), []byte(configContent), 0o600))
+
+	err := lint.Run(mockExe, testConfig, &lint.Options{LintAll: true, BaseDir: dir})
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "outside the mounted workspace")
+	mockExe.AssertNotCalled(t, "CommandContext", mock.Anything, mock.Anything, mock.Anything)
 }
 
 func TestRepoSetsGoToolchain_Pinned(t *testing.T) {
