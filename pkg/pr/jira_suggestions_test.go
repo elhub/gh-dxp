@@ -29,3 +29,12 @@ func TestFormatJiraSuggestions(t *testing.T) {
 	assert.Equal(t, expected, formatJiraSuggestions(issues))
 	assert.Empty(t, formatJiraSuggestions(nil))
 }
+
+func TestJiraIssuePromptDefault(t *testing.T) {
+	detectedIDs := []string{"ABC-10"}
+	suggestions := []jira.SearchIssue{{Key: "ABC-20"}}
+
+	assert.Equal(t, "ABC-20", jiraIssuePromptDefault(detectedIDs, suggestions))
+	assert.Equal(t, "ABC-10", jiraIssuePromptDefault(detectedIDs, nil))
+	assert.Equal(t, "ABC-10", jiraIssuePromptDefault(detectedIDs, []jira.SearchIssue{{Key: "ABC-20"}, {Key: "ABC-30"}}))
+}

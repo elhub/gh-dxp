@@ -335,6 +335,7 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 	var issueIDString string
 	autoDetected := false
 	detectedIDs := ExtractJiraIDs(branchName)
+	issueIDDefault := strings.Join(detectedIDs, ", ")
 	if !options.TestRun && options.Issues == "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -354,11 +355,14 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 			}
 		} else if len(suggestions) > 0 {
 			logger.Info(formatJiraSuggestions(suggestions))
+			if len(suggestions) == 1 {
+				issueIDDefault = jiraIssuePromptDefault(detectedIDs, suggestions)
+			}
 		}
 
 		userIssueString, errI := ghutil.AskForString(
 			"Issue IDs (separate with commas):",
-			strings.Join(detectedIDs, ", "),
+			issueIDDefault,
 		)
 		if errI != nil {
 			return "", errI
@@ -386,6 +390,13 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 	}
 
 	return body, nil
+}
+
+func jiraIssuePromptDefault(detectedIDs []string, suggestions []jira.SearchIssue) string {
+	if len(suggestions) == 1 {
+		return suggestions[0].Key
+	}
+	return strings.Join(detectedIDs, ", ")
 }
 
 func formatJiraSuggestions(issues []jira.SearchIssue) string {
