@@ -391,10 +391,10 @@ func issuesChanges(options *CreateOptions, settings *config.Settings, branchName
 func formatJiraSuggestions(issues []jira.SearchIssue) string {
 	var suggestionLines []string
 	for i, issue := range issues {
-		if i == 5 {
+		if i >= 5 {
 			break
 		}
-		suggestionLines = append(suggestionLines, fmt.Sprintf("%d. %s - %s", i+1, issue.Key, issue.Fields.Summary))
+		suggestionLines = append(suggestionLines, fmt.Sprintf("- %s - %s", issue.Key, issue.Fields.Summary))
 	}
 	if len(suggestionLines) == 0 {
 		return ""
