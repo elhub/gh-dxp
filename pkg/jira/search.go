@@ -95,7 +95,7 @@ func SearchIssues(ctx context.Context, baseURL, email string, text SearchText) (
 	}
 
 	query := url.Values{
-		"jql":        {"assignee = currentUser() AND statusCategory != Done ORDER BY updated DESC"},
+		"jql":        {"assignee = currentUser() AND statusCategory != Done AND project != ET ORDER BY updated DESC"},
 		"fields":     {"summary,description"},
 		"maxResults": {"50"},
 	}

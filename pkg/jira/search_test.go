@@ -1,7 +1,10 @@
 package jira
 
 import (
+	"context"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
@@ -9,6 +12,25 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestSearchIssuesExcludesETProject(t *testing.T) {
+	t.Setenv("JIRA_API_TOKEN", "token")
+	t.Setenv("JIRA_USERNAME", "user@example.com")
+
+	var gotJQL string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotJQL = r.URL.Query().Get("jql")
+		_, _ = w.Write([]byte(`{"issues":[{"key":"TDX-1","fields":{"summary":"fix billing"}}]}`))
+	}))
+	defer server.Close()
+
+	issues, err := SearchIssues(context.Background(), server.URL, "", SearchText{CommitMessage: "fix billing"})
+
+	require.NoError(t, err)
+	assert.Contains(t, gotJQL, "project != ET")
+	require.Len(t, issues, 1)
+	assert.Equal(t, "TDX-1", issues[0].Key)
+}
 
 func writeTokenFile(t *testing.T, dir, content string) {
 	t.Helper()
