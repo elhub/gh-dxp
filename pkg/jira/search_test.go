@@ -82,12 +82,11 @@ func TestResolveCredentials(t *testing.T) {
 			wantToken:   "tokenonly",
 		},
 		{
-			name:        "JIRA_API_TOKEN env var overrides file",
+			name:        "JIRA_API_TOKEN without email → not configured",
 			envToken:    "envtoken",
 			fileExists:  true,
 			fileContent: "file@elhub.no:filetoken",
-			wantEmail:   "",
-			wantToken:   "envtoken",
+			wantErr:     ErrJiraNotConfigured,
 		},
 		{
 			name:        "JIRA_USERNAME env var overrides file email",

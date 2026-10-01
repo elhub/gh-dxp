@@ -34,6 +34,9 @@ func resolveCredentials(email string) (resolvedEmail, token string, err error) {
 		resolvedEmail = envEmail
 	}
 	if envToken != "" {
+		if resolvedEmail == "" {
+			return "", "", ErrJiraNotConfigured
+		}
 		return resolvedEmail, envToken, nil
 	}
 
