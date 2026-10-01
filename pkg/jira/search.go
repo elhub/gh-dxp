@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"unicode"
 )
 
 // ErrJiraDisabled is returned when the user has opted out of Jira.
@@ -147,8 +148,8 @@ func rankIssues(issues []SearchIssue, text SearchText) []SearchIssue {
 	}
 	var matches []scored
 	for _, issue := range issues {
-		summary := strings.ToLower(issue.Fields.Summary)
-		description := strings.ToLower(string(issue.Fields.Description))
+		summary := tokenize(issue.Fields.Summary)
+		description := tokenize(string(issue.Fields.Description))
 		score := scoreText(summary, text.CommitMessage, 6) + scoreText(description, text.CommitMessage, 3)
 		score += scoreText(summary, text.Title, 3) + scoreText(description, text.Title, 2)
 		score += scoreText(summary, text.Description, 1) + scoreText(description, text.Description, 1)
@@ -164,10 +165,32 @@ func rankIssues(issues []SearchIssue, text SearchText) []SearchIssue {
 	return result
 }
 
-func scoreText(content, text string, weight int) int {
+// stopWords are ignored when matching. It includes the structural keys of Jira's JSON description format.
+var stopWords = map[string]bool{
+	"the": true, "and": true, "for": true, "with": true, "from": true, "this": true, "that": true,
+	"add": true, "fix": true, "feat": true, "chore": true, "docs": true, "test": true, "refactor": true,
+	"type": true, "text": true, "content": true, "doc": true, "paragraph": true, "version": true,
+}
+
+// tokenize lowercases s and splits it into words, dropping short words and stop words.
+func tokenize(s string) map[string]bool {
+	words := strings.FieldsFunc(strings.ToLower(s), func(r rune) bool {
+		return !unicode.IsLetter(r) && !unicode.IsDigit(r)
+	})
+	tokens := make(map[string]bool, len(words))
+	for _, w := range words {
+		if len(w) >= 3 && !stopWords[w] {
+			tokens[w] = true
+		}
+	}
+	return tokens
+}
+
+// scoreText adds weight for every distinct term in text that is a whole word of content.
+func scoreText(content map[string]bool, text string, weight int) int {
 	score := 0
-	for _, term := range strings.Fields(strings.ToLower(text)) {
-		if strings.Contains(content, term) {
+	for term := range tokenize(text) {
+		if content[term] {
 			score += weight
 		}
 	}

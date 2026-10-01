@@ -173,4 +173,9 @@ func TestRankIssues(t *testing.T) {
 		result := rankIssues(issues, SearchText{CommitMessage: "fix billing add user"})
 		assert.Len(t, result, 2)
 	})
+
+	t.Run("ignores short words, stop words and partial words", func(t *testing.T) {
+		result := rankIssues(issues, SearchText{Title: "Add a button to go", CommitMessage: "bill auth"})
+		assert.Empty(t, result)
+	})
 }

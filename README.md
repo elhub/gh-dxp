@@ -24,8 +24,9 @@ The integration is opt-in and uses your own Jira credentials.
    | Env    | `JIRA_USERNAME` and `JIRA_API_TOKEN` |
 
    ```sh
-   echo "your-email@example.com:your_api_token" > ~/.jira_token
-   chmod 600 ~/.jira_token
+   # Prompts for the values (the token is not echoed or stored in shell history)
+   # and creates the file readable only by you. Run in bash or zsh.
+   (umask 077; read -r -p "Jira email: " email; read -r -s -p "API token: " token; echo; printf '%s:%s\n' "$email" "$token" > ~/.jira_token)
    ```
 
 To opt out and never be asked about Jira, run `echo disabled > ~/.jira_token`.

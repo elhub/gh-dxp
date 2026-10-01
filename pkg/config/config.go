@@ -38,6 +38,9 @@ func MergeSettings(source, newSettings *Settings) *Settings {
 		source.ProjectTemplateURI = newSettings.ProjectTemplateURI
 		source.ProjectType = newSettings.ProjectType
 	}
+	if newSettings.JiraURL != "" {
+		source.JiraURL = newSettings.JiraURL
+	}
 
 	return source
 }
