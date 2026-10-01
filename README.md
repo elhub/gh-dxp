@@ -18,10 +18,10 @@ The integration is opt-in and uses your own Jira credentials.
 1. Create an API token at [id.atlassian.com/manage-api-tokens](https://id.atlassian.com/manage-api-tokens).
 2. Provide your credentials using **one** of the following (environment variables take priority):
 
-   | Method | Configuration |
-   |--------|---------------|
-   | File   | `~/.jira_token` containing a single line: `email:token` |
-   | Env    | `JIRA_USERNAME` and `JIRA_API_TOKEN` |
+   | Method | Configuration                                               |
+   |--------|-------------------------------------------------------------|
+   | File   | `~/.jira_token` containing a single line: `email:token`     |
+   | Env    | `JIRA_USERNAME` and `JIRA_API_TOKEN`                        |
 
    ```sh
    # Prompts for the values (the token is not echoed or stored in shell history)
@@ -35,6 +35,7 @@ To opt out and never be asked about Jira, run `echo disabled > ~/.jira_token`.
 
 - Runs only when creating a **new** PR without `--issues`. Updating an existing PR does not query Jira.
 - Searches your open, assigned tickets (the `ET` project is excluded) and lists the best matches.
+- Uses only `https://elhub.atlassian.net`; repository configuration cannot override the Jira endpoint.
 - Reads only ticket key, summary and description. Nothing else is accessed or stored.
 - Without credentials, the step is skipped and PR creation works as usual.
 - Requests time out after 5 seconds, so Jira issues never block PR creation.

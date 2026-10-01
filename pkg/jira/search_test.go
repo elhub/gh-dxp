@@ -39,10 +39,45 @@ func TestSearchIssuesRejectsUntrustedHost(t *testing.T) {
 	t.Setenv("JIRA_API_TOKEN", "token")
 	t.Setenv("JIRA_USERNAME", "user@example.com")
 
-	for _, u := range []string{"https://evil.example.com/browse", "http://elhub.atlassian.net/browse", "https://atlassian.net.evil.com"} {
+	for _, u := range []string{
+		"https://evil.example.com/browse",
+		"http://elhub.atlassian.net/browse",
+		"https://atlassian.net.evil.com",
+		"https://other.atlassian.net/browse",
+		"https://sub.elhub.atlassian.net",
+		"https://elhub.atlassian.net:8443",
+		"https://user@elhub.atlassian.net",
+		"https://elhub.atlassian.net/other",
+	} {
 		_, err := SearchIssues(context.Background(), u, "", SearchText{})
 		assert.ErrorContains(t, err, "untrusted", u)
 	}
+}
+
+func TestTrustedJiraURL(t *testing.T) {
+	assert.True(t, isTrustedJiraURL("https://elhub.atlassian.net"))
+}
+
+func TestSearchIssuesDoesNotFollowRedirects(t *testing.T) {
+	t.Setenv("JIRA_API_TOKEN", "token")
+	t.Setenv("JIRA_USERNAME", "user@example.com")
+
+	redirected := false
+	target := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {
+		redirected = true
+	}))
+	defer target.Close()
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, target.URL, http.StatusFound)
+	}))
+	defer server.Close()
+	orig := isTrustedJiraURL
+	isTrustedJiraURL = func(string) bool { return true }
+	defer func() { isTrustedJiraURL = orig }()
+
+	_, err := SearchIssues(context.Background(), server.URL, "", SearchText{})
+	require.ErrorContains(t, err, "302")
+	assert.False(t, redirected)
 }
 
 func writeTokenFile(t *testing.T, dir, content string) {

@@ -82,13 +82,14 @@ type SearchIssue struct {
 	} `json:"fields"`
 }
 
-// isTrustedJiraURL allows only https Atlassian Cloud hosts. It is a variable so tests can use a local server.
+// isTrustedJiraURL allows only the Elhub Jira endpoint. It is a variable so tests can use a local server.
 var isTrustedJiraURL = func(rawURL string) bool {
 	u, err := url.Parse(rawURL)
 	if err != nil || u.Scheme != "https" {
 		return false
 	}
-	return strings.HasSuffix(u.Hostname(), ".atlassian.net")
+	return u.Host == "elhub.atlassian.net" && u.User == nil &&
+		u.Path == "" && u.RawQuery == "" && u.Fragment == ""
 }
 
 // SearchIssues searches Jira issues and returns results ranked by relevance.
@@ -103,7 +104,7 @@ func SearchIssues(ctx context.Context, baseURL, email string, text SearchText) (
 	if baseURL == "" || resolvedEmail == "" {
 		return nil, fmt.Errorf("Jira URL and email are required")
 	}
-	// The URL can come from repository config, so never send credentials to an untrusted host.
+	// Only send credentials to the Elhub Jira endpoint.
 	if !isTrustedJiraURL(baseURL) {
 		return nil, fmt.Errorf("refusing to send Jira credentials to untrusted URL %q", baseURL)
 	}
@@ -123,7 +124,12 @@ func SearchIssues(ctx context.Context, baseURL, email string, text SearchText) (
 	req.Header.Set("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(resolvedEmail+":"+token)))
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := http.DefaultClient.Do(req)
+	client := &http.Client{
+		CheckRedirect: func(_ *http.Request, _ []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}

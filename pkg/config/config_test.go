@@ -71,7 +71,7 @@ func TestMergeSettings(t *testing.T) {
 	assert.Equal(t, "go", mergedSettings.ProjectType)
 }
 
-// Test that MergeSettings keeps the default Jira URL unless one is configured.
+// Test that repository settings cannot override the Elhub Jira URL.
 func TestMergeSettingsJiraURL(t *testing.T) {
 	defaultURL := config.DefaultSettings().JiraURL
 
@@ -79,5 +79,5 @@ func TestMergeSettingsJiraURL(t *testing.T) {
 	assert.Equal(t, defaultURL, merged.JiraURL)
 
 	merged = config.MergeSettings(config.DefaultSettings(), &config.Settings{JiraURL: "https://other.atlassian.net/browse"})
-	assert.Equal(t, "https://other.atlassian.net/browse", merged.JiraURL)
+	assert.Equal(t, defaultURL, merged.JiraURL)
 }
