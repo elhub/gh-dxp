@@ -10,18 +10,39 @@ In addition to that, a [user guide](https://docs.elhub.cloud/support/application
 
 ## Jira Integration (Optional)
 
-`gh dxp pr create` can suggest relevant Jira tickets based on your commits. To enable:
+`gh dxp pr create` can suggest related Jira tickets based on your commits, PR title and description.
+The integration is opt-in and uses your own Jira credentials.
 
-1. Generate a Jira API token at [id.atlassian.com/manage-api-tokens](https://id.atlassian.com/manage-api-tokens)
-2. Create `~/.jira_token` with your email and token:
+### Setup
 
-```sh
-echo "your-email@company.com:your_api_token" > ~/.jira_token
-chmod 600 ~/.jira_token
-```
+1. Create an API token at [id.atlassian.com/manage-api-tokens](https://id.atlassian.com/manage-api-tokens).
+2. Provide your credentials using **one** of the following (environment variables take priority):
 
-> To opt out silently and suppress future prompts: `echo disabled > ~/.jira_token`
+   | Method | Configuration |
+   |--------|---------------|
+   | File   | `~/.jira_token` containing a single line: `email:token` |
+   | Env    | `JIRA_USERNAME` and `JIRA_API_TOKEN` |
 
+   ```sh
+   echo "your-email@example.com:your_api_token" > ~/.jira_token
+   chmod 600 ~/.jira_token
+   ```
+
+To opt out and never be asked about Jira, run `echo disabled > ~/.jira_token`.
+
+### Behavior
+
+- Runs only when creating a **new** PR without `--issues`. Updating an existing PR does not query Jira.
+- Searches your open, assigned tickets (the `ET` project is excluded) and lists the best matches.
+- Reads only ticket key, summary and description. Nothing else is accessed or stored.
+- Without credentials, the step is skipped and PR creation works as usual.
+- Requests time out after 5 seconds, so Jira issues never block PR creation.
+
+### Troubleshooting
+
+- Verify credentials: `curl -u "email:token" https://elhub.atlassian.net/rest/api/3/myself`
+- Make sure `~/.jira_token` contains a single `email:token` line.
+- No suggestions usually means none of your open tickets match the commit text.
 ## Aliases
 
 To avoid having to type `gh dxp` constantly, we recommend running:
