@@ -37,7 +37,7 @@ To opt out and never be asked about Jira, run `echo disabled > ~/.jira_token`.
 - Searches your open, assigned tickets (the `ET` project is excluded) and lists the best matches.
 - Uses only `https://elhub.atlassian.net`; repository configuration cannot override the Jira endpoint.
 - Reads only ticket key, summary and description. Nothing else is accessed or stored.
-- Without credentials, the step is ignored and PR creation works as usual.
+- Without credentials, the step is skipped and PR creation works as usual.
 - Requests time out after 5 seconds, so Jira issues never block PR creation.
 
 ### Troubleshooting
