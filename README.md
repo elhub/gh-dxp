@@ -1,10 +1,11 @@
 # gh-dxp
 
-A GitHub (gh) CLI extension for automating daily development work, brought to you by Elhub's DevXP team. It implements an opinionated workflow based around
+ggA GitHub (gh) CLI extension for automating daily development work, brought to you by Elhub's DevXP team. It implements an opinionated workflow based around
 small and frequent commits, squash merge, and mandatory linting and unit testing. To view more detailed documentation, please refer to the gh-dxp page
 in docs-support.
 
 ## User Guide
+
 Using the `-h` flag with any command will display relevant documentation.
 In addition to that, a [user guide](https://docs.elhub.cloud/support/applications/gh-dxp/index.html) for `gh dxp` is also available.
 
@@ -45,6 +46,7 @@ To opt out and never be asked about Jira, run `echo disabled > ~/.jira_token`.
 - Verify credentials: `curl -u "email:token" https://elhub.atlassian.net/rest/api/3/myself`
 - Make sure `~/.jira_token` contains a single `email:token` line.
 - No suggestions usually means none of your open tickets match the commit text.
+
 ## Aliases
 
 To avoid having to type `gh dxp` constantly, we recommend running:
@@ -59,6 +61,7 @@ The `alias.yml` file included in this project installs a number of useful aliase
 
 1. [Install the `gh` CLI](https://github.com/cli/cli#installation)
 2. Install gh-dxp:
+
     ```sh
     gh extension install elhub/gh-dxp
     ```
