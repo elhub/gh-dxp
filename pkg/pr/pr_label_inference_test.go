@@ -135,3 +135,21 @@ func TestRepositoryHasLabelIgnoresCase(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, exists)
 }
+
+func TestEnsureLabelExistsAcceptsLabelCreatedConcurrently(t *testing.T) {
+	labelListArgs := []string{"label", "list", "--limit", "1000", "--json", "name", "--jq", ".[].name"}
+	labelCreateArgs := []string{
+		"label", "create", "Documentation",
+		"--color", "#dda5fc",
+		"--description", "A documentation PR is a pull request that updates the documentation.",
+	}
+	exe := new(testutils.MockExecutor)
+	exe.On("GH", labelListArgs).Return("", nil).Once()
+	exe.On("GH", labelCreateArgs).Return("", errors.New("label already exists")).Once()
+	exe.On("GH", labelListArgs).Return("documentation\n", nil).Once()
+
+	err := ensureLabelExistsInRepository(exe, "Documentation")
+
+	assert.NoError(t, err)
+	exe.AssertExpectations(t)
+}
