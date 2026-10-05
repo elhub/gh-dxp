@@ -131,11 +131,11 @@ func create(exe ghutil.Executor, options *CreateOptions, settings *config.Settin
 }
 
 func ensureLabelExistsInRepository(exe ghutil.Executor, labelName string) error {
-	stdOut, err := exe.GH("label", "list", "--limit", "1000", "--json", "name", "--jq", ".[].name")
+	exists, err := repositoryHasLabel(exe, labelName)
 	if err != nil {
 		return err
 	}
-	if strings.Contains(stdOut, labelName) {
+	if exists {
 		return nil
 	}
 	var label PullRequestLabel
@@ -153,9 +153,26 @@ func ensureLabelExistsInRepository(exe ghutil.Executor, labelName string) error 
 	logger.Info("Label " + labelName + " does not exist in repository. Creating label \"" + label.Name + "\"...")
 	_, err = exe.GH("label", "create", label.Name, "--color", label.Color, "--description", label.Description)
 	if err != nil {
+		// Another process may have created the label after the initial lookup.
+		if exists, lookupErr := repositoryHasLabel(exe, labelName); lookupErr == nil && exists {
+			return nil
+		}
 		return err
 	}
 	return nil
+}
+
+func repositoryHasLabel(exe ghutil.Executor, labelName string) (bool, error) {
+	stdOut, err := exe.GH("label", "list", "--limit", "1000", "--json", "name", "--jq", ".[].name")
+	if err != nil {
+		return false, err
+	}
+	for _, existingName := range strings.Split(stdOut, "\n") {
+		if strings.EqualFold(strings.TrimSpace(existingName), labelName) {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 func generatePRArgs(options *CreateOptions) []string {

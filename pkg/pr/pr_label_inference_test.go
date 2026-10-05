@@ -72,9 +72,9 @@ func TestInferLabelFromCommits(t *testing.T) {
 			expected:     "",
 		},
 		{
-			name:         "returns empty on git log error",
-			commitErr:    errors.New("git log failed"),
-			expected:     "",
+			name:      "returns empty on git log error",
+			commitErr: errors.New("git log failed"),
+			expected:  "",
 		},
 		{
 			name:         "uses only first commit line",
@@ -119,4 +119,37 @@ func TestPerformPreCreateOperationsAutoSetsLabelFromConventionalCommit(t *testin
 	assert.NoError(t, err)
 	assert.Equal(t, "Feature", prOut.label)
 	mockExe.AssertExpectations(t)
+}
+
+func TestRepositoryHasLabelIgnoresCase(t *testing.T) {
+	exe := testutils.NewMockExecutor([]testutils.MockContent{
+		{
+			Method: "GH",
+			Args:   []any{[]string{"label", "list", "--limit", "1000", "--json", "name", "--jq", ".[].name"}},
+			Out:    "documentation\n",
+		},
+	})
+
+	exists, err := repositoryHasLabel(exe, "Documentation")
+
+	assert.NoError(t, err)
+	assert.True(t, exists)
+}
+
+func TestEnsureLabelExistsAcceptsLabelCreatedConcurrently(t *testing.T) {
+	labelListArgs := []string{"label", "list", "--limit", "1000", "--json", "name", "--jq", ".[].name"}
+	labelCreateArgs := []string{
+		"label", "create", "Documentation",
+		"--color", "#dda5fc",
+		"--description", "A documentation PR is a pull request that updates the documentation.",
+	}
+	exe := new(testutils.MockExecutor)
+	exe.On("GH", labelListArgs).Return("", nil).Once()
+	exe.On("GH", labelCreateArgs).Return("", errors.New("label already exists")).Once()
+	exe.On("GH", labelListArgs).Return("documentation\n", nil).Once()
+
+	err := ensureLabelExistsInRepository(exe, "Documentation")
+
+	assert.NoError(t, err)
+	exe.AssertExpectations(t)
 }
