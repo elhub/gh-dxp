@@ -81,6 +81,11 @@ func Execute(workingDir string, settings *config.Settings, options *Options, cli
 			overwrite: true,
 		},
 		{
+			fileName:  ".github/renovate-template.json",
+			path:      filepath.Join(ghDir, "renovate.json"),
+			overwrite: false,
+		},
+		{
 			fileName:  ".teamcity/pom-template.xml",
 			path:      filepath.Join(tcDir, "pom.xml"),
 			overwrite: false,
