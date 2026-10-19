@@ -1,9 +1,10 @@
 import jetbrains.buildServer.configs.kotlin.ArtifactRule
 import jetbrains.buildServer.configs.kotlin.buildSteps.script
-import jetbrains.buildServer.configs.kotlin.triggers.finishBuildTrigger
+import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import no.elhub.devxp.build.configuration.pipeline.constants.AgentScope.LinuxAgentContext
 import no.elhub.devxp.build.configuration.pipeline.constants.Group.DEVXP
 import no.elhub.devxp.build.configuration.pipeline.dsl.elhubProject
+import no.elhub.devxp.build.configuration.pipeline.dsl.interfaces.JobOperations
 import no.elhub.devxp.build.configuration.pipeline.extensions.fetchTags
 import no.elhub.devxp.build.configuration.pipeline.jobs.customJob
 import no.elhub.devxp.build.configuration.pipeline.jobs.makeVerify
@@ -17,36 +18,37 @@ elhubProject(DEVXP, "gh-dxp") {
     }
 
     pipeline {
-        makeVerify {
-            buildArtifactRules = listOf(ArtifactRule.include("build/coverage.*", "build.zip"))
-            outputArtifactRules = listOf(ArtifactRule.include("build.zip!**", "build/"))
-            sonarScanSettings = {
-                sonarProjectSources = "."
-                additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
+        sequential {
+            makeVerify {
+                buildArtifactRules = listOf(ArtifactRule.include("build/coverage.*", "build.zip"))
+                outputArtifactRules = listOf(ArtifactRule.include("build.zip!**", "build/"))
+                sonarScanSettings = {
+                    sonarProjectSources = "."
+                    additionalParams = arrayListOf("-Dsonar.go.coverage.reportPaths=build/coverage.out")
+                }
             }
-            enablePublishMetrics = true
+            publishTag()
+            release()
         }
-        val publishBuildType = publishTag()
-        customJob(LinuxAgentContext) {
-            name = "🚀 Release"
-            id("Release")
-            steps {
-                fetchTags()
-                script {
-                    name = "GitHub Release Script"
-                    scriptContent = """
-                        make release
-                    """.trimIndent()
-                }
-            }
+    }
+}
 
-            triggers {
-                finishBuildTrigger {
-                    buildType = "${publishBuildType.id}"
-                    successfulOnly = true
-                    branchFilter = "+:refs/heads/main"
-                }
-            }
+fun JobOperations.release() = customJob(LinuxAgentContext) {
+    name = "🚀 Release"
+    id("Release")
+    steps {
+        fetchTags()
+        script {
+            name = "GitHub Release Script"
+            scriptContent = """
+                make release
+            """.trimIndent()
+        }
+    }
+
+    triggers {
+        vcs {
+            triggerRules = "+:comment=(?s).*\\[(patch|minor|major)\\].*:**"
         }
     }
 }
