@@ -48,7 +48,7 @@ fun JobOperations.release() = customJob(LinuxAgentContext) {
     }
 
     triggers {
-        Triggers().vcs {
+        vcs {
             triggerRules = "+:comment=(?s).*\\[(patch|minor|major)\\].*:**"
         }
     }
