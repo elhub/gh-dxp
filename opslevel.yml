@@ -1,0 +1,35 @@
+---
+version: 1
+component:
+  name: gh-dxp
+  type: tool
+  lifecycle: production
+  tier: tier_4
+  owner: team-devxp
+  language: Go
+  framework: Cobra
+  description: >-
+    A GitHub (gh) CLI extension for automating daily development work, brought to you by Elhub's DevXP team. It implements an opinionated workflow based around
+    small and frequent commits, squash merge, and mandatory linting and unit testing. To view more detailed documentation, please refer to the gh-dxp page
+    in docs-support.
+  aliases:
+    - gh_dxp
+    - no.elhub.devxp.gh-dxp
+  repositories:
+    - name: elhub/gh-dxp
+      path: "/"
+      provider: github
+      display_name: gh-dxp
+  tools:
+    - name: Source Code
+      category: code
+      url: https://github.com/elhub/gh-dxp
+      environment: Production
+    - name: Usage Docs
+      category: wiki
+      url: https://github.com/elhub/gh-dxp/blob/main/README.md
+      environment: Production
+    - name: Command Reference
+      category: wiki
+      url: https://github.com/elhub/gh-dxp/blob/main/docs/command-reference.md
+      environment: Production
