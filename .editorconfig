@@ -54,7 +54,7 @@ max_line_length = 160
 
 # Rego
 [*.rego]
-indent_size = 2
+indent_style = tab
 
 # Shell
 [*.sh]
