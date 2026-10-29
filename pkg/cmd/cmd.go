@@ -55,6 +55,7 @@ func GenerateCmd(settings *config.Settings, version string) (*cobra.Command, err
 		AliasCmd(exe),
 		BranchCmd(exe),
 		LintCmd(exe, settings),
+		OpsLevelCmd(exe),
 		OwnerCmd(exe, settings),
 		PRCmd(exe, settings),
 		RepoCmd(exe, settings),
