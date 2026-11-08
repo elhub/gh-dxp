@@ -4,11 +4,11 @@ go 1.27.3
 
 require (
 	charm.land/bubbles/v2 v2.2.1
-	charm.land/bubbletea/v2 v2.1.0
+	charm.land/bubbletea/v2 v2.1.1
 	charm.land/lipgloss/v2 v2.0.6
 	github.com/AlecAivazis/survey/v2 v2.3.7
 	github.com/MakeNowJust/heredoc/v2 v2.0.1
-	github.com/caarlos0/log v0.6.2
+	github.com/caarlos0/log v0.6.3
 	github.com/cli/go-gh/v2 v2.17.0
 	github.com/hmarr/codeowners v1.2.1
 	github.com/pkg/errors v0.9.1
