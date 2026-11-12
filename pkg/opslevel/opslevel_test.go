@@ -49,7 +49,7 @@ func TestExecute(t *testing.T) {
 func TestPromptTools(t *testing.T) {
 	names := []string{"TeamCity", "ArgoCD", "SonarQube", "Dependency Track", "Issue Tracker", "OpenAPI Spec", "Architecture Docs", "Usage Docs", "Metrics", "Logging"}
 	categories := []string{"continuous_integration", "deployment", "security_scans", "security_scans", "issue_tracking", "api_documentation", "wiki", "wiki", "metrics", "logs"}
-	hints := []string{"TeamCity project or build configuration", "ArgoCD application", "SonarQube project overview", "Dependency Track project", "Jira project or filtered issues", "OpenAPI specification", "Architecture documentation", "README or usage documentation", "Grafana metrics dashboard", "Grafana Explore or log dashboard"}
+	hints := []string{"TeamCity project or build configuration", "ArgoCD application", "SonarQube project overview", "Dependency Track project", "Jira project or filtered issues", "OpenAPI specification", "Architecture documentation", "Actual usage documentation", "Grafana metrics dashboard", "Grafana Explore or log dashboard"}
 	for _, skip := range []bool{false, true} {
 		t.Run(map[bool]string{false: "supplied", true: "skipped"}[skip], func(t *testing.T) {
 			prompts := 0
@@ -489,7 +489,7 @@ func TestSystemChoices(t *testing.T) {
 }
 
 func TestLanguageChoices(t *testing.T) {
-	for _, selection := range []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Rust", "None", "Custom..."} {
+	for _, selection := range []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Jinja", "Yaml", "Rust", "None", "Custom..."} {
 		t.Run(selection, func(t *testing.T) {
 			textPrompted := false
 			value, err := askLanguage("Rust", func(prompt, defaultValue string) (string, error) {
@@ -499,7 +499,7 @@ func TestLanguageChoices(t *testing.T) {
 				return "Scala", nil
 			}, func(prompt string, choices []string) (string, error) {
 				require.Contains(t, prompt, "default: Rust")
-				require.Equal(t, []string{"Rust", "None", "Kotlin", "Java", "Python", "Go", "Typescript", "Custom..."}, choices)
+				require.Equal(t, []string{"Rust", "None", "Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Jinja", "Yaml", "Custom..."}, choices)
 				return selection, nil
 			})
 			require.NoError(t, err)
@@ -516,7 +516,7 @@ func TestLanguageChoices(t *testing.T) {
 }
 
 func TestFrameworkChoices(t *testing.T) {
-	for _, selection := range []string{"Ktor", "React", "Ansible", "Cobra", "None", "Custom..."} {
+	for _, selection := range []string{"Ktor", "React", "Ansible", "Cobra", "Helm", "None", "Custom..."} {
 		t.Run(selection, func(t *testing.T) {
 			textPrompted := false
 			value, err := askFramework("Cobra", func(prompt, defaultValue string) (string, error) {
@@ -526,7 +526,7 @@ func TestFrameworkChoices(t *testing.T) {
 				return "Spring", nil
 			}, func(prompt string, choices []string) (string, error) {
 				require.Contains(t, prompt, "default: Cobra")
-				require.Equal(t, []string{"Cobra", "None", "Ktor", "React", "Ansible", "Custom..."}, choices)
+				require.Equal(t, []string{"Cobra", "None", "Ktor", "React", "Ansible", "Helm", "Custom..."}, choices)
 				return selection, nil
 			})
 			require.NoError(t, err)
