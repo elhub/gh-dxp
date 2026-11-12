@@ -65,6 +65,59 @@ EXTENDS:
 
 ```
 
+## 🗂️ opslevel
+
+Creates `opslevel.yml` at the current Git repository's root, asking for confirmation before overwriting an existing file.
+Requires Git and an authenticated GitHub CLI with access to the repository.
+
+```bash
+gh dxp opslevel
+```
+
+Uses the repository name, description, primary language, and source URL from GitHub. Prompts for component type,
+lifecycle, tier, owning team or chapter alias, system, language, framework, description, and package name, even when populated.
+Current values are shown as defaults; press Enter to keep them or choose/type a replacement. Use the same description in
+GitHub and the README for consistency. Ownership must identify an OpsLevel team or chapter, not a person.
+
+Before creating or updating the file, the command displays the complete proposed YAML and asks you to confirm
+the values. Declining writes nothing. Descriptions are written as literal YAML blocks (`|-`), preserving line breaks.
+Fields are written in the order defined by the OpsLevel reference, with custom fields after the standard fields.
+
+When overwriting, existing component values take precedence over GitHub defaults; explicit flags take precedence
+over existing values as prompt defaults. Each editable metadata value is prompted for. Existing aliases, repositories,
+tools, tags, dependencies, and other custom fields are retained. YAML formatting and comments are not preserved.
+Declining leaves the file unchanged. Invalid existing configuration is reported without replacing the file.
+
+For scripts, disable prompts and supply the required metadata:
+
+```bash
+gh dxp opslevel --no-input --type tool --lifecycle production --tier tier_4 \
+  --owner team-devxp --description "A developer workflow tool." --package-name no.elhub.my-tool
+```
+
+Optional flags `--system`, `--language`, and `--framework` set technology and system metadata.
+The system prompt offers the standard system names, `None` to omit the field, and `Custom...` for a custom name.
+Existing custom names remain selectable defaults, and `--system` also accepts custom names.
+The language prompt offers Kotlin, Java, Python, Go, and Typescript, plus `None` and `Custom...`.
+Existing or detected languages remain defaults, including custom values; `--language` also accepts custom names.
+The framework prompt offers Ktor and React, plus `None` and `Custom...`. Existing custom values remain defaults,
+and `--framework` also accepts custom names.
+`--description` overrides the existing or GitHub description. `--no-input` skips prompts and final review,
+and fails if required values are missing or the file already exists.
+
+Two aliases are added: the repository name with hyphens replaced by underscores, and the package name required
+for SonarQube integration. Enter the package name when prompted, or provide `--package-name` (required with
+`--no-input`). It is not inferred from the GitHub URL or guessed from existing aliases.
+Updates retain existing aliases and add the required aliases without duplicates. The GitHub URL is a source
+tool link, never an alias. Add relevant dependencies or tags manually.
+Prompts for optional TeamCity, ArgoCD, SonarQube, Dependency Track, Issue Tracker, OpenAPI Spec,
+Architecture Docs, Usage Docs, Metrics, and Logging URIs. Each prompt includes a hint about where to find
+the link, such as Jira for Issue Tracker or Grafana for Metrics and Logging. Leave a URI blank to skip
+that tool and continue. When an ArgoCD URI is supplied, choose its environment: `prod1` or `cirrus`.
+Supplied links add tools or update existing tools with the same name; skipped
+tools remain unchanged on updates. `--no-input` adds only the automatic Source Code link.
+For open-source repositories, add internal tool links in the OpsLevel UI only.
+
 ## 🧐 owner
 Gets the owner of a specific file or directory. This is useful for determining who to contact if you have questions about the code.
 

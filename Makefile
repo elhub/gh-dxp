@@ -26,7 +26,7 @@ check:
 
 # Target: Clean build artifacts
 clean:
-	go clean
+	$(GO) clean
 	rm -rf ${BUILD_DIR}
 	rm -rf ${BINARY_NAME}
 
