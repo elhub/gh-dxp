@@ -110,7 +110,13 @@ for SonarQube integration. Enter the package name when prompted, or provide `--p
 `--no-input`). It is not inferred from the GitHub URL or guessed from existing aliases.
 Updates retain existing aliases and add the required aliases without duplicates. The GitHub URL is a source
 tool link, never an alias. Add relevant dependencies or tags manually.
-Internal tool links are not generated; for open-source repositories, add these in the OpsLevel UI only.
+Prompts for optional TeamCity, ArgoCD, SonarQube, Dependency Track, Issue Tracker, OpenAPI Spec,
+Architecture Docs, Usage Docs, Metrics, and Logging URIs. Each prompt includes a hint about where to find
+the link, such as Jira for Issue Tracker or Grafana for Metrics and Logging. Leave a URI blank to skip
+that tool and continue. When an ArgoCD URI is supplied, choose its environment: `prod1` or `cirrus`.
+Supplied links add tools or update existing tools with the same name; skipped
+tools remain unchanged on updates. `--no-input` adds only the automatic Source Code link.
+For open-source repositories, add internal tool links in the OpsLevel UI only.
 
 ## 🧐 owner
 Gets the owner of a specific file or directory. This is useful for determining who to contact if you have questions about the code.

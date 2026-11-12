@@ -33,3 +33,6 @@ component:
       category: wiki
       url: https://github.com/elhub/gh-dxp/blob/main/docs/command-reference.md
       environment: Production
+  dependencies: []
+  alert_sources: []
+  properties: {}

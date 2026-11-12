@@ -30,18 +30,21 @@ type Options struct {
 }
 
 type component struct {
-	Name         string       `yaml:"name"`
-	Type         string       `yaml:"type"`
-	Lifecycle    string       `yaml:"lifecycle"`
-	Tier         string       `yaml:"tier"`
-	Owner        string       `yaml:"owner"`
-	System       string       `yaml:"system,omitempty"`
-	Language     string       `yaml:"language,omitempty"`
-	Framework    string       `yaml:"framework,omitempty"`
-	Description  string       `yaml:"description"`
-	Aliases      []string     `yaml:"aliases,omitempty"`
-	Repositories []repository `yaml:"repositories"`
-	Tools        []tool       `yaml:"tools"`
+	Name         string           `yaml:"name"`
+	Type         string           `yaml:"type"`
+	Lifecycle    string           `yaml:"lifecycle"`
+	Tier         string           `yaml:"tier"`
+	Owner        string           `yaml:"owner"`
+	System       string           `yaml:"system,omitempty"`
+	Language     string           `yaml:"language,omitempty"`
+	Framework    string           `yaml:"framework,omitempty"`
+	Description  string           `yaml:"description"`
+	Aliases      []string         `yaml:"aliases,omitempty"`
+	Repositories []repository     `yaml:"repositories"`
+	Tools        []tool           `yaml:"tools"`
+	Dependencies []map[string]any `yaml:"dependencies"`
+	AlertSources []any            `yaml:"alert_sources"`
+	Properties   map[string]any   `yaml:"properties"`
 }
 
 type repository struct {
@@ -55,7 +58,7 @@ type tool struct {
 	Name        string `yaml:"name"`
 	Category    string `yaml:"category"`
 	URL         string `yaml:"url"`
-	Environment string `yaml:"environment"`
+	Environment string `yaml:"environment,omitempty"`
 }
 
 // ErrOverwriteDeclined indicates that the user declined to overwrite an existing configuration.
@@ -120,7 +123,14 @@ func execute(
 		Tier: options.Tier, Owner: options.Owner, System: options.System,
 		Language: options.Language, Framework: options.Framework, Description: options.Description,
 		Repositories: []repository{{Name: metadata.NameWithOwner, Path: "/", Provider: "github", DisplayName: metadata.Name}},
-		Tools:        []tool{{Name: "Source Code", Category: "code", URL: metadata.URL, Environment: "Production"}},
+		Tools:        []tool{{Name: "Source Code", Category: "code", URL: metadata.URL, Environment: "github"}},
+	}
+	if !options.NoInput {
+		tools, err := promptTools(askString, askChoice)
+		if err != nil {
+			return err
+		}
+		catalogComponent.Tools = append(catalogComponent.Tools, tools...)
 	}
 	catalogComponent.Aliases = []string{strings.ReplaceAll(metadata.Name, "-", "_")}
 	if !slices.Contains(catalogComponent.Aliases, options.PackageName) {
@@ -155,7 +165,28 @@ func execute(
 				}
 				value = aliases
 			}
-			if _, present := fields[key]; present && slices.Contains([]string{"repositories", "tools"}, key) {
+			if previous, present := fields[key]; present && key == "tools" {
+				tools, ok := previous.([]any)
+				if !ok {
+					return fmt.Errorf("existing component tools must be a list")
+				}
+				for _, entry := range value.([]any)[1:] {
+					incoming := entry.(map[string]any)
+					index := slices.IndexFunc(tools, func(value any) bool {
+						current, ok := value.(map[string]any)
+						return ok && current["name"] == incoming["name"]
+					})
+					if index < 0 {
+						tools = append(tools, incoming)
+					} else {
+						for field, fieldValue := range incoming {
+							tools[index].(map[string]any)[field] = fieldValue
+						}
+					}
+				}
+				value = tools
+			}
+			if _, present := fields[key]; present && slices.Contains([]string{"repositories", "dependencies", "alert_sources", "properties"}, key) {
 				continue
 			}
 			fields[key] = value
@@ -187,6 +218,54 @@ func execute(
 		return writeErr
 	}
 	return closeErr
+}
+
+func promptTools(
+	askString func(string, string) (string, error),
+	askChoice func(string, []string) (string, error),
+) ([]tool, error) {
+	var tools []tool
+	hints := map[string]string{
+		"TeamCity":          "TeamCity project or build configuration link",
+		"ArgoCD":            "ArgoCD application link",
+		"SonarQube":         "SonarQube project overview link",
+		"Dependency Track":  "Dependency Track project link",
+		"Issue Tracker":     "Jira project or filtered issues link",
+		"OpenAPI Spec":      "OpenAPI specification file or published API docs link",
+		"Architecture Docs": "Architecture documentation link",
+		"Usage Docs":        "Actual usage documentation link",
+		"Metrics":           "Grafana metrics dashboard link",
+		"Logging":           "Grafana Explore or log dashboard link",
+	}
+	for _, entry := range []tool{
+		{Name: "TeamCity", Category: "continuous_integration", Environment: "cirrus"},
+		{Name: "ArgoCD", Category: "deployment", Environment: "prod1"},
+		{Name: "SonarQube", Category: "security_scans", Environment: "cirrus"},
+		{Name: "Dependency Track", Category: "security_scans", Environment: "cirrus"},
+		{Name: "Issue Tracker", Category: "issue_tracking", Environment: "atlassian"},
+		{Name: "OpenAPI Spec", Category: "api_documentation", Environment: "prod1"},
+		{Name: "Architecture Docs", Category: "wiki", Environment: "cirrus"},
+		{Name: "Usage Docs", Category: "wiki", Environment: "cirrus"},
+		{Name: "Metrics", Category: "metrics", Environment: "cirrus"},
+		{Name: "Logging", Category: "logs", Environment: "cirrus"},
+	} {
+		uri, err := askString(entry.Name+" URI ("+hints[entry.Name]+"; leave blank to skip):", "")
+		if err != nil {
+			return nil, err
+		}
+		entry.URL = strings.TrimSpace(uri)
+		if entry.URL == "" {
+			continue
+		}
+		if entry.Name == "ArgoCD" {
+			entry.Environment, err = askChoice("ArgoCD environment:", []string{"prod1", "cirrus"})
+			if err != nil {
+				return nil, err
+			}
+		}
+		tools = append(tools, entry)
+	}
+	return tools, nil
 }
 
 func orderedYAML(document any) ([]byte, error) {
@@ -432,7 +511,7 @@ func askLanguage(
 	askString func(string, string) (string, error),
 	askChoice func(string, []string) (string, error),
 ) (string, error) {
-	return askCustomChoice("Language", current, []string{"Kotlin", "Java", "Python", "Go", "Typescript"}, askString, askChoice)
+	return askCustomChoice("Language", current, []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Jinja", "Yaml"}, askString, askChoice)
 }
 
 func askFramework(
@@ -440,7 +519,7 @@ func askFramework(
 	askString func(string, string) (string, error),
 	askChoice func(string, []string) (string, error),
 ) (string, error) {
-	return askCustomChoice("Framework", current, []string{"Ktor", "React", "Ansible"}, askString, askChoice)
+	return askCustomChoice("Framework", current, []string{"Ktor", "React", "Ansible", "Cobra", "Helm"}, askString, askChoice)
 }
 
 func askCustomChoice(

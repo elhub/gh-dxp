@@ -37,12 +37,171 @@ func TestExecute(t *testing.T) {
 	require.Equal(t, []string{"my_tool", "no.elhub.my-tool"}, document.Component.Aliases)
 	require.Equal(t, "elhub/my-tool", document.Component.Repositories[0].Name)
 	require.Equal(t, "https://github.com/elhub/my-tool", document.Component.Tools[0].URL)
+	require.Contains(t, string(content), "  dependencies: []\n  alert_sources: []\n  properties: {}\n")
 	require.ErrorContains(t, Execute(dir, exe, options), "refusing to overwrite")
 	after, err := os.ReadFile(filepath.Join(dir, "opslevel.yml"))
 	require.NoError(t, err)
 	require.Equal(t, content, after)
 	exe.AssertNumberOfCalls(t, "GH", 1)
 	exe.AssertExpectations(t)
+}
+
+func TestPromptTools(t *testing.T) {
+	names := []string{"TeamCity", "ArgoCD", "SonarQube", "Dependency Track", "Issue Tracker", "OpenAPI Spec", "Architecture Docs", "Usage Docs", "Metrics", "Logging"}
+	categories := []string{"continuous_integration", "deployment", "security_scans", "security_scans", "issue_tracking", "api_documentation", "wiki", "wiki", "metrics", "logs"}
+	hints := []string{"TeamCity project or build configuration", "ArgoCD application", "SonarQube project overview", "Dependency Track project", "Jira project or filtered issues", "OpenAPI specification", "Architecture documentation", "README or usage documentation", "Grafana metrics dashboard", "Grafana Explore or log dashboard"}
+	for _, skip := range []bool{false, true} {
+		t.Run(map[bool]string{false: "supplied", true: "skipped"}[skip], func(t *testing.T) {
+			prompts := 0
+			choicePrompts := 0
+			tools, err := promptTools(func(prompt, defaultValue string) (string, error) {
+				require.Contains(t, prompt, names[prompts]+" URI (")
+				require.Contains(t, prompt, hints[prompts])
+				require.Contains(t, prompt, "leave blank to skip")
+				require.Empty(t, defaultValue)
+				prompts++
+				if skip {
+					return " \t ", nil
+				}
+				return " https://example.com/tool ", nil
+			}, func(prompt string, choices []string) (string, error) {
+				choicePrompts++
+				require.Equal(t, "ArgoCD environment:", prompt)
+				require.Equal(t, []string{"prod1", "cirrus"}, choices)
+				return "prod1", nil
+			})
+			require.NoError(t, err)
+			require.Equal(t, len(names), prompts)
+			if skip {
+				require.Empty(t, tools)
+				require.Zero(t, choicePrompts)
+				return
+			}
+			require.Equal(t, 1, choicePrompts)
+			require.Len(t, tools, len(names))
+			for index, entry := range tools {
+				require.Equal(t, names[index], entry.Name)
+				require.Equal(t, categories[index], entry.Category)
+				require.Equal(t, "https://example.com/tool", entry.URL)
+				environment := "cirrus"
+				if entry.Name == "ArgoCD" || entry.Name == "OpenAPI Spec" {
+					environment = "prod1"
+				} else if entry.Name == "Issue Tracker" {
+					environment = "atlassian"
+				}
+				require.Equal(t, environment, entry.Environment)
+			}
+		})
+	}
+}
+
+func TestPromptToolsCancellation(t *testing.T) {
+	cancelled := errors.New("prompt cancelled")
+	tools, err := promptTools(func(_, _ string) (string, error) {
+		return "", cancelled
+	}, nil)
+	require.ErrorIs(t, err, cancelled)
+	require.Empty(t, tools)
+}
+
+func TestPromptToolsArgoCDEnvironment(t *testing.T) {
+	for _, environment := range []string{"prod1", "cirrus", "cancel"} {
+		t.Run(environment, func(t *testing.T) {
+			cancelled := errors.New("prompt cancelled")
+			tools, err := promptTools(func(prompt, _ string) (string, error) {
+				if strings.HasPrefix(prompt, "ArgoCD URI") {
+					return "https://argocd.example.com/application", nil
+				}
+				return "", nil
+			}, func(prompt string, choices []string) (string, error) {
+				require.Equal(t, "ArgoCD environment:", prompt)
+				require.Equal(t, []string{"prod1", "cirrus"}, choices)
+				if environment == "cancel" {
+					return "", cancelled
+				}
+				return environment, nil
+			})
+			if environment == "cancel" {
+				require.ErrorIs(t, err, cancelled)
+				require.Empty(t, tools)
+				return
+			}
+			require.NoError(t, err)
+			require.Len(t, tools, 1)
+			require.Equal(t, "ArgoCD", tools[0].Name)
+			require.Equal(t, environment, tools[0].Environment)
+			content, err := orderedYAML(tools)
+			require.NoError(t, err)
+			require.Contains(t, string(content), "environment: "+environment)
+		})
+	}
+}
+
+func TestExecuteToolLinks(t *testing.T) {
+	for _, scenario := range []string{"create", "update", "skip", "cancel"} {
+		t.Run(scenario, func(t *testing.T) {
+			dir := t.TempDir()
+			path := filepath.Join(dir, "opslevel.yml")
+			original := "version: 1\ncomponent:\n  tools:\n" +
+				"    - {name: TeamCity, category: continuous_integration, url: 'https://example.com/old', custom: retained}\n" +
+				"    - {name: Custom, category: wiki, url: 'https://example.com/custom'}\n"
+			if scenario == "update" || scenario == "skip" {
+				require.NoError(t, os.WriteFile(path, []byte(original), 0o600))
+			}
+			exe := new(testutils.MockExecutor)
+			exe.On("GH", []string{"repo", "view", "--json", "name,nameWithOwner,description,url,primaryLanguage"}).Return(
+				`{"name":"my-tool","nameWithOwner":"elhub/my-tool","description":"A tool","url":"https://github.com/elhub/my-tool"}`, nil)
+			options := Options{Type: "tool", Lifecycle: "production", Tier: "tier_4", Owner: "team-devxp", PackageName: "no.elhub.my-tool"}
+			cancelled := errors.New("cancelled")
+			err := execute(dir, exe, options, func(_ string) (bool, error) {
+				return true, nil
+			}, func(prompt, defaultValue string) (string, error) {
+				if strings.Contains(prompt, " URI (") {
+					if scenario == "cancel" {
+						return "", cancelled
+					}
+					if scenario != "skip" && (strings.HasPrefix(prompt, "TeamCity URI") || strings.HasPrefix(prompt, "Logging URI")) {
+						return "https://example.com/new", nil
+					}
+					return "", nil
+				}
+				return defaultValue, nil
+			}, func(_ string, choices []string) (string, error) {
+				return choices[0], nil
+			})
+			if scenario == "cancel" {
+				require.ErrorIs(t, err, cancelled)
+				require.NoFileExists(t, path)
+				return
+			}
+			require.NoError(t, err)
+			content, err := os.ReadFile(path)
+			require.NoError(t, err)
+			var document struct {
+				Component component `yaml:"component"`
+			}
+			require.NoError(t, yaml.Unmarshal(content, &document))
+			tools := document.Component.Tools
+			if scenario == "skip" {
+				require.Len(t, tools, 2)
+				require.Equal(t, "https://example.com/old", tools[0].URL)
+				return
+			}
+			require.Len(t, tools, 3)
+			if scenario == "create" {
+				require.Equal(t, "Source Code", tools[0].Name)
+				require.Equal(t, "TeamCity", tools[1].Name)
+				require.Equal(t, "https://example.com/new", tools[1].URL)
+			} else {
+				require.Equal(t, "TeamCity", tools[0].Name)
+				require.Equal(t, "https://example.com/new", tools[0].URL)
+				require.Equal(t, "Custom", tools[1].Name)
+				require.Contains(t, string(content), "custom: retained")
+			}
+			require.Equal(t, "Logging", tools[2].Name)
+			require.Equal(t, "https://example.com/new", tools[2].URL)
+		})
+	}
 }
 
 func TestCompleteOptions(t *testing.T) {
@@ -145,7 +304,9 @@ func TestReviewBeforeWriting(t *testing.T) {
 				path := filepath.Join(dir, "opslevel.yml")
 				original := "version: 1\ncomponent:\n  name: my-tool\n  type: tool\n" +
 					"  lifecycle: development\n  tier: tier_3\n  owner: team-existing\n" +
-					"  description: Existing description\n  tags: [{key: datastore, value: postgresql}]\n"
+					"  description: Existing description\n  tags: [{key: datastore, value: postgresql}]\n" +
+					"  dependencies: [{alias: shared-service, notes: Required service}]\n" +
+					"  alert_sources: [existing-alert-source]\n  properties: {custom-property: retained}\n"
 				options := Options{Type: "tool", Lifecycle: "production", Tier: "tier_4", Owner: "team-devxp", PackageName: "no.elhub.my-tool"}
 				if updating {
 					require.NoError(t, os.WriteFile(path, []byte(original), 0o600))
@@ -169,6 +330,12 @@ func TestReviewBeforeWriting(t *testing.T) {
 						require.Contains(t, preview, "owner: team-existing")
 						require.Contains(t, preview, "description: |-\n    Existing description")
 						require.Contains(t, preview, "value: postgresql")
+						require.Contains(t, preview, "alias: shared-service")
+						require.Contains(t, preview, "notes: Required service")
+						require.Contains(t, preview, "existing-alert-source")
+						require.Contains(t, preview, "custom-property: retained")
+					} else {
+						require.Contains(t, preview, "  dependencies: []\n  alert_sources: []\n  properties: {}\n")
 					}
 					if decision == "cancel" {
 						return false, cancelled
