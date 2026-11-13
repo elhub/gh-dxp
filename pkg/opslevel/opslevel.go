@@ -123,7 +123,7 @@ func execute(
 		Tier: options.Tier, Owner: options.Owner, System: options.System,
 		Language: options.Language, Framework: options.Framework, Description: options.Description,
 		Repositories: []repository{{Name: metadata.NameWithOwner, Path: "/", Provider: "github", DisplayName: metadata.Name}},
-		Tools:        []tool{{Name: "Source Code", Category: "code", URL: metadata.URL, Environment: "github"}},
+		Tools:        []tool{{Name: "Source Code", Category: "code", URL: metadata.URL}},
 	}
 	if !options.NoInput {
 		tools, err := promptTools(askString, askChoice)
@@ -174,11 +174,17 @@ func execute(
 					incoming := entry.(map[string]any)
 					index := slices.IndexFunc(tools, func(value any) bool {
 						current, ok := value.(map[string]any)
-						return ok && current["name"] == incoming["name"]
+						if !ok || current["name"] != incoming["name"] {
+							return false
+						}
+						currentEnvironment, _ := current["environment"].(string)
+						incomingEnvironment, _ := incoming["environment"].(string)
+						return !toolUsesEnvironments(incoming["name"].(string)) || currentEnvironment == incomingEnvironment
 					})
 					if index < 0 {
 						tools = append(tools, incoming)
 					} else {
+						delete(tools[index].(map[string]any), "environment")
 						for field, fieldValue := range incoming {
 							tools[index].(map[string]any)[field] = fieldValue
 						}
@@ -238,34 +244,58 @@ func promptTools(
 		"Logging":           "Grafana Explore or log dashboard link",
 	}
 	for _, entry := range []tool{
-		{Name: "TeamCity", Category: "continuous_integration", Environment: "cirrus"},
-		{Name: "ArgoCD", Category: "deployment", Environment: "prod1"},
-		{Name: "SonarQube", Category: "security_scans", Environment: "cirrus"},
-		{Name: "Dependency Track", Category: "security_scans", Environment: "cirrus"},
-		{Name: "Issue Tracker", Category: "issue_tracking", Environment: "atlassian"},
-		{Name: "OpenAPI Spec", Category: "api_documentation", Environment: "prod1"},
-		{Name: "Architecture Docs", Category: "wiki", Environment: "cirrus"},
-		{Name: "Usage Docs", Category: "wiki", Environment: "cirrus"},
-		{Name: "Metrics", Category: "metrics", Environment: "cirrus"},
-		{Name: "Logging", Category: "logs", Environment: "cirrus"},
+		{Name: "TeamCity", Category: "continuous_integration"},
+		{Name: "ArgoCD", Category: "deployment"},
+		{Name: "SonarQube", Category: "security_scans"},
+		{Name: "Dependency Track", Category: "security_scans"},
+		{Name: "Issue Tracker", Category: "issue_tracking"},
+		{Name: "OpenAPI Spec", Category: "api_documentation"},
+		{Name: "Architecture Docs", Category: "wiki"},
+		{Name: "Usage Docs", Category: "wiki"},
+		{Name: "Metrics", Category: "metrics"},
+		{Name: "Logging", Category: "logs"},
 	} {
-		uri, err := askString(entry.Name+" URI ("+hints[entry.Name]+"; leave blank to skip):", "")
-		if err != nil {
-			return nil, err
-		}
-		entry.URL = strings.TrimSpace(uri)
-		if entry.URL == "" {
-			continue
-		}
-		if entry.Name == "ArgoCD" {
-			entry.Environment, err = askChoice("ArgoCD environment:", []string{"prod1", "cirrus"})
+		hasEnvironments := toolUsesEnvironments(entry.Name)
+		environments := []string{"Done", "None", "elhub-prod1", "elhub-qa1", "elhub-mt1", "cirrus-prod", "cirrus-test"}
+		for {
+			environment := ""
+			if hasEnvironments {
+				selected, err := askChoice(entry.Name+" environment (Done to skip or finish):", environments)
+				if err != nil {
+					return nil, err
+				}
+				if selected == "Done" {
+					break
+				}
+				environment = selected
+				if selected != "None" {
+					entry.Environment = selected
+				} else {
+					entry.Environment = ""
+				}
+			}
+			uri, err := askString(entry.Name+" URI ("+hints[entry.Name]+"; leave blank to skip):", "")
 			if err != nil {
 				return nil, err
 			}
+			entry.URL = strings.TrimSpace(uri)
+			if entry.URL != "" {
+				tools = append(tools, entry)
+				if hasEnvironments {
+					index := slices.Index(environments, environment)
+					environments = slices.Delete(environments, index, index+1)
+				}
+			}
+			if !hasEnvironments {
+				break
+			}
 		}
-		tools = append(tools, entry)
 	}
 	return tools, nil
+}
+
+func toolUsesEnvironments(name string) bool {
+	return slices.Contains([]string{"ArgoCD", "OpenAPI Spec", "Metrics", "Logging"}, name)
 }
 
 func orderedYAML(document any) ([]byte, error) {
@@ -511,7 +541,7 @@ func askLanguage(
 	askString func(string, string) (string, error),
 	askChoice func(string, []string) (string, error),
 ) (string, error) {
-	return askCustomChoice("Language", current, []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Jinja", "Yaml"}, askString, askChoice)
+	return askCustomChoice("Language", current, []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Yaml"}, askString, askChoice)
 }
 
 func askFramework(

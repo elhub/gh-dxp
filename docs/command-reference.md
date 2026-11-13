@@ -98,7 +98,7 @@ gh dxp opslevel --no-input --type tool --lifecycle production --tier tier_4 \
 Optional flags `--system`, `--language`, and `--framework` set technology and system metadata.
 The system prompt offers the standard system names, `None` to omit the field, and `Custom...` for a custom name.
 Existing custom names remain selectable defaults, and `--system` also accepts custom names.
-The language prompt offers Kotlin, Java, Python, Go, and Typescript, plus `None` and `Custom...`.
+The language prompt offers Kotlin, Java, Python, Go, Typescript, Shell, and Yaml, plus `None` and `Custom...`.
 Existing or detected languages remain defaults, including custom values; `--language` also accepts custom names.
 The framework prompt offers Ktor and React, plus `None` and `Custom...`. Existing custom values remain defaults,
 and `--framework` also accepts custom names.
@@ -113,8 +113,12 @@ tool link, never an alias. Add relevant dependencies or tags manually.
 Prompts for optional TeamCity, ArgoCD, SonarQube, Dependency Track, Issue Tracker, OpenAPI Spec,
 Architecture Docs, Usage Docs, Metrics, and Logging URIs. Each prompt includes a hint about where to find
 the link, such as Jira for Issue Tracker or Grafana for Metrics and Logging. Leave a URI blank to skip
-that tool and continue. When an ArgoCD URI is supplied, choose its environment: `prod1` or `cirrus`.
-Supplied links add tools or update existing tools with the same name; skipped
+that entry. ArgoCD, OpenAPI Spec, Metrics, and Logging use a repeatable flow: select an environment,
+enter its URI, then repeat for another environment. Choose `elhub-prod1`, `elhub-qa1`, `elhub-mt1`, `cirrus-prod`,
+`cirrus-test`, or `None` to omit the environment. Each environment can be added once per tool;
+choose `Done` to skip the tool or finish adding entries. Other tools have no environment.
+Supplied links add tools or update existing tools with the same name and, for the four
+environment-aware tools, the same environment. Updating another tool removes its old environment; skipped
 tools remain unchanged on updates. `--no-input` adds only the automatic Source Code link.
 For open-source repositories, add internal tool links in the OpsLevel UI only.
 

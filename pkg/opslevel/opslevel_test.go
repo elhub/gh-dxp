@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -37,6 +38,7 @@ func TestExecute(t *testing.T) {
 	require.Equal(t, []string{"my_tool", "no.elhub.my-tool"}, document.Component.Aliases)
 	require.Equal(t, "elhub/my-tool", document.Component.Repositories[0].Name)
 	require.Equal(t, "https://github.com/elhub/my-tool", document.Component.Tools[0].URL)
+	require.NotContains(t, string(content), "environment:")
 	require.Contains(t, string(content), "  dependencies: []\n  alert_sources: []\n  properties: {}\n")
 	require.ErrorContains(t, Execute(dir, exe, options), "refusing to overwrite")
 	after, err := os.ReadFile(filepath.Join(dir, "opslevel.yml"))
@@ -47,50 +49,65 @@ func TestExecute(t *testing.T) {
 }
 
 func TestPromptTools(t *testing.T) {
-	names := []string{"TeamCity", "ArgoCD", "SonarQube", "Dependency Track", "Issue Tracker", "OpenAPI Spec", "Architecture Docs", "Usage Docs", "Metrics", "Logging"}
-	categories := []string{"continuous_integration", "deployment", "security_scans", "security_scans", "issue_tracking", "api_documentation", "wiki", "wiki", "metrics", "logs"}
-	hints := []string{"TeamCity project or build configuration", "ArgoCD application", "SonarQube project overview", "Dependency Track project", "Jira project or filtered issues", "OpenAPI specification", "Architecture documentation", "Actual usage documentation", "Grafana metrics dashboard", "Grafana Explore or log dashboard"}
+	names := []string{
+		"TeamCity", "ArgoCD", "SonarQube", "Dependency Track", "Issue Tracker",
+		"OpenAPI Spec", "Architecture Docs", "Usage Docs", "Metrics", "Logging",
+	}
+	categories := []string{
+		"continuous_integration", "deployment", "security_scans", "security_scans", "issue_tracking",
+		"api_documentation", "wiki", "wiki", "metrics", "logs",
+	}
+	hints := []string{
+		"TeamCity project or build configuration", "ArgoCD application", "SonarQube project overview",
+		"Dependency Track project", "Jira project or filtered issues", "OpenAPI specification",
+		"Architecture documentation", "Actual usage documentation", "Grafana metrics dashboard", "Grafana Explore or log dashboard",
+	}
 	for _, skip := range []bool{false, true} {
 		t.Run(map[bool]string{false: "supplied", true: "skipped"}[skip], func(t *testing.T) {
 			prompts := 0
-			choicePrompts := 0
+			selected := map[string]bool{}
 			tools, err := promptTools(func(prompt, defaultValue string) (string, error) {
-				require.Contains(t, prompt, names[prompts]+" URI (")
-				require.Contains(t, prompt, hints[prompts])
+				index := prompts
+				if skip {
+					for toolUsesEnvironments(names[index]) {
+						index++
+					}
+				}
+				require.Contains(t, prompt, names[index]+" URI (")
+				require.Contains(t, prompt, hints[index])
 				require.Contains(t, prompt, "leave blank to skip")
 				require.Empty(t, defaultValue)
-				prompts++
+				prompts = index + 1
 				if skip {
 					return " \t ", nil
 				}
 				return " https://example.com/tool ", nil
 			}, func(prompt string, choices []string) (string, error) {
-				choicePrompts++
-				require.Equal(t, "ArgoCD environment:", prompt)
-				require.Equal(t, []string{"prod1", "cirrus"}, choices)
-				return "prod1", nil
+				require.Contains(t, prompt, "environment (Done to skip or finish)")
+				if skip || selected[prompt] {
+					return "Done", nil
+				}
+				selected[prompt] = true
+				require.Contains(t, choices, "None")
+				return "None", nil
 			})
 			require.NoError(t, err)
-			require.Equal(t, len(names), prompts)
 			if skip {
 				require.Empty(t, tools)
-				require.Zero(t, choicePrompts)
 				return
 			}
-			require.Equal(t, 1, choicePrompts)
+			require.Equal(t, len(names), prompts)
+			require.Len(t, selected, 4)
 			require.Len(t, tools, len(names))
 			for index, entry := range tools {
 				require.Equal(t, names[index], entry.Name)
 				require.Equal(t, categories[index], entry.Category)
 				require.Equal(t, "https://example.com/tool", entry.URL)
-				environment := "cirrus"
-				if entry.Name == "ArgoCD" || entry.Name == "OpenAPI Spec" {
-					environment = "prod1"
-				} else if entry.Name == "Issue Tracker" {
-					environment = "atlassian"
-				}
-				require.Equal(t, environment, entry.Environment)
+				require.Empty(t, entry.Environment)
 			}
+			content, err := orderedYAML(tools)
+			require.NoError(t, err)
+			require.NotContains(t, string(content), "environment:")
 		})
 	}
 }
@@ -104,35 +121,76 @@ func TestPromptToolsCancellation(t *testing.T) {
 	require.Empty(t, tools)
 }
 
-func TestPromptToolsArgoCDEnvironment(t *testing.T) {
-	for _, environment := range []string{"prod1", "cirrus", "cancel"} {
-		t.Run(environment, func(t *testing.T) {
-			cancelled := errors.New("prompt cancelled")
+func TestPromptToolsEnvironments(t *testing.T) {
+	for _, name := range []string{"ArgoCD", "OpenAPI Spec", "Metrics", "Logging"} {
+		t.Run(name, func(t *testing.T) {
+			environments := []string{"elhub-prod1", "elhub-qa1", "elhub-mt1", "cirrus-prod", "cirrus-test", "None"}
+			answers := append(slices.Clone(environments), "Done")
 			tools, err := promptTools(func(prompt, _ string) (string, error) {
-				if strings.HasPrefix(prompt, "ArgoCD URI") {
-					return "https://argocd.example.com/application", nil
+				if strings.HasPrefix(prompt, name+" URI") {
+					return " https://example.com/" + environments[6-len(answers)] + " ", nil
 				}
 				return "", nil
 			}, func(prompt string, choices []string) (string, error) {
-				require.Equal(t, "ArgoCD environment:", prompt)
-				require.Equal(t, []string{"prod1", "cirrus"}, choices)
-				if environment == "cancel" {
-					return "", cancelled
+				if !strings.HasPrefix(prompt, name+" environment") {
+					return "Done", nil
 				}
-				return environment, nil
+				require.NotEmpty(t, answers)
+				require.ElementsMatch(t, append([]string{"Done"}, environments[6-len(answers)+1:]...), choices)
+				answer := answers[0]
+				answers = answers[1:]
+				return answer, nil
 			})
-			if environment == "cancel" {
-				require.ErrorIs(t, err, cancelled)
-				require.Empty(t, tools)
-				return
-			}
 			require.NoError(t, err)
-			require.Len(t, tools, 1)
-			require.Equal(t, "ArgoCD", tools[0].Name)
-			require.Equal(t, environment, tools[0].Environment)
+			require.Empty(t, answers)
+			require.Len(t, tools, len(environments))
+			for index, entry := range tools {
+				require.Equal(t, name, entry.Name)
+				require.Equal(t, "https://example.com/"+environments[index], entry.URL)
+				if environments[index] == "None" {
+					require.Empty(t, entry.Environment)
+				} else {
+					require.Equal(t, environments[index], entry.Environment)
+				}
+			}
 			content, err := orderedYAML(tools)
 			require.NoError(t, err)
-			require.Contains(t, string(content), "environment: "+environment)
+			require.Equal(t, 5, strings.Count(string(content), "environment:"))
+		})
+	}
+}
+
+func TestPromptToolsEnvironmentSkipAndCancellation(t *testing.T) {
+	for _, scenario := range []string{"blank URI", "cancel environment", "cancel URI"} {
+		t.Run(scenario, func(t *testing.T) {
+			cancelled := errors.New("prompt cancelled")
+			prompts := 0
+			tools, err := promptTools(func(prompt, _ string) (string, error) {
+				if strings.HasPrefix(prompt, "ArgoCD URI") && scenario == "cancel URI" {
+					return "", cancelled
+				}
+				return " \t ", nil
+			}, func(prompt string, choices []string) (string, error) {
+				if !strings.HasPrefix(prompt, "ArgoCD environment") {
+					return "Done", nil
+				}
+				prompts++
+				require.Contains(t, choices, "elhub-qa1")
+				if scenario == "cancel environment" {
+					return "", cancelled
+				}
+				if prompts == 1 {
+					return "elhub-qa1", nil
+				}
+				return "Done", nil
+			})
+			if scenario == "blank URI" {
+				require.NoError(t, err)
+				require.Equal(t, 2, prompts)
+			} else {
+				require.ErrorIs(t, err, cancelled)
+			}
+			require.Empty(t, tools)
 		})
 	}
 }
@@ -143,7 +201,7 @@ func TestExecuteToolLinks(t *testing.T) {
 			dir := t.TempDir()
 			path := filepath.Join(dir, "opslevel.yml")
 			original := "version: 1\ncomponent:\n  tools:\n" +
-				"    - {name: TeamCity, category: continuous_integration, url: 'https://example.com/old', custom: retained}\n" +
+				"    - {name: TeamCity, category: continuous_integration, url: 'https://example.com/old', environment: cirrus, custom: retained}\n" +
 				"    - {name: Custom, category: wiki, url: 'https://example.com/custom'}\n"
 			if scenario == "update" || scenario == "skip" {
 				require.NoError(t, os.WriteFile(path, []byte(original), 0o600))
@@ -153,6 +211,7 @@ func TestExecuteToolLinks(t *testing.T) {
 				`{"name":"my-tool","nameWithOwner":"elhub/my-tool","description":"A tool","url":"https://github.com/elhub/my-tool"}`, nil)
 			options := Options{Type: "tool", Lifecycle: "production", Tier: "tier_4", Owner: "team-devxp", PackageName: "no.elhub.my-tool"}
 			cancelled := errors.New("cancelled")
+			loggingAdded := false
 			err := execute(dir, exe, options, func(_ string) (bool, error) {
 				return true, nil
 			}, func(prompt, defaultValue string) (string, error) {
@@ -166,7 +225,12 @@ func TestExecuteToolLinks(t *testing.T) {
 					return "", nil
 				}
 				return defaultValue, nil
-			}, func(_ string, choices []string) (string, error) {
+			}, func(prompt string, choices []string) (string, error) {
+				if strings.HasPrefix(prompt, "Logging environment") && scenario != "skip" && !loggingAdded {
+					loggingAdded = true
+					require.Contains(t, choices, "elhub-qa1")
+					return "elhub-qa1", nil
+				}
 				return choices[0], nil
 			})
 			if scenario == "cancel" {
@@ -198,10 +262,65 @@ func TestExecuteToolLinks(t *testing.T) {
 				require.Equal(t, "Custom", tools[1].Name)
 				require.Contains(t, string(content), "custom: retained")
 			}
+			require.NotContains(t, string(content), "environment: cirrus")
 			require.Equal(t, "Logging", tools[2].Name)
 			require.Equal(t, "https://example.com/new", tools[2].URL)
+			require.Equal(t, "elhub-qa1", tools[2].Environment)
 		})
 	}
+}
+
+func TestExecuteToolLinksMatchEnvironment(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "opslevel.yml")
+	require.NoError(t, os.WriteFile(path, []byte("version: 1\ncomponent:\n  tools:\n"+
+		"    - {name: ArgoCD, url: 'https://example.com/old-prod1', environment: elhub-prod1, custom: retained}\n"+
+		"    - {name: ArgoCD, url: 'https://example.com/cirrus', environment: cirrus}\n"+
+		"    - {name: ArgoCD, url: 'https://example.com/old-none', environment: ''}\n"), 0o600))
+	exe := new(testutils.MockExecutor)
+	exe.On("GH", []string{"repo", "view", "--json", "name,nameWithOwner,description,url,primaryLanguage"}).Return(
+		`{"name":"my-tool","nameWithOwner":"elhub/my-tool","description":"A tool","url":"https://github.com/elhub/my-tool"}`, nil)
+	options := Options{Type: "tool", Lifecycle: "production", Tier: "tier_4", Owner: "team-devxp", PackageName: "no.elhub.my-tool"}
+	answers := []string{"elhub-prod1", "None", "elhub-qa1", "Done"}
+	environment := ""
+	err := execute(dir, exe, options, func(_ string) (bool, error) {
+		return true, nil
+	}, func(prompt, defaultValue string) (string, error) {
+		if strings.HasPrefix(prompt, "ArgoCD URI") {
+			return "https://example.com/new-" + environment, nil
+		}
+		return defaultValue, nil
+	}, func(prompt string, choices []string) (string, error) {
+		if strings.HasPrefix(prompt, "ArgoCD environment") {
+			require.NotEmpty(t, answers)
+			environment = answers[0]
+			answers = answers[1:]
+			require.Contains(t, choices, environment)
+			return environment, nil
+		}
+		return choices[0], nil
+	})
+	require.NoError(t, err)
+	require.Empty(t, answers)
+	content, err := os.ReadFile(path)
+	require.NoError(t, err)
+	var document struct {
+		Component component `yaml:"component"`
+	}
+	require.NoError(t, yaml.Unmarshal(content, &document))
+	tools := document.Component.Tools
+	require.Len(t, tools, 4)
+	require.Equal(t, "https://example.com/new-elhub-prod1", tools[0].URL)
+	require.Equal(t, "elhub-prod1", tools[0].Environment)
+	require.Equal(t, "https://example.com/cirrus", tools[1].URL)
+	require.Equal(t, "cirrus", tools[1].Environment)
+	require.Equal(t, "https://example.com/new-None", tools[2].URL)
+	require.Empty(t, tools[2].Environment)
+	require.Equal(t, "https://example.com/new-elhub-qa1", tools[3].URL)
+	require.Equal(t, "elhub-qa1", tools[3].Environment)
+	require.Contains(t, string(content), "custom: retained")
+	require.Equal(t, 3, strings.Count(string(content), "environment:"))
+	exe.AssertExpectations(t)
 }
 
 func TestCompleteOptions(t *testing.T) {
@@ -489,7 +608,7 @@ func TestSystemChoices(t *testing.T) {
 }
 
 func TestLanguageChoices(t *testing.T) {
-	for _, selection := range []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Jinja", "Yaml", "Rust", "None", "Custom..."} {
+	for _, selection := range []string{"Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Yaml", "Rust", "None", "Custom..."} {
 		t.Run(selection, func(t *testing.T) {
 			textPrompted := false
 			value, err := askLanguage("Rust", func(prompt, defaultValue string) (string, error) {
@@ -499,7 +618,7 @@ func TestLanguageChoices(t *testing.T) {
 				return "Scala", nil
 			}, func(prompt string, choices []string) (string, error) {
 				require.Contains(t, prompt, "default: Rust")
-				require.Equal(t, []string{"Rust", "None", "Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Jinja", "Yaml", "Custom..."}, choices)
+				require.Equal(t, []string{"Rust", "None", "Kotlin", "Java", "Python", "Go", "Typescript", "Shell", "Yaml", "Custom..."}, choices)
 				return selection, nil
 			})
 			require.NoError(t, err)
