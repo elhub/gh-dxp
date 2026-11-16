@@ -24,15 +24,12 @@ component:
     - name: Source Code
       category: code
       url: https://github.com/elhub/gh-dxp
-      environment: Production
     - name: Usage Docs
       category: wiki
       url: https://github.com/elhub/gh-dxp/blob/main/README.md
-      environment: Production
     - name: Command Reference
       category: wiki
       url: https://github.com/elhub/gh-dxp/blob/main/docs/command-reference.md
-      environment: Production
   dependencies: []
   alert_sources: []
   properties: {}
